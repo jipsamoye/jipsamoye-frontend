@@ -129,6 +129,30 @@ src/
 └── styles/           # 글로벌 스타일
 ```
 
+## 코드 관례
+
+### 컴포넌트
+- 한 파일 = 한 컴포넌트
+- 파일명 PascalCase (`PostCard.tsx`)
+- props는 interface로 명시 (`interface PostCardProps`)
+- 서버/클라이언트 컴포넌트 구분 명확히 (`'use client'` 필요한 곳만)
+
+### API 호출
+- 컴포넌트에서 직접 fetch 안 함 → custom hook으로 분리 (`usePosts`, `useAuth`)
+- API 응답은 반드시 타입 정의해서 사용
+- `any` 사용 금지
+
+### 스타일
+- Tailwind 클래스 순서: 레이아웃 → 크기 → 색상 → 기타
+- 반복되는 스타일은 컴포넌트로 추출 (CSS 클래스 복사 X)
+- 다크모드: `darkMode: 'class'` + 시스템 설정 따라가기 + 수동 토글
+- 반응형: PC(1200px+) → 태블릿(768px~) → 모바일(~767px)
+
+### 폴더
+- `components/common/` — 어디서든 재사용 (Button, Modal)
+- `components/domain/` — 특정 도메인 전용 (PostCard, CommentItem)
+- `components/layout/` — 레이아웃 (Header, Sidebar)
+
 ## 주의사항
 
 - 인증은 현재 userId를 RequestParam으로 전달 (추후 세션 기반으로 전환)
