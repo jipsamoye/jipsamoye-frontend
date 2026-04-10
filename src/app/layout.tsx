@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import { Geist } from "next/font/google";
 import "./globals.css";
-import Header from "@/components/layout/Header";
-import Sidebar from "@/components/layout/Sidebar";
+import ClientLayout from "@/components/layout/ClientLayout";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -22,13 +21,7 @@ export default function RootLayout({
   return (
     <html lang="ko" className={`${geistSans.variable} h-full`} suppressHydrationWarning>
       <body className="min-h-full">
-        <Header />
-        <Sidebar />
-        <main className="pt-16 lg:pl-52 pb-16 lg:pb-0">
-          <div className="max-w-7xl mx-auto px-4 py-6">
-            {children}
-          </div>
-        </main>
+        <ClientLayout>{children}</ClientLayout>
       </body>
     </html>
   );

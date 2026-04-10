@@ -1,24 +1,25 @@
 'use client';
 
 import Link from 'next/link';
-import { MagnifyingGlassIcon, BellIcon, UserCircleIcon } from './icons';
+import { MagnifyingGlassIcon, BellIcon } from './icons';
 import ThemeToggle from './ThemeToggle';
+import Avatar from '@/components/common/Avatar';
 
 interface HeaderProps {
   isLoggedIn?: boolean;
   onLoginClick?: () => void;
+  nickname?: string;
+  profileImageUrl?: string | null;
 }
 
-export default function Header({ isLoggedIn = false, onLoginClick }: HeaderProps) {
+export default function Header({ isLoggedIn = false, onLoginClick, nickname, profileImageUrl }: HeaderProps) {
   return (
     <header className="fixed top-0 left-0 right-0 z-50 h-16 bg-white dark:bg-gray-950 border-b border-gray-200 dark:border-gray-800">
       <div className="flex items-center justify-between h-full px-4 lg:px-6">
-        {/* 로고 */}
         <Link href="/" className="text-xl font-bold text-gray-900 dark:text-white">
           집사모여
         </Link>
 
-        {/* 오른쪽 메뉴 */}
         <div className="flex items-center gap-3">
           <ThemeToggle />
 
@@ -36,8 +37,8 @@ export default function Header({ isLoggedIn = false, onLoginClick }: HeaderProps
               <button className="p-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">
                 <BellIcon />
               </button>
-              <Link href="/profile" className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">
-                <UserCircleIcon />
+              <Link href={`/users/${nickname}`} className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">
+                <Avatar src={profileImageUrl ?? null} size="sm" />
               </Link>
             </>
           ) : (

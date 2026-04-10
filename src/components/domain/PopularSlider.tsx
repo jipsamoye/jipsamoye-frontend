@@ -1,9 +1,19 @@
 'use client';
 
 import { useRef, useState, useEffect } from 'react';
+import Link from 'next/link';
+import { HeartIcon } from '@/components/layout/icons';
+
+interface PopularItem {
+  id: number;
+  label: string;
+  thumbnailUrl?: string | null;
+  likeCount?: number;
+  nickname?: string;
+}
 
 interface PopularSliderProps {
-  items: { id: number; label: string }[];
+  items: PopularItem[];
 }
 
 export default function PopularSlider({ items }: PopularSliderProps) {
@@ -29,7 +39,7 @@ export default function PopularSlider({ items }: PopularSliderProps) {
       el?.removeEventListener('scroll', checkScroll);
       window.removeEventListener('resize', checkScroll);
     };
-  }, []);
+  }, [items]);
 
   const scroll = (direction: 'left' | 'right') => {
     const el = scrollRef.current;
@@ -43,7 +53,6 @@ export default function PopularSlider({ items }: PopularSliderProps) {
 
   return (
     <div className="relative group">
-      {/* 왼쪽 화살표 */}
       {canScrollLeft && (
         <button
           onClick={() => scroll('left')}
@@ -55,32 +64,33 @@ export default function PopularSlider({ items }: PopularSliderProps) {
         </button>
       )}
 
-      {/* 슬라이더 */}
-      <div
-        ref={scrollRef}
-        className="flex gap-4 overflow-x-auto scrollbar-hide pb-4"
-      >
+      <div ref={scrollRef} className="flex gap-4 overflow-x-auto scrollbar-hide pb-4">
         {items.map((item) => (
-          <div
+          <Link
             key={item.id}
+            href={`/posts/${item.id}`}
             className="flex-shrink-0 w-[calc(25%-12px)] min-w-[200px] bg-gray-100 dark:bg-gray-800 rounded-xl overflow-hidden cursor-pointer hover:ring-2 hover:ring-amber-300 transition-all"
           >
-            <div className="aspect-square bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-gray-400 text-sm">
-              {item.label}
+            <div className="aspect-square bg-gray-200 dark:bg-gray-700 overflow-hidden">
+              {item.thumbnailUrl ? (
+                <img src={item.thumbnailUrl} alt={item.label} className="w-full h-full object-cover" />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-gray-400 text-4xl">🐾</div>
+              )}
             </div>
             <div className="p-3">
-              <p className="font-medium text-sm truncate">제목 {item.id}</p>
-              <div className="flex items-center gap-2 mt-1 text-xs text-gray-500">
-                <span>♥ {item.id * 10}</span>
-                <span>👁 {item.id * 25}</span>
+              <p className="font-medium text-sm truncate">{item.label}</p>
+              <div className="flex items-center gap-3 mt-1 text-xs text-gray-500 dark:text-gray-400">
+                {item.likeCount !== undefined && (
+                  <span className="flex items-center gap-1"><HeartIcon /> {item.likeCount}</span>
+                )}
               </div>
-              <p className="text-xs text-gray-400 mt-1">닉네임{item.id}</p>
+              {item.nickname && <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">{item.nickname}</p>}
             </div>
-          </div>
+          </Link>
         ))}
       </div>
 
-      {/* 오른쪽 화살표 */}
       {canScrollRight && (
         <button
           onClick={() => scroll('right')}

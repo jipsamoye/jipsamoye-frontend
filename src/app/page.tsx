@@ -1,11 +1,64 @@
-import PopularSlider from '@/components/domain/PopularSlider';
+'use client';
 
-const popularItems = Array.from({ length: 10 }, (_, i) => ({
-  id: i + 1,
-  label: `인기 게시글 ${i + 1}`,
-}));
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { api } from '@/lib/api';
+import { PetPostListItem, PageResponse } from '@/types/api';
+import PopularSlider from '@/components/domain/PopularSlider';
+import PostCard from '@/components/domain/PostCard';
 
 export default function Home() {
+  const [popularPosts, setPopularPosts] = useState<PetPostListItem[]>([]);
+  const [latestPosts, setLatestPosts] = useState<PetPostListItem[]>([]);
+  const [page, setPage] = useState(0);
+  const [hasNext, setHasNext] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const observerRef = useRef<HTMLDivElement>(null);
+
+  // 인기 게시글
+  useEffect(() => {
+    api.get<PetPostListItem[]>('/api/posts/popular')
+      .then((res) => setPopularPosts(res.data))
+      .catch(() => {});
+  }, []);
+
+  // 최신 게시글 무한 스크롤
+  const loadMore = useCallback(async () => {
+    if (loading || !hasNext) return;
+    setLoading(true);
+    try {
+      const res = await api.get<PageResponse<PetPostListItem>>(`/api/posts?page=${page}&size=20`);
+      setLatestPosts((prev) => [...prev, ...res.data.content]);
+      setHasNext(res.data.hasNext);
+      setPage((prev) => prev + 1);
+    } catch {
+      setHasNext(false);
+    } finally {
+      setLoading(false);
+    }
+  }, [page, loading, hasNext]);
+
+  useEffect(() => {
+    loadMore();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Intersection Observer로 무한 스크롤
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => { if (entries[0].isIntersecting) loadMore(); },
+      { threshold: 0.1 }
+    );
+    if (observerRef.current) observer.observe(observerRef.current);
+    return () => observer.disconnect();
+  }, [loadMore]);
+
+  const popularSliderItems = popularPosts.map((p) => ({
+    id: p.id,
+    label: p.title,
+    thumbnailUrl: p.thumbnailUrl,
+    likeCount: p.likeCount,
+    nickname: p.nickname,
+  }));
+
   return (
     <div>
       {/* 배너 */}
@@ -22,47 +75,44 @@ export default function Home() {
               강아지, 고양이와 함께하는 일상을 공유하고 다른 집사들과 소통해보세요.
             </p>
           </div>
-          {/* 장식 요소 */}
-          <div className="absolute right-4 md:right-12 top-1/2 -translate-y-1/2 text-6xl md:text-8xl opacity-20 select-none">
-            🐾
-          </div>
-          <div className="absolute right-20 md:right-32 bottom-2 text-4xl md:text-5xl opacity-10 select-none">
-            🐕
-          </div>
-          <div className="absolute right-8 md:right-16 bottom-4 text-3xl md:text-4xl opacity-10 select-none">
-            🐈
-          </div>
+          <div className="absolute right-4 md:right-12 top-1/2 -translate-y-1/2 text-6xl md:text-8xl opacity-20 select-none">🐾</div>
+          <div className="absolute right-20 md:right-32 bottom-2 text-4xl md:text-5xl opacity-10 select-none">🐕</div>
+          <div className="absolute right-8 md:right-16 bottom-4 text-3xl md:text-4xl opacity-10 select-none">🐈</div>
         </div>
       </section>
 
       {/* 오늘의 멍냥 */}
       <section className="mb-8">
         <h2 className="text-xl font-bold mb-4">오늘의 멍냥</h2>
-        <PopularSlider items={popularItems} />
+        {popularPosts.length > 0 ? (
+          <PopularSlider items={popularSliderItems} />
+        ) : (
+          <div className="text-center py-12 text-gray-400 bg-gray-50 dark:bg-gray-900 rounded-xl">
+            <p className="text-3xl mb-2">🏆</p>
+            <p className="text-sm">아직 인기 게시글이 없어요</p>
+          </div>
+        )}
       </section>
 
+      {/* 최신 게시글 */}
       <section>
         <h2 className="text-xl font-bold mb-4">최신 게시글</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
-            <div
-              key={i}
-              className="bg-gray-100 dark:bg-gray-800 rounded-xl overflow-hidden"
-            >
-              <div className="aspect-square bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-gray-400 text-sm">
-                사진 {i}
-              </div>
-              <div className="p-3">
-                <p className="font-medium text-sm truncate">게시글 제목 {i}</p>
-                <div className="flex items-center gap-2 mt-1 text-xs text-gray-500">
-                  <span>♥ 12</span>
-                  <span>👁 34</span>
-                </div>
-                <p className="text-xs text-gray-400 mt-1">닉네임{i}</p>
-              </div>
-            </div>
-          ))}
-        </div>
+        {latestPosts.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {latestPosts.map((post) => (
+              <PostCard key={post.id} post={post} />
+            ))}
+          </div>
+        ) : !loading ? (
+          <div className="text-center py-16 text-gray-400">
+            <p className="text-4xl mb-4">🐾</p>
+            <p>아직 게시글이 없어요. 첫 번째 집사가 되어보세요!</p>
+          </div>
+        ) : null}
+
+        {/* 무한 스크롤 감지 영역 */}
+        <div ref={observerRef} className="h-10" />
+        {loading && <div className="flex justify-center py-4 text-gray-400">로딩 중...</div>}
       </section>
     </div>
   );
