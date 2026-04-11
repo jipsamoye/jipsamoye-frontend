@@ -3,39 +3,50 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { api } from '@/lib/api';
 import { PetPostListItem, PageResponse } from '@/types/api';
+import { dummyPopularPosts, dummyLatestPosts } from '@/lib/dummyData';
 import PopularSlider from '@/components/domain/PopularSlider';
 import PostCard from '@/components/domain/PostCard';
 
 export default function Home() {
   const [popularPosts, setPopularPosts] = useState<PetPostListItem[]>([]);
   const [latestPosts, setLatestPosts] = useState<PetPostListItem[]>([]);
-  const [page, setPage] = useState(0);
+  const pageRef = useRef(0);
   const [hasNext, setHasNext] = useState(true);
   const [loading, setLoading] = useState(false);
+  const loadingRef = useRef(false);
   const observerRef = useRef<HTMLDivElement>(null);
 
   // 인기 게시글
   useEffect(() => {
     api.get<PetPostListItem[]>('/api/posts/popular')
-      .then((res) => setPopularPosts(res.data))
-      .catch(() => {});
+      .then((res) => setPopularPosts(res.data.length > 0 ? res.data : dummyPopularPosts))
+      .catch(() => setPopularPosts(dummyPopularPosts));
   }, []);
 
   // 최신 게시글 무한 스크롤
   const loadMore = useCallback(async () => {
-    if (loading || !hasNext) return;
+    if (loadingRef.current || !hasNext) return;
+    loadingRef.current = true;
     setLoading(true);
     try {
-      const res = await api.get<PageResponse<PetPostListItem>>(`/api/posts?page=${page}&size=20`);
-      setLatestPosts((prev) => [...prev, ...res.data.content]);
+      const res = await api.get<PageResponse<PetPostListItem>>(`/api/posts?page=${pageRef.current}&size=20`);
+      setLatestPosts((prev) => {
+        const existingIds = new Set(prev.map((p) => p.id));
+        const newPosts = res.data.content.filter((p) => !existingIds.has(p.id));
+        return [...prev, ...newPosts];
+      });
       setHasNext(res.data.hasNext);
-      setPage((prev) => prev + 1);
+      pageRef.current += 1;
     } catch {
+      if (latestPosts.length === 0) {
+        setLatestPosts(dummyLatestPosts);
+      }
       setHasNext(false);
     } finally {
+      loadingRef.current = false;
       setLoading(false);
     }
-  }, [page, loading, hasNext]);
+  }, [hasNext]);
 
   useEffect(() => {
     loadMore();

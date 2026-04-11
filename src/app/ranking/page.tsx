@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { api } from '@/lib/api';
 import { PetPostListItem } from '@/types/api';
+import { dummyPopularPosts } from '@/lib/dummyData';
 import PostCard from '@/components/domain/PostCard';
 
 export default function RankingPage() {
@@ -13,8 +14,8 @@ export default function RankingPage() {
   useEffect(() => {
     setLoading(true);
     api.get<PetPostListItem[]>('/api/posts/popular')
-      .then((res) => setPosts(res.data))
-      .catch(() => setPosts([]))
+      .then((res) => setPosts(res.data.length > 0 ? res.data : dummyPopularPosts))
+      .catch(() => setPosts(dummyPopularPosts))
       .finally(() => setLoading(false));
   }, [tab]);
 
