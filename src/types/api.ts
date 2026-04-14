@@ -124,31 +124,32 @@ export interface PresignedUrlRequest {
 // 알림
 export interface Notification {
   id: number;
-  type: 'LIKE' | 'COMMENT' | 'REPLY' | 'FOLLOW';
+  type: string;
+  targetId?: number;
   message: string;
-  postId?: number;
-  fromUserId: number;
-  fromNickname: string;
-  fromProfileImageUrl: string | null;
-  isRead: boolean;
+  senderId: number;
+  senderNickname: string;
+  senderProfileImageUrl: string | null;
+  read: boolean;
   createdAt: string;
 }
 
 // 채팅 메시지
 export interface ChatMessage {
   id: number;
+  userId: number;
   nickname: string;
+  profileImageUrl: string | null;
   content: string;
-  imageUrl?: string;
   createdAt: string;
 }
 
 // DM 채팅방
 export interface DmRoom {
-  id: number;
-  targetUserId: number;
-  targetNickname: string;
-  targetProfileImageUrl: string | null;
+  roomId: number;
+  otherUserId: number;
+  otherUserNickname: string;
+  otherUserProfileImageUrl: string | null;
   lastMessage: string;
   lastMessageAt: string;
   unreadCount: number;
@@ -157,12 +158,10 @@ export interface DmRoom {
 // DM 메시지
 export interface DmMessage {
   id: number;
-  roomId: number;
   senderId: number;
   senderNickname: string;
-  senderProfileImageUrl: string | null;
   content: string;
   imageUrl?: string;
-  isRead: boolean;
+  readAt: string | null;
   createdAt: string;
 }

@@ -19,6 +19,8 @@ function charCountColor(len: number, max: number) {
   return 'text-gray-400';
 }
 
+const EMPTY_ARRAY: string[] = [];
+
 interface PostEditorProps {
   mode: 'create' | 'edit';
   initialTitle?: string;
@@ -31,7 +33,7 @@ export default function PostEditor({
   mode,
   initialTitle = '',
   initialContent = '',
-  initialImageUrls = [],
+  initialImageUrls = EMPTY_ARRAY,
   postId,
 }: PostEditorProps) {
   const router = useRouter();

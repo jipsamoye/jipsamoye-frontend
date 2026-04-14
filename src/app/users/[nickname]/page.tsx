@@ -16,7 +16,7 @@ export default function ProfilePage({ params }: { params: Promise<{ nickname: st
   const { nickname } = use(params);
   const decodedNickname = decodeURIComponent(nickname);
   const router = useRouter();
-  const { user } = useAuthContext();
+  const { user, updateUser } = useAuthContext();
 
   const [profile, setProfile] = useState<User | null>(null);
   const [posts, setPosts] = useState<PetPostListItem[]>([]);
@@ -300,7 +300,7 @@ export default function ProfilePage({ params }: { params: Promise<{ nickname: st
           onClose={() => setShowEditModal(false)}
           profile={profile}
           userId={user.id}
-          onSaved={setProfile}
+          onSaved={(updatedProfile) => { setProfile(updatedProfile); updateUser(updatedProfile); }}
         />
       )}
     </div>

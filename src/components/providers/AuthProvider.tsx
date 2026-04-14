@@ -11,6 +11,7 @@ interface AuthContextType {
   loginAsGuest: () => Promise<User | null>;
   logout: () => Promise<void>;
   withdraw: () => Promise<void>;
+  updateUser: (user: User) => void;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -51,6 +52,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
   }, []);
 
+  const updateUser = useCallback((updatedUser: User) => {
+    setUser(updatedUser);
+  }, []);
+
   const withdraw = useCallback(async () => {
     const userId = storage.getUserId();
     if (!userId) return;
@@ -60,7 +65,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, loading, loginAsGuest, logout, withdraw }}>
+    <AuthContext.Provider value={{ user, loading, loginAsGuest, logout, withdraw, updateUser }}>
       {children}
     </AuthContext.Provider>
   );

@@ -61,7 +61,7 @@ export default function NotificationProvider({ children }: NotificationProviderP
   const markAsRead = useCallback(async (id: number) => {
     if (!user) return;
     setNotifications((prev) =>
-      prev.map((n) => (n.id === id ? { ...n, isRead: true } : n))
+      prev.map((n) => (n.id === id ? { ...n, read: true } : n))
     );
     setUnreadCount((prev) => Math.max(0, prev - 1));
     try {
@@ -73,20 +73,14 @@ export default function NotificationProvider({ children }: NotificationProviderP
 
   const markAllAsRead = useCallback(async () => {
     if (!user) return;
-    setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
+    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
     setUnreadCount(0);
     try {
-      // Mark each unread notification as read
-      const unreadIds = notifications.filter((n) => !n.isRead).map((n) => n.id);
-      await Promise.all(
-        unreadIds.map((id) =>
-          api.patch(`/api/notifications/${id}/read?userId=${user.id}`)
-        )
-      );
+      await api.patch(`/api/notifications/read-all?userId=${user.id}`);
     } catch {
       // Backend may not be available
     }
-  }, [user, notifications]);
+  }, [user]);
 
   // Connect WebSocket and subscribe to notifications when user logs in
   useEffect(() => {
@@ -104,7 +98,7 @@ export default function NotificationProvider({ children }: NotificationProviderP
     const unsubscribe = wsService.subscribe('NOTIFICATION', (data) => {
       const notification = data as Notification;
       setNotifications((prev) => [notification, ...prev]);
-      if (!notification.isRead) {
+      if (!notification.read) {
         setUnreadCount((prev) => prev + 1);
       }
     });

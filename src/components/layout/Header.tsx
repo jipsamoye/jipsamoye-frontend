@@ -35,9 +35,9 @@ export default function Header({ isLoggedIn = false, onLoginClick, onLogout, nic
     notificationContext.markAsRead(notification.id);
     setShowNotification(false);
     if (notification.type === 'FOLLOW') {
-      router.push(`/users/${notification.fromNickname}`);
-    } else if (notification.postId) {
-      router.push(`/posts/${notification.postId}`);
+      router.push(`/users/${notification.senderNickname}`);
+    } else if (notification.targetId) {
+      router.push(`/posts/${notification.targetId}`);
     }
   };
 
@@ -117,10 +117,10 @@ export default function Header({ isLoggedIn = false, onLoginClick, onLogout, nic
                             key={notification.id}
                             onClick={() => handleNotificationClick(notification)}
                             className={`flex items-start gap-3 w-full px-4 py-3 text-left hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors ${
-                              !notification.isRead ? 'bg-amber-50 dark:bg-amber-950/20' : ''
+                              !notification.read ? 'bg-amber-50 dark:bg-amber-950/20' : ''
                             }`}
                           >
-                            <Avatar src={notification.fromProfileImageUrl} size="sm" />
+                            <Avatar src={notification.senderProfileImageUrl} size="sm" />
                             <div className="flex-1 min-w-0">
                               <p className="text-sm text-gray-900 dark:text-gray-100 line-clamp-2">
                                 {notification.message}
@@ -129,7 +129,7 @@ export default function Header({ isLoggedIn = false, onLoginClick, onLogout, nic
                                 {timeAgo(notification.createdAt)}
                               </p>
                             </div>
-                            {!notification.isRead && (
+                            {!notification.read && (
                               <span className="mt-1.5 w-2 h-2 rounded-full bg-amber-500 flex-shrink-0" />
                             )}
                           </button>

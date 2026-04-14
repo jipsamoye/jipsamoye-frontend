@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useAuthContext } from '@/components/providers/AuthProvider';
 import { api } from '@/lib/api';
+import { wsService } from '@/lib/websocket';
 import Avatar from '@/components/common/Avatar';
 import Modal from '@/components/common/Modal';
 import { timeAgo } from '@/lib/utils';
@@ -22,7 +23,7 @@ export default function DmPage() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const selectedRoom = rooms.find((r) => r.id === selectedRoomId) ?? null;
+  const selectedRoom = rooms.find((r) => r.roomId === selectedRoomId) ?? null;
 
   useEffect(() => {
     if (!user) return;
@@ -37,10 +38,22 @@ export default function DmPage() {
       setMessages([]);
       return;
     }
+    // REST로 기존 메시지 로드
     api
-      .get<DmMessage[]>(`/api/dm/rooms/${selectedRoomId}/messages?page=0&size=50`)
-      .then((res) => setMessages(res.data ?? []))
+      .get<PageResponse<DmMessage>>(`/api/dm/rooms/${selectedRoomId}/messages?userId=${user.id}&page=0&size=50`)
+      .then((res) => setMessages(res.data?.content ?? []))
       .catch(() => setMessages([]));
+
+    // WebSocket 구독 (실시간 수신)
+    const unsubscribe = wsService.subscribeDmRoom(selectedRoomId, (data) => {
+      const msg = data as DmMessage;
+      setMessages((prev) => {
+        if (prev.some((m) => m.id === msg.id)) return prev;
+        return [...prev, msg];
+      });
+    });
+
+    return unsubscribe;
   }, [selectedRoomId, user]);
 
   useEffect(() => {
@@ -60,31 +73,28 @@ export default function DmPage() {
   const handleSend = useCallback(() => {
     if (!inputValue.trim() || !selectedRoomId || !user) return;
 
-    const newMessage: DmMessage = {
-      id: Date.now(),
+    // WebSocket으로 메시지 전송
+    wsService.send('/pub/dm/send', {
+      userId: user.id,
       roomId: selectedRoomId,
-      senderId: user.id,
-      senderNickname: user.nickname,
-      senderProfileImageUrl: user.profileImageUrl,
       content: inputValue.trim(),
-      isRead: false,
-      createdAt: new Date().toISOString(),
-    };
-    setMessages((prev) => [...prev, newMessage]);
+      imageUrl: null,
+    });
+    const sentContent = inputValue.trim();
     setInputValue('');
 
     setRooms((prev) =>
       prev.map((r) =>
-        r.id === selectedRoomId
-          ? { ...r, lastMessage: newMessage.content, lastMessageAt: newMessage.createdAt }
+        r.roomId === selectedRoomId
+          ? { ...r, lastMessage: sentContent, lastMessageAt: new Date().toISOString() }
           : r
       )
     );
   }, [inputValue, selectedRoomId, user]);
 
   const handleKeyDown = useCallback(
-    (e: React.KeyboardEvent<HTMLInputElement>) => {
-      if (e.key === 'Enter' && !e.nativeEvent.isComposing) {
+    (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+      if (e.key === 'Enter' && !e.shiftKey && !e.nativeEvent.isComposing) {
         e.preventDefault();
         handleSend();
       }
@@ -111,13 +121,13 @@ export default function DmPage() {
         );
         const newRoom = res.data;
         setRooms((prev) => {
-          if (prev.some((r) => r.id === newRoom.id)) return prev;
+          if (prev.some((r) => r.roomId === newRoom.roomId)) return prev;
           return [newRoom, ...prev];
         });
-        setSelectedRoomId(newRoom.id);
+        setSelectedRoomId(newRoom.roomId);
         setMobileView('chat');
       } catch {
-        // ignore - room creation failed
+        // ignore
       }
       setShowNewMessageModal(false);
     },
@@ -157,29 +167,20 @@ export default function DmPage() {
         className={`w-full lg:w-80 lg:flex-shrink-0 border-r border-gray-200 dark:border-gray-800 flex flex-col bg-white dark:bg-gray-950
           ${mobileView === 'list' ? 'flex' : 'hidden lg:flex'}`}
       >
-        {/* 상단 제목 */}
         <div className="p-5 pb-3">
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white">DM</h2>
         </div>
 
-        {/* 검색바 */}
         <div className="px-4 pb-3">
           <div className="relative">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth={1.5}
-              stroke="currentColor"
-              className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"
-            >
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400">
               <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
             </svg>
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="작가 이름을 검색해 보세요"
+              placeholder="이름을 검색해 보세요"
               className="w-full pl-9 pr-4 py-2 rounded-xl border border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-900 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-300 focus:border-transparent transition-all duration-200"
             />
           </div>
@@ -193,20 +194,20 @@ export default function DmPage() {
           <div className="flex-1 overflow-y-auto">
             {rooms
               .filter((room) =>
-                room.targetNickname.toLowerCase().includes(searchQuery.toLowerCase())
+                room.otherUserNickname.toLowerCase().includes(searchQuery.toLowerCase())
               )
               .map((room) => (
                 <button
-                  key={room.id}
-                  onClick={() => handleSelectRoom(room.id)}
+                  key={room.roomId}
+                  onClick={() => handleSelectRoom(room.roomId)}
                   className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-gray-50 dark:hover:bg-gray-900
-                    ${selectedRoomId === room.id ? 'bg-gray-100 dark:bg-gray-800' : ''}`}
+                    ${selectedRoomId === room.roomId ? 'bg-gray-100 dark:bg-gray-800' : ''}`}
                 >
-                  <Avatar src={room.targetProfileImageUrl} alt={room.targetNickname} size="md" />
+                  <Avatar src={room.otherUserProfileImageUrl} alt={room.otherUserNickname} size="md" />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between">
                       <span className="text-sm font-medium text-gray-900 dark:text-white truncate">
-                        {room.targetNickname}
+                        {room.otherUserNickname}
                       </span>
                       <span className="text-xs text-gray-400 dark:text-gray-500 flex-shrink-0 ml-2">
                         {timeAgo(room.lastMessageAt)}
@@ -259,24 +260,18 @@ export default function DmPage() {
                     <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
                   </svg>
                 </button>
-                <Avatar src={selectedRoom.targetProfileImageUrl} alt={selectedRoom.targetNickname} size="md" />
+                <Avatar src={selectedRoom.otherUserProfileImageUrl} alt={selectedRoom.otherUserNickname} size="md" />
                 <div>
-                  <p className="font-medium text-gray-900 dark:text-white text-sm">
-                    {selectedRoom.targetNickname}
-                  </p>
-                  <p className="text-xs text-gray-400">
-                    @{selectedRoom.targetNickname}
-                  </p>
+                  <p className="font-medium text-gray-900 dark:text-white text-sm">{selectedRoom.otherUserNickname}</p>
+                  <p className="text-xs text-gray-400">@{selectedRoom.otherUserNickname}</p>
                 </div>
               </div>
               <div className="flex items-center gap-1">
-                {/* 알림 아이콘 */}
                 <button className="p-2 rounded-xl text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200">
                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0" />
                   </svg>
                 </button>
-                {/* 나가기 아이콘 */}
                 <button
                   onClick={handleBackToList}
                   className="p-2 rounded-xl text-gray-400 hover:text-red-500 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200"
@@ -297,45 +292,42 @@ export default function DmPage() {
               )}
               {messages.map((msg) => {
                 const isMine = msg.senderId === user.id;
-                return (
-                  <div
-                    key={msg.id}
-                    className={`flex items-end gap-2 ${isMine ? 'justify-end' : 'justify-start'}`}
-                  >
-                    {!isMine && (
-                      <Avatar src={msg.senderProfileImageUrl} alt={msg.senderNickname} size="sm" />
-                    )}
-                    <div className={`flex flex-col ${isMine ? 'items-end' : 'items-start'}`}>
-                      {!isMine && (
-                        <span className="text-xs text-gray-500 dark:text-gray-400 mb-1">
-                          {msg.senderNickname}
-                        </span>
-                      )}
-                      <div
-                        className={`max-w-xs lg:max-w-md px-4 py-2 rounded-2xl text-sm break-words
-                          ${isMine
-                            ? 'bg-amber-500 text-white rounded-br-md'
-                            : 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white rounded-bl-md'
-                          }`}
-                      >
+                const time = new Date(msg.createdAt).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
+
+                if (isMine) {
+                  return (
+                    <div key={msg.id} className="flex items-end justify-end gap-1.5">
+                      <div className="flex flex-col items-end gap-0.5 mb-0.5">
+                        {msg.readAt ? (
+                          <span className="text-[10px] text-gray-400">읽음</span>
+                        ) : (
+                          <span className="text-[10px] text-amber-500">1</span>
+                        )}
+                        <span className="text-[10px] text-gray-400">{time}</span>
+                      </div>
+                      <div className="max-w-[75%] px-3.5 py-2.5 rounded-2xl rounded-br-md bg-amber-500 text-white text-sm break-words whitespace-pre-wrap">
                         {msg.imageUrl && (
                           <img src={msg.imageUrl} alt="첨부 이미지" className="max-w-full rounded-lg mb-1" />
                         )}
                         {msg.content}
                       </div>
-                      <div className="flex items-center gap-1 mt-1">
-                        {isMine && msg.isRead && (
-                          <span className="text-xs text-gray-400 dark:text-gray-500">읽음</span>
-                        )}
-                        {isMine && !msg.isRead && (
-                          <span className="text-xs text-amber-500">1</span>
-                        )}
-                        <span className="text-xs text-gray-400 dark:text-gray-500">
-                          {new Date(msg.createdAt).toLocaleTimeString('ko-KR', {
-                            hour: '2-digit',
-                            minute: '2-digit',
-                          })}
-                        </span>
+                    </div>
+                  );
+                }
+
+                return (
+                  <div key={msg.id} className="flex items-start gap-2">
+                    <Avatar src={selectedRoom.otherUserProfileImageUrl} size="sm" />
+                    <div className="flex-1 min-w-0">
+                      <span className="text-xs font-medium text-gray-700 dark:text-gray-300 block mb-1">{msg.senderNickname}</span>
+                      <div className="flex items-end gap-1.5">
+                        <div className="inline-block max-w-[85%] px-3.5 py-2.5 rounded-2xl rounded-bl-md bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm break-words whitespace-pre-wrap">
+                          {msg.imageUrl && (
+                            <img src={msg.imageUrl} alt="첨부 이미지" className="max-w-full rounded-lg mb-1" />
+                          )}
+                          {msg.content}
+                        </div>
+                        <span className="text-[10px] text-gray-400 mb-0.5 flex-shrink-0">{time}</span>
                       </div>
                     </div>
                   </div>
@@ -363,18 +355,20 @@ export default function DmPage() {
                     <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0Z" />
                   </svg>
                 </button>
-                <input
-                  type="text"
+                <textarea
                   value={inputValue}
                   onChange={(e) => setInputValue(e.target.value)}
                   onKeyDown={handleKeyDown}
                   placeholder="메시지 보내기"
-                  className="flex-1 px-4 py-2 rounded-full border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-900 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                  rows={1}
+                  className="flex-1 px-4 py-2 rounded-xl border border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-900 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all duration-200 resize-none max-h-24 overflow-y-auto"
+                  style={{ height: 'auto', minHeight: '36px' }}
+                  ref={(el) => { if (el) { el.style.height = 'auto'; el.style.height = Math.min(el.scrollHeight, 96) + 'px'; } }}
                 />
                 <button
                   onClick={handleSend}
                   disabled={!inputValue.trim()}
-                  className="flex-shrink-0 px-4 py-2 rounded-full bg-amber-500 hover:bg-amber-600 disabled:bg-gray-300 dark:disabled:bg-gray-700 text-white text-sm font-medium transition-colors"
+                  className="flex-shrink-0 px-4 py-2 rounded-full bg-amber-500 hover:bg-amber-600 disabled:bg-gray-300 dark:disabled:bg-gray-700 text-white text-sm font-medium transition-all duration-200"
                 >
                   전송
                 </button>
@@ -387,16 +381,8 @@ export default function DmPage() {
       {/* 메세지 보내기 모달 */}
       <Modal isOpen={showNewMessageModal} onClose={() => setShowNewMessageModal(false)} title="메세지 보내기">
         <div className="flex flex-col gap-4">
-          {/* 검색창 */}
           <div className="relative">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth={1.5}
-              stroke="currentColor"
-              className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"
-            >
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400">
               <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
             </svg>
             <input
@@ -408,7 +394,6 @@ export default function DmPage() {
             />
           </div>
 
-          {/* 유저 목록 */}
           <div className="max-h-72 overflow-y-auto -mx-2">
             {filteredFollowing.length === 0 ? (
               <p className="text-center text-sm text-gray-400 dark:text-gray-500 py-6">
@@ -422,9 +407,7 @@ export default function DmPage() {
                 >
                   <div className="flex items-center gap-3">
                     <Avatar src={followUser.profileImageUrl} alt={followUser.nickname} size="md" />
-                    <span className="text-sm font-medium text-gray-900 dark:text-white">
-                      {followUser.nickname}
-                    </span>
+                    <span className="text-sm font-medium text-gray-900 dark:text-white">{followUser.nickname}</span>
                   </div>
                   <button
                     onClick={() => handleCreateRoom(followUser.id)}

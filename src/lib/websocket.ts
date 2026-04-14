@@ -1,93 +1,87 @@
+import SockJS from 'sockjs-client';
+import { Client, IMessage } from '@stomp/stompjs';
+
 type MessageHandler = (data: unknown) => void;
 
-interface WebSocketMessage {
-  type: string;
-  data: unknown;
-}
-
 class WebSocketService {
-  private ws: WebSocket | null = null;
+  private client: Client | null = null;
   private handlers: Map<string, Set<MessageHandler>> = new Map();
+  private subscriptions: Map<string, { unsubscribe: () => void }> = new Map();
   private userId: number | null = null;
-  private retryCount = 0;
-  private maxRetries = 5;
-  private retryTimeout: ReturnType<typeof setTimeout> | null = null;
+  private connected = false;
 
   connect(userId: number): void {
-    if (this.ws?.readyState === WebSocket.OPEN && this.userId === userId) {
-      return;
-    }
+    if (this.connected && this.userId === userId) return;
 
     this.disconnect();
     this.userId = userId;
-    this.retryCount = 0;
-    this.createConnection();
-  }
 
-  private createConnection(): void {
-    if (this.userId === null) return;
+    const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
 
-    const wsBaseUrl = process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:8080';
-    const url = `${wsBaseUrl}/ws?userId=${this.userId}`;
+    this.client = new Client({
+      webSocketFactory: () => new SockJS(`${baseUrl}/ws`),
+      reconnectDelay: 3000,
+      onConnect: () => {
+        this.connected = true;
+        console.log('[WebSocket] STOMP 연결됨');
+
+        // 알림 구독: /sub/notifications/{userId}
+        this.stompSubscribe(
+          `/sub/notifications/${userId}`,
+          'NOTIFICATION'
+        );
+
+        // 오픈채팅 구독: /sub/chat/room
+        this.stompSubscribe('/sub/chat/room', 'CHAT_MESSAGE');
+
+        // DM은 채팅방별로 동적 구독 (subscribeDmRoom 메서드 사용)
+      },
+      onDisconnect: () => {
+        this.connected = false;
+        console.log('[WebSocket] STOMP 연결 해제');
+      },
+      onStompError: (frame) => {
+        console.log('[WebSocket] STOMP 에러:', frame.headers['message']);
+      },
+    });
 
     try {
-      this.ws = new WebSocket(url);
-
-      this.ws.onopen = () => {
-        this.retryCount = 0;
-        console.log('[WebSocket] Connected');
-      };
-
-      this.ws.onmessage = (event: MessageEvent) => {
-        try {
-          const message: WebSocketMessage = JSON.parse(event.data as string);
-          const handlers = this.handlers.get(message.type);
-          if (handlers) {
-            handlers.forEach((handler) => handler(message.data));
-          }
-        } catch {
-          console.log('[WebSocket] Failed to parse message');
-        }
-      };
-
-      this.ws.onclose = () => {
-        console.log('[WebSocket] Disconnected');
-        this.tryReconnect();
-      };
-
-      this.ws.onerror = () => {
-        // Silently ignore errors — backend may not be available
-      };
+      this.client.activate();
     } catch {
-      console.log('[WebSocket] Connection failed');
+      console.log('[WebSocket] 연결 실패');
     }
   }
 
-  private tryReconnect(): void {
-    if (this.userId === null) return;
-    if (this.retryCount >= this.maxRetries) {
-      console.log('[WebSocket] Max retries reached, giving up');
-      return;
-    }
+  private stompSubscribe(destination: string, type: string): void {
+    if (!this.client || !this.connected) return;
 
-    this.retryCount += 1;
-    console.log(`[WebSocket] Reconnecting (${this.retryCount}/${this.maxRetries})...`);
+    const sub = this.client.subscribe(destination, (message: IMessage) => {
+      try {
+        const data = JSON.parse(message.body);
+        console.log(`[WebSocket] 수신 (${destination}):`, data);
+        const handlers = this.handlers.get(type);
+        if (handlers) {
+          handlers.forEach((handler) => handler(data));
+        }
+      } catch {
+        console.log('[WebSocket] 메시지 파싱 실패:', message.body);
+      }
+    });
 
-    this.retryTimeout = setTimeout(() => {
-      this.createConnection();
-    }, 3000);
+    this.subscriptions.set(destination, sub);
   }
 
   disconnect(): void {
     this.userId = null;
-    if (this.retryTimeout) {
-      clearTimeout(this.retryTimeout);
-      this.retryTimeout = null;
-    }
-    if (this.ws) {
-      this.ws.onclose = null;
-      this.ws.close();
-      this.ws = null;
+    this.connected = false;
+    this.subscriptions.clear();
+    if (this.client) {
+      try {
+        this.client.deactivate();
+      } catch {
+        // ignore
+      }
+      this.client = null;
     }
   }
 
@@ -108,10 +102,39 @@ class WebSocketService {
     };
   }
 
-  send(type: string, data: unknown): void {
-    if (this.ws?.readyState === WebSocket.OPEN) {
-      this.ws.send(JSON.stringify({ type, data }));
+  send(destination: string, data: unknown): void {
+    if (this.client && this.connected) {
+      this.client.publish({
+        destination,
+        body: JSON.stringify(data),
+      });
     }
+  }
+
+  subscribeDmRoom(roomId: number, handler: MessageHandler): () => void {
+    const destination = `/sub/dm/room/${roomId}`;
+
+    // STOMP 구독
+    if (this.client && this.connected) {
+      const sub = this.client.subscribe(destination, (message: IMessage) => {
+        try {
+          const data = JSON.parse(message.body);
+          console.log(`[WebSocket] 수신 (${destination}):`, data);
+          handler(data);
+        } catch {
+          console.log('[WebSocket] DM 메시지 파싱 실패:', message.body);
+        }
+      });
+      this.subscriptions.set(destination, sub);
+    }
+
+    return () => {
+      const sub = this.subscriptions.get(destination);
+      if (sub) {
+        sub.unsubscribe();
+        this.subscriptions.delete(destination);
+      }
+    };
   }
 }
 

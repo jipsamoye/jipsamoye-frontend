@@ -33,12 +33,15 @@ export default function NavigationGuardProvider({ children }: { children: React.
     if (message) messageRef.current = message;
 
     if (blocked && !dummyPushedRef.current) {
-      // 더미 히스토리 추가 → 뒤로가기 시 더미가 먼저 pop됨 (페이지 전환 안 됨)
-      window.history.pushState({ navGuard: true }, '', window.location.href);
-      dummyPushedRef.current = true;
+      // 더미 히스토리 추가 (약간의 딜레이로 히스토리 안정화)
+      setTimeout(() => {
+        if (blockedRef.current && !dummyPushedRef.current) {
+          window.history.pushState({ navGuard: true }, '', window.location.href);
+          dummyPushedRef.current = true;
+        }
+      }, 0);
     }
     if (!blocked && dummyPushedRef.current) {
-      // 가드 해제 시 더미를 현재 상태로 교체 (history.back() 안 씀)
       window.history.replaceState(null, '', window.location.href);
       dummyPushedRef.current = false;
     }
@@ -67,14 +70,16 @@ export default function NavigationGuardProvider({ children }: { children: React.
   };
 
   const cancelLeave = () => {
-    // 취소 시 더미 히스토리 다시 추가
-    if (!dummyPushedRef.current && blockedRef.current) {
-      window.history.pushState({ navGuard: true }, '', window.location.href);
-      dummyPushedRef.current = true;
-    }
     setShowModal(false);
     isBackRef.current = false;
     pendingUrl.current = null;
+    // 브라우저 히스토리 정리 후 더미 재추가 (타이밍 보장)
+    setTimeout(() => {
+      if (blockedRef.current && !dummyPushedRef.current) {
+        window.history.pushState({ navGuard: true }, '', window.location.href);
+        dummyPushedRef.current = true;
+      }
+    }, 50);
   };
 
   // 브라우저 뒤로가기 감지
