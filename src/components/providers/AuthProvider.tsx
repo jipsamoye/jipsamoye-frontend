@@ -3,6 +3,7 @@
 import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 import { api } from '@/lib/api';
 import { User } from '@/types/api';
+import { storage } from '@/lib/storage';
 
 interface AuthContextType {
   user: User | null;
@@ -19,12 +20,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const userId = localStorage.getItem('userId');
+    const userId = storage.getUserId();
     if (userId) {
       api.get<User>(`/api/auth/me?userId=${userId}`)
         .then((res) => setUser(res.data))
         .catch(() => {
-          localStorage.removeItem('userId');
+          storage.clearUserId();
           setUser(null);
         })
         .finally(() => setLoading(false));
@@ -37,7 +38,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const res = await api.post<User>('/api/auth/guest');
       setUser(res.data);
-      localStorage.setItem('userId', String(res.data.id));
+      storage.setUserId(String(res.data.id));
       return res.data;
     } catch {
       return null;
@@ -46,15 +47,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = useCallback(async () => {
     try { await api.post('/api/auth/logout'); } catch { /* ignore */ }
-    localStorage.removeItem('userId');
+    storage.clearUserId();
     setUser(null);
   }, []);
 
   const withdraw = useCallback(async () => {
-    const userId = localStorage.getItem('userId');
+    const userId = storage.getUserId();
     if (!userId) return;
     try { await api.delete(`/api/auth/withdraw?userId=${userId}`); } catch { /* ignore */ }
-    localStorage.removeItem('userId');
+    storage.clearUserId();
     setUser(null);
   }, []);
 

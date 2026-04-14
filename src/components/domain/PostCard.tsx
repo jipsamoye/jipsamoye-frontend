@@ -9,8 +9,8 @@ interface PostCardProps {
 export default function PostCard({ post }: PostCardProps) {
   return (
     <Link href={`/posts/${post.id}`} className="block group">
-      <div className="bg-gray-100 dark:bg-gray-800 rounded-xl overflow-hidden transition-transform group-hover:scale-[1.02]">
-        <div className="aspect-square bg-gray-200 dark:bg-gray-700 overflow-hidden">
+      <div className="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-800 rounded-2xl overflow-hidden transition-all duration-200 group-hover:shadow-md group-hover:scale-[1.02]">
+        <div className="aspect-square bg-gray-200 dark:bg-gray-700 overflow-hidden rounded-t-2xl">
           {post.thumbnailUrl ? (
             <img
               src={post.thumbnailUrl}
@@ -23,15 +23,15 @@ export default function PostCard({ post }: PostCardProps) {
             </div>
           )}
         </div>
-        <div className="p-3">
+        <div className="p-3.5">
           <p className="font-medium text-sm truncate">{post.title}</p>
-          <div className="flex items-center gap-3 mt-1 text-xs text-gray-500 dark:text-gray-400">
+          <div className="flex items-center gap-2 mt-1 text-xs text-gray-500 dark:text-gray-400">
+            <span>{post.nickname}</span>
             <span className="flex items-center gap-1">
               <HeartIcon />
               {post.likeCount}
             </span>
           </div>
-          <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">{post.nickname}</p>
         </div>
       </div>
     </Link>

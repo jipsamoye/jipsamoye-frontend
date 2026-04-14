@@ -3,18 +3,19 @@
 import { useState, useCallback } from 'react';
 import { api } from '@/lib/api';
 import { PresignedUrlResponse } from '@/types/api';
+import { storage } from '@/lib/storage';
+import { ALLOWED_IMAGE_EXTS, POST_CONFIG } from '@/lib/constants';
 
 export function useImageUpload() {
   const [uploading, setUploading] = useState(false);
 
   const uploadImage = useCallback(async (file: File): Promise<string | null> => {
-    const userId = localStorage.getItem('userId');
+    const userId = storage.getUserId();
     if (!userId) return null;
 
     const ext = file.name.split('.').pop()?.toLowerCase() || 'jpg';
-    const allowedExts = ['jpg', 'jpeg', 'png', 'webp'];
-    if (!allowedExts.includes(ext)) return null;
-    if (file.size > 10 * 1024 * 1024) return null;
+    if (!ALLOWED_IMAGE_EXTS.includes(ext)) return null;
+    if (file.size > POST_CONFIG.MAX_IMAGE_SIZE) return null;
 
     setUploading(true);
     try {

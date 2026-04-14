@@ -1,10 +1,16 @@
 import type { Metadata } from "next";
-import { Geist } from "next/font/google";
+import { Geist, Jua } from "next/font/google";
 import "./globals.css";
 import ClientLayout from "@/components/layout/ClientLayout";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
+  subsets: ["latin"],
+});
+
+const jua = Jua({
+  weight: "400",
+  variable: "--font-jua",
   subsets: ["latin"],
 });
 
@@ -19,7 +25,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ko" className={`${geistSans.variable} h-full`} suppressHydrationWarning>
+    <html lang="ko" className={`${geistSans.variable} ${jua.variable} h-full`} suppressHydrationWarning>
       <body className="min-h-full">
         <ClientLayout>{children}</ClientLayout>
       </body>

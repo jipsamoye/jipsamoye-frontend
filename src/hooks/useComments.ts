@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { api } from '@/lib/api';
 import { Comment, PageResponse, CommentRequest } from '@/types/api';
+import { storage } from '@/lib/storage';
 
 export function useComments(postId: number) {
   const [comments, setComments] = useState<Comment[]>([]);
@@ -28,7 +29,7 @@ export function useComments(postId: number) {
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const addComment = useCallback(async (content: string) => {
-    const userId = localStorage.getItem('userId');
+    const userId = storage.getUserId();
     if (!userId) return null;
     try {
       const res = await api.post<Comment>(`/api/posts/${postId}/comments?userId=${userId}`, { content });
@@ -40,7 +41,7 @@ export function useComments(postId: number) {
   }, [postId]);
 
   const updateComment = useCallback(async (commentId: number, content: string) => {
-    const userId = localStorage.getItem('userId');
+    const userId = storage.getUserId();
     if (!userId) return null;
     try {
       const res = await api.patch<Comment>(`/api/comments/${commentId}?userId=${userId}`, { content });
@@ -52,7 +53,7 @@ export function useComments(postId: number) {
   }, []);
 
   const deleteComment = useCallback(async (commentId: number) => {
-    const userId = localStorage.getItem('userId');
+    const userId = storage.getUserId();
     if (!userId) return false;
     try {
       await api.delete(`/api/comments/${commentId}?userId=${userId}`);
