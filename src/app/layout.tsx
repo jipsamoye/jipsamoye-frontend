@@ -22,8 +22,11 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: "집사모여 — 우리 애 자랑하러",
-  description: "강아지·고양이를 키우는 집사들이 반려동물을 자랑하고 소통하는 커뮤니티",
+  title: "집사모여 — 반려동물 자랑 커뮤니티",
+  description: "강아지, 고양이와 함께하는 일상을 공유하고 다른 집사들과 소통해보세요. 반려동물 사진 공유, 오픈채팅, DM까지!",
+  icons: {
+    icon: '/favicon.svg',
+  },
 };
 
 export default function RootLayout({
