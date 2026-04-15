@@ -16,7 +16,7 @@ class WebSocketService {
     this.disconnect();
     this.userId = userId;
 
-    const baseUrl = process.env.NEXT_PUBLIC_WS_URL || 'http://43.203.165.97';
+    const baseUrl = process.env.NEXT_PUBLIC_WS_URL || 'https://api.jipsamoye.com';
 
     this.client = new Client({
       webSocketFactory: () => new SockJS(`${baseUrl}/ws`),
