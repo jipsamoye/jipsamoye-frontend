@@ -73,7 +73,7 @@ export default function PopularSlider({ items }: PopularSliderProps) {
           >
             <div className="aspect-square bg-gray-200 dark:bg-gray-700 overflow-hidden">
               {item.thumbnailUrl ? (
-                <img src={item.thumbnailUrl} alt={item.label} className="w-full h-full object-cover" />
+                <img src={item.thumbnailUrl} alt={item.label} loading="lazy" decoding="async" className="w-full h-full object-cover" />
               ) : (
                 <div className="w-full h-full flex items-center justify-center text-gray-400 text-4xl">🐾</div>
               )}

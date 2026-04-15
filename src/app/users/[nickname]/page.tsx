@@ -11,6 +11,7 @@ import PostCard from '@/components/domain/PostCard';
 import CoverImageEditor from '@/components/domain/CoverImageEditor';
 import ProfileEditModal from '@/components/domain/ProfileEditModal';
 import { ALLOWED_IMAGE_EXTS, POST_CONFIG } from '@/lib/constants';
+import { compressImage } from '@/lib/imageCompress';
 
 export default function ProfilePage({ params }: { params: Promise<{ nickname: string }> }) {
   const { nickname } = use(params);
@@ -80,18 +81,19 @@ export default function ProfilePage({ params }: { params: Promise<{ nickname: st
     } catch { /* ignore */ }
   };
 
-  const uploadImage = async (file: File, dirName: string): Promise<string | null> => {
+  const uploadImage = async (file: File, dirName: string, preset: 'profile' | 'cover'): Promise<string | null> => {
     if (!user) return null;
     const ext = file.name.split('.').pop()?.toLowerCase() || 'jpg';
     if (!ALLOWED_IMAGE_EXTS.includes(ext)) return null;
     if (file.size > POST_CONFIG.MAX_IMAGE_SIZE) return null;
 
     try {
-      const res = await api.post<PresignedUrlResponse>(`/api/images/presigned-url?userId=${user.id}`, { dirName, ext });
+      const compressed = await compressImage(file, preset);
+      const res = await api.post<PresignedUrlResponse>(`/api/images/presigned-url?userId=${user.id}`, { dirName, ext: 'webp' });
       await fetch(res.data.presignedUrl, {
         method: 'PUT',
-        headers: { 'Content-Type': file.type },
-        body: file,
+        headers: { 'Content-Type': 'image/webp' },
+        body: compressed,
       });
       return res.data.imageUrl;
     } catch {
@@ -102,8 +104,8 @@ export default function ProfilePage({ params }: { params: Promise<{ nickname: st
   const handleCoverSave = async (blob: Blob) => {
     if (!user) return;
     setCoverSaving(true);
-    const file = new File([blob], 'cover.jpg', { type: 'image/jpeg' });
-    const imageUrl = await uploadImage(file, 'covers');
+    const file = new File([blob], 'cover.webp', { type: 'image/webp' });
+    const imageUrl = await uploadImage(file, 'covers', 'cover');
     if (!imageUrl) {
       setCoverSaving(false);
       return;
@@ -120,7 +122,7 @@ export default function ProfilePage({ params }: { params: Promise<{ nickname: st
   const handleProfileImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !user || !profile) return;
-    const imageUrl = await uploadImage(file, 'profiles');
+    const imageUrl = await uploadImage(file, 'profiles', 'profile');
     if (!imageUrl) return;
     try {
       const res = await api.patch<User>(`/api/users/me?userId=${user.id}`, { profileImageUrl: imageUrl });
@@ -142,7 +144,7 @@ export default function ProfilePage({ params }: { params: Promise<{ nickname: st
         style={coverStyle}
       >
         {profile.coverImageUrl ? (
-          <img src={profile.coverImageUrl} alt="커버" className="w-full h-full object-cover" />
+          <img src={profile.coverImageUrl} alt="커버" loading="lazy" decoding="async" className="w-full h-full object-cover" />
         ) : (
           <div className="w-full h-full bg-gradient-to-r from-gray-200 to-gray-300 dark:from-gray-800 dark:to-gray-700" />
         )}

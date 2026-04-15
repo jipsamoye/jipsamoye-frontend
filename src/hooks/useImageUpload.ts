@@ -5,6 +5,7 @@ import { api } from '@/lib/api';
 import { PresignedUrlResponse } from '@/types/api';
 import { storage } from '@/lib/storage';
 import { ALLOWED_IMAGE_EXTS, POST_CONFIG } from '@/lib/constants';
+import { compressImage } from '@/lib/imageCompress';
 
 export function useImageUpload() {
   const [uploading, setUploading] = useState(false);
@@ -19,15 +20,17 @@ export function useImageUpload() {
 
     setUploading(true);
     try {
+      const compressed = await compressImage(file, 'post');
+
       const res = await api.post<PresignedUrlResponse>(`/api/images/presigned-url?userId=${userId}`, {
         dirName: 'posts',
-        ext,
+        ext: 'webp',
       });
 
       await fetch(res.data.presignedUrl, {
         method: 'PUT',
-        headers: { 'Content-Type': file.type },
-        body: file,
+        headers: { 'Content-Type': 'image/webp' },
+        body: compressed,
       });
 
       return res.data.imageUrl;

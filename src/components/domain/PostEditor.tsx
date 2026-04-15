@@ -10,6 +10,7 @@ import { useFormGuard } from '@/hooks/useFormGuard';
 import Button from '@/components/common/Button';
 import { showToast } from '@/components/common/Toast';
 import { POST_CONFIG, ALLOWED_IMAGE_EXTS } from '@/lib/constants';
+import { compressImage } from '@/lib/imageCompress';
 
 const { TITLE_MAX, CONTENT_MAX, MAX_IMAGES, MAX_IMAGE_SIZE } = POST_CONFIG;
 
@@ -89,15 +90,17 @@ export default function PostEditor({
       if (file.size > MAX_IMAGE_SIZE) continue;
 
       try {
+        const compressed = await compressImage(file, 'post');
+
         const res = await api.post<PresignedUrlResponse>(`/api/images/presigned-url?userId=${user.id}`, {
           dirName: 'posts',
-          ext,
+          ext: 'webp',
         });
 
         await fetch(res.data.presignedUrl, {
           method: 'PUT',
-          headers: { 'Content-Type': file.type },
-          body: file,
+          headers: { 'Content-Type': 'image/webp' },
+          body: compressed,
         });
 
         newUrls.push(res.data.imageUrl);

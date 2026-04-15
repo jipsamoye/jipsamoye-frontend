@@ -156,7 +156,7 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
       {/* 이미지 (세로 나열) */}
       <div className="flex flex-col gap-2 mb-6">
         {post.imageUrls.map((url, i) => (
-          <img key={i} src={url} alt={`${post.title} ${i + 1}`} className="w-full rounded-2xl object-cover" />
+          <img key={i} src={url} alt={`${post.title} ${i + 1}`} loading="lazy" decoding="async" className="w-full rounded-2xl object-cover" />
         ))}
       </div>
 

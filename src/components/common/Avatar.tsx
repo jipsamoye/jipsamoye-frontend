@@ -18,6 +18,8 @@ export default function Avatar({ src, alt = '', size = 'md' }: AvatarProps) {
       <img
         src={src}
         alt={alt}
+        loading="lazy"
+        decoding="async"
         className={`${sizeClasses[size]} rounded-full object-cover ring-2 ring-white dark:ring-gray-900 shadow-sm`}
       />
     );

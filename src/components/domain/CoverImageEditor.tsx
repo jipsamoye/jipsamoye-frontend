@@ -141,7 +141,7 @@ export default function CoverImageEditor({ isOpen, onClose, onSave, saving, init
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
     ctx.drawImage(imageEl, sx, sy, sw, sh, 0, 0, 1200, 300);
-    canvas.toBlob((blob) => { if (blob) onSave(blob); }, 'image/jpeg', 0.9);
+    canvas.toBlob((blob) => { if (blob) onSave(blob); }, 'image/webp', 0.8);
   };
 
   const handleClose = () => {
