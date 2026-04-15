@@ -1,6 +1,6 @@
 import { ApiResponse } from '@/types/api';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.jipsamoye.com';
+const API_BASE_URL = '';
 
 async function request<T>(
   endpoint: string,
