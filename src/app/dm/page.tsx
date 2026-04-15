@@ -161,7 +161,7 @@ export default function DmPage() {
   }
 
   return (
-    <div className="flex h-[calc(100vh-4rem)] overflow-hidden -mx-4 -mt-6">
+    <div className="flex h-[calc(100vh-8rem)] lg:h-[calc(100vh-4rem)] overflow-hidden -mx-4 -my-6">
       {/* 왼쪽: 채팅방 목록 */}
       <div
         className={`w-full lg:w-80 lg:flex-shrink-0 border-r border-gray-200 dark:border-gray-800 flex flex-col bg-white dark:bg-gray-950
@@ -284,7 +284,7 @@ export default function DmPage() {
             </div>
 
             {/* 메시지 목록 */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-4">
+            <div className="flex-1 overflow-y-auto p-4 space-y-4 chat-scrollbar">
               {messages.length === 0 && (
                 <p className="text-center text-sm text-gray-400 dark:text-gray-500 py-8">
                   아직 메시지가 없어요. 첫 메시지를 보내보세요!

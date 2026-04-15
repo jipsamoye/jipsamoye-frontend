@@ -6,7 +6,6 @@ import Sidebar from './Sidebar';
 import LoginModal from '@/components/domain/LoginModal';
 import { useAuthContext } from '@/components/providers/AuthProvider';
 import ToastContainer from '@/components/common/Toast';
-import OpenChat from '@/components/domain/OpenChat';
 import AppProviders from '@/components/providers/AppProviders';
 
 function LayoutContent({ children }: { children: React.ReactNode }) {
@@ -34,7 +33,6 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
         onGuestLogin={loginAsGuest}
       />
       <ToastContainer />
-      <OpenChat />
     </>
   );
 }

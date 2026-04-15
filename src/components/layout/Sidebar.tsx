@@ -1,7 +1,7 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
-import { HomeIcon, TrophyIcon, ChatBubbleLeftRightIcon, ChatIcon } from './icons';
+import { HomeIcon, TrophyIcon, ChatBubbleLeftRightIcon, OpenChatIcon, ChatIcon } from './icons';
 import { useNavigationGuard } from '@/components/providers/NavigationGuard';
 
 interface NavItem {
@@ -14,6 +14,7 @@ const navItems: NavItem[] = [
   { label: '홈', href: '/', icon: <HomeIcon /> },
   { label: '랭킹', href: '/ranking', icon: <TrophyIcon /> },
   { label: '자유게시판', href: '/board', icon: <ChatBubbleLeftRightIcon /> },
+  { label: '오픈채팅', href: '/chat', icon: <OpenChatIcon /> },
   { label: 'DM', href: '/dm', icon: <ChatIcon /> },
 ];
 
