@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { api } from '@/lib/api';
 import { PetPost, PresignedUrlResponse } from '@/types/api';
@@ -24,6 +24,13 @@ function charCountColor(len: number, max: number) {
 
 const EMPTY_ARRAY: string[] = [];
 
+interface ImageItem {
+  id: string;
+  localUrl: string;
+  serverUrl: string | null;
+  status: 'uploading' | 'done' | 'error';
+}
+
 interface PostEditorProps {
   mode: 'create' | 'edit';
   initialTitle?: string;
@@ -31,6 +38,8 @@ interface PostEditorProps {
   initialImageUrls?: string[];
   postId?: string;
 }
+
+let imageIdCounter = 0;
 
 export default function PostEditor({
   mode,
@@ -50,82 +59,136 @@ export default function PostEditor({
   const [content, setContent] = useState(initialContent);
   const [titleFocused, setTitleFocused] = useState(false);
   const [contentFocused, setContentFocused] = useState(false);
-  const [imageUrls, setImageUrls] = useState<string[]>(initialImageUrls);
-  const [uploading, setUploading] = useState(false);
+  const [images, setImages] = useState<ImageItem[]>([]);
   const [submitting, setSubmitting] = useState(false);
 
   const originalData = useRef({ title: initialTitle, content: initialContent, imageUrls: initialImageUrls });
 
-  // Update originalData when initial values change (edit mode data fetch)
+  // 수정 모드: 기존 이미지 URL을 ImageItem으로 변환
   useEffect(() => {
     originalData.current = { title: initialTitle, content: initialContent, imageUrls: initialImageUrls };
     setTitle(initialTitle);
     setContent(initialContent);
-    setImageUrls(initialImageUrls);
+    if (initialImageUrls.length > 0) {
+      setImages(initialImageUrls.map((url) => ({
+        id: `init-${imageIdCounter++}`,
+        localUrl: url,
+        serverUrl: url,
+        status: 'done' as const,
+      })));
+    }
   }, [initialTitle, initialContent, initialImageUrls]);
 
+  // 메모리 정리: 로컬 URL 해제
+  useEffect(() => {
+    return () => {
+      images.forEach((img) => {
+        if (img.localUrl.startsWith('blob:')) {
+          URL.revokeObjectURL(img.localUrl);
+        }
+      });
+    };
+  }, []);
+
+  const completedServerUrls = images.filter((i) => i.status === 'done' && i.serverUrl).map((i) => i.serverUrl!);
+  const isUploading = images.some((i) => i.status === 'uploading');
+
   const isDirty = mode === 'create'
-    ? title.trim() !== '' || content.trim() !== '' || imageUrls.length > 0
+    ? title.trim() !== '' || content.trim() !== '' || images.length > 0
     : title !== originalData.current.title ||
       content !== originalData.current.content ||
-      JSON.stringify(imageUrls) !== JSON.stringify(originalData.current.imageUrls);
+      JSON.stringify(completedServerUrls) !== JSON.stringify(originalData.current.imageUrls);
 
   const guardMessage = mode === 'create' ? '작성을 취소하고 나가시겠어요?' : '수정을 취소하고 나가시겠어요?';
 
   useFormGuard(isDirty, guardMessage);
 
-  const handleImageUpload = async (files: FileList) => {
+  const uploadSingleImage = useCallback(async (file: File, itemId: string) => {
     if (!user) return;
-    if (imageUrls.length + files.length > MAX_IMAGES) {
+
+    try {
+      const compressed = await compressImage(file, 'post');
+
+      const res = await api.post<PresignedUrlResponse>(`/api/images/presigned-url?userId=${user.id}`, {
+        dirName: 'posts',
+        ext: 'webp',
+      });
+
+      await fetch(res.data.presignedUrl, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'image/webp' },
+        body: compressed,
+      });
+
+      setImages((prev) =>
+        prev.map((img) => img.id === itemId ? { ...img, serverUrl: res.data.imageUrl, status: 'done' as const } : img)
+      );
+    } catch {
+      setImages((prev) =>
+        prev.map((img) => img.id === itemId ? { ...img, status: 'error' as const } : img)
+      );
+    }
+  }, [user]);
+
+  const handleImageUpload = (files: FileList) => {
+    if (!user) return;
+    const totalCount = images.length + files.length;
+    if (totalCount > MAX_IMAGES) {
       showToast(`이미지는 최대 ${MAX_IMAGES}장까지 올릴 수 있어요`);
       return;
     }
 
-    setUploading(true);
-    const newUrls: string[] = [];
+    const newItems: ImageItem[] = [];
 
     for (const file of Array.from(files)) {
       const ext = file.name.split('.').pop()?.toLowerCase() || 'jpg';
       if (!ALLOWED_IMAGE_EXTS.includes(ext)) continue;
       if (file.size > MAX_IMAGE_SIZE) continue;
 
-      try {
-        const compressed = await compressImage(file, 'post');
+      const itemId = `img-${imageIdCounter++}`;
+      const localUrl = URL.createObjectURL(file);
 
-        const res = await api.post<PresignedUrlResponse>(`/api/images/presigned-url?userId=${user.id}`, {
-          dirName: 'posts',
-          ext: 'webp',
-        });
+      newItems.push({
+        id: itemId,
+        localUrl,
+        serverUrl: null,
+        status: 'uploading',
+      });
 
-        await fetch(res.data.presignedUrl, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'image/webp' },
-          body: compressed,
-        });
-
-        newUrls.push(res.data.imageUrl);
-      } catch {
-        // ignore
-      }
+      // 백그라운드로 압축+업로드 시작
+      uploadSingleImage(file, itemId);
     }
 
-    setImageUrls((prev) => [...prev, ...newUrls]);
-    setUploading(false);
+    setImages((prev) => [...prev, ...newItems]);
   };
 
-  const removeImage = (index: number) => {
-    setImageUrls((prev) => prev.filter((_, i) => i !== index));
+  const retryUpload = (itemId: string, file?: File) => {
+    if (!file) return;
+    setImages((prev) =>
+      prev.map((img) => img.id === itemId ? { ...img, status: 'uploading' as const } : img)
+    );
+    uploadSingleImage(file, itemId);
+  };
+
+  const removeImage = (itemId: string) => {
+    setImages((prev) => {
+      const target = prev.find((img) => img.id === itemId);
+      if (target?.localUrl.startsWith('blob:')) {
+        URL.revokeObjectURL(target.localUrl);
+      }
+      return prev.filter((img) => img.id !== itemId);
+    });
   };
 
   const handleSubmit = async () => {
-    if (!user || !title.trim() || imageUrls.length === 0) return;
+    if (!user || !title.trim() || completedServerUrls.length === 0) return;
     setSubmitting(true);
     try {
       if (mode === 'create') {
         const res = await api.post<PetPost>(`/api/posts?userId=${user.id}`, {
           title,
           content,
-          imageUrls,
+          imageUrls: completedServerUrls,
         });
         setBlocked(false);
         router.push(`/posts/${res.data.id}`);
@@ -133,7 +196,7 @@ export default function PostEditor({
         await api.patch<PetPost>(`/api/posts/${postId}?userId=${user.id}`, {
           title,
           content,
-          imageUrls,
+          imageUrls: completedServerUrls,
         });
         setBlocked(false);
         router.push(`/posts/${postId}`);
@@ -171,20 +234,36 @@ export default function PostEditor({
         />
       </div>
 
-      {uploading && <p className="text-sm text-amber-500 mb-4">이미지 업로드 중...</p>}
-
-      {/* 업로드된 이미지 미리보기 */}
-      {imageUrls.length > 0 && (
+      {/* 이미지 미리보기 + 상태 표시 */}
+      {images.length > 0 && (
         <div className="flex gap-3 overflow-x-auto scrollbar-hide mb-6 pb-2">
-          {imageUrls.map((url, i) => (
-            <div key={i} className="relative flex-shrink-0 w-24 h-24 rounded-xl overflow-hidden">
-              <img src={url} alt={`미리보기 ${i + 1}`} className="w-full h-full object-cover" />
-              <button
-                onClick={() => removeImage(i)}
-                className="absolute top-1 right-1 w-5 h-5 bg-black/60 rounded-full flex items-center justify-center text-white text-xs"
-              >
-                ✕
-              </button>
+          {images.map((img) => (
+            <div key={img.id} className="relative flex-shrink-0 w-24 h-24 rounded-xl overflow-hidden">
+              <img src={img.localUrl} alt="미리보기" className="w-full h-full object-cover" />
+
+              {/* 업로드 중: 오버레이 + 스피너 */}
+              {img.status === 'uploading' && (
+                <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                  <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                </div>
+              )}
+
+              {/* 에러: 오버레이 + 재시도 */}
+              {img.status === 'error' && (
+                <div className="absolute inset-0 bg-red-500/40 flex items-center justify-center">
+                  <span className="text-white text-xs font-medium">실패</span>
+                </div>
+              )}
+
+              {/* 삭제 버튼 (업로드 중이 아닐 때만) */}
+              {img.status !== 'uploading' && (
+                <button
+                  onClick={() => removeImage(img.id)}
+                  className="absolute top-1 right-1 w-5 h-5 bg-black/60 rounded-full flex items-center justify-center text-white text-xs"
+                >
+                  ✕
+                </button>
+              )}
             </div>
           ))}
         </div>
@@ -261,15 +340,15 @@ export default function PostEditor({
       {/* 버튼 */}
       {mode === 'create' ? (
         <div className="flex flex-col items-end gap-2">
-          {title.trim() && imageUrls.length > 0 && !content.trim() && (
+          {title.trim() && completedServerUrls.length > 0 && !content.trim() && (
             <span className="text-xs text-gray-400">이대로 작성할 수 있어요! 🐾</span>
           )}
           <Button
             size="lg"
             onClick={handleSubmit}
-            disabled={submitting || !title.trim() || imageUrls.length === 0}
+            disabled={submitting || isUploading || !title.trim() || completedServerUrls.length === 0}
           >
-            {submitting ? '작성 중...' : '작성하기'}
+            {submitting ? '작성 중...' : isUploading ? '이미지 업로드 중...' : '작성하기'}
           </Button>
         </div>
       ) : (
@@ -284,9 +363,9 @@ export default function PostEditor({
           <Button
             size="lg"
             onClick={handleSubmit}
-            disabled={submitting || !title.trim() || imageUrls.length === 0}
+            disabled={submitting || isUploading || !title.trim() || completedServerUrls.length === 0}
           >
-            {submitting ? '수정 중...' : '수정하기'}
+            {submitting ? '수정 중...' : isUploading ? '이미지 업로드 중...' : '수정하기'}
           </Button>
         </div>
       )}
