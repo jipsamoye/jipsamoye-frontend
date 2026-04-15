@@ -169,7 +169,7 @@ export default function Header({ isLoggedIn = false, onLoginClick, onLogout, nic
                     </Link>
                     <hr className="my-1 border-gray-100 dark:border-gray-800" />
                     <button
-                      onClick={() => { setShowDropdown(false); onLogout?.(); }}
+                      onClick={() => { setShowDropdown(false); onLogout?.(); router.push('/'); }}
                       className="block w-full text-left px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
                     >
                       로그아웃

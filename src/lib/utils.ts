@@ -3,7 +3,8 @@
  */
 export function timeAgo(dateString: string): string {
   const now = Date.now();
-  const date = new Date(dateString).getTime();
+  const utcStr = dateString.endsWith('Z') ? dateString : dateString + 'Z';
+  const date = new Date(utcStr).getTime();
   const diffMs = now - date;
   const diffSec = Math.floor(diffMs / 1000);
   const diffMin = Math.floor(diffSec / 60);

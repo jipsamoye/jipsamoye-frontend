@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { api } from '@/lib/api';
 import { User, SocialLink } from '@/types/api';
@@ -21,6 +21,8 @@ export default function ProfileEditModal({ isOpen, onClose, profile, userId, onS
   const [editBio, setEditBio] = useState(profile.bio || '');
   const [editLinks, setEditLinks] = useState<SocialLink[]>(profile.socialLinks || []);
   const [saving, setSaving] = useState(false);
+  const [nicknameStatus, setNicknameStatus] = useState<'idle' | 'checking' | 'available' | 'taken' | 'invalid'>('idle');
+  const nicknameTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Reset state when modal opens
   useEffect(() => {
@@ -28,8 +30,45 @@ export default function ProfileEditModal({ isOpen, onClose, profile, userId, onS
       setEditNickname(profile.nickname);
       setEditBio(profile.bio || '');
       setEditLinks(profile.socialLinks || []);
+      setNicknameStatus('idle');
     }
   }, [isOpen, profile]);
+
+  // 닉네임 실시간 중복 체크 (디바운스 300ms)
+  useEffect(() => {
+    if (nicknameTimerRef.current) clearTimeout(nicknameTimerRef.current);
+
+    // 현재 닉네임과 같으면 체크 안 함
+    if (editNickname === profile.nickname) {
+      setNicknameStatus('idle');
+      return;
+    }
+
+    // 2자 미만이면 invalid
+    if (editNickname.trim().length < 2) {
+      setNicknameStatus('invalid');
+      return;
+    }
+
+    setNicknameStatus('checking');
+    nicknameTimerRef.current = setTimeout(async () => {
+      try {
+        const res = await api.get<boolean>(`/api/users/check-nickname?nickname=${encodeURIComponent(editNickname)}`);
+        setNicknameStatus(res.data ? 'available' : 'taken');
+      } catch {
+        // API 없으면 일단 통과
+        setNicknameStatus('available');
+      }
+    }, 300);
+
+    return () => {
+      if (nicknameTimerRef.current) clearTimeout(nicknameTimerRef.current);
+    };
+  }, [editNickname, profile.nickname]);
+
+  const hasChanges = editNickname !== profile.nickname ||
+    editBio !== (profile.bio || '') ||
+    JSON.stringify(editLinks) !== JSON.stringify(profile.socialLinks || []);
 
   const handleSaveProfile = async () => {
     setSaving(true);
@@ -73,14 +112,33 @@ export default function ProfileEditModal({ isOpen, onClose, profile, userId, onS
           <div className="relative">
             <input
               value={editNickname}
-              onChange={(e) => setEditNickname(e.target.value)}
+              onChange={(e) => setEditNickname(e.target.value.slice(0, 10))}
               maxLength={10}
-              className="w-full px-4 py-2.5 rounded-xl border border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-amber-300 transition-all duration-200"
+              className={`w-full px-4 py-2.5 rounded-xl border bg-gray-50 dark:bg-gray-800 text-sm focus:outline-none focus:ring-2 transition-all duration-200 ${
+                nicknameStatus === 'taken' || nicknameStatus === 'invalid'
+                  ? 'border-red-300 dark:border-red-800 focus:ring-red-300'
+                  : nicknameStatus === 'available'
+                  ? 'border-green-300 dark:border-green-800 focus:ring-green-300'
+                  : 'border-gray-100 dark:border-gray-800 focus:ring-amber-300'
+              }`}
             />
             <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">
               {editNickname.length}/10
             </span>
           </div>
+          {/* 닉네임 상태 메시지 */}
+          {nicknameStatus === 'checking' && (
+            <p className="text-xs text-gray-400 mt-1.5">확인 중...</p>
+          )}
+          {nicknameStatus === 'available' && (
+            <p className="text-xs text-green-500 mt-1.5">사용 가능한 닉네임이에요 ✓</p>
+          )}
+          {nicknameStatus === 'taken' && (
+            <p className="text-xs text-red-500 mt-1.5">이미 사용 중인 닉네임이에요</p>
+          )}
+          {nicknameStatus === 'invalid' && (
+            <p className="text-xs text-red-500 mt-1.5">2자 이상 입력해 주세요</p>
+          )}
         </div>
 
         {/* 자기 소개 */}
@@ -146,7 +204,7 @@ export default function ProfileEditModal({ isOpen, onClose, profile, userId, onS
         {/* 저장 버튼 */}
         <button
           onClick={handleSaveProfile}
-          disabled={saving || !editNickname.trim()}
+          disabled={saving || !editNickname.trim() || !hasChanges || nicknameStatus === 'taken' || nicknameStatus === 'invalid' || nicknameStatus === 'checking'}
           className="w-full py-3 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-2xl font-medium hover:bg-gray-800 dark:hover:bg-gray-100 transition-all duration-200 disabled:opacity-50"
         >
           {saving ? '저장 중...' : '변경 내용 저장'}

@@ -52,14 +52,16 @@ class WebSocketService {
     }
   }
 
-  private stompSubscribe(destination: string, type: string): void {
+  private stompSubscribe(destination: string, defaultType: string): void {
     if (!this.client || !this.connected) return;
 
     const sub = this.client.subscribe(destination, (message: IMessage) => {
       try {
         const data = JSON.parse(message.body);
-        console.log(`[WebSocket] 수신 (${destination}):`, data);
-        const handlers = this.handlers.get(type);
+        // body에 type 필드가 있으면 그걸 사용, 없으면 defaultType 사용
+        const msgType = (data as Record<string, unknown>).type as string || defaultType;
+        console.log(`[WebSocket] 수신 (${destination}) [${msgType}]:`, data);
+        const handlers = this.handlers.get(msgType);
         if (handlers) {
           handlers.forEach((handler) => handler(data));
         }

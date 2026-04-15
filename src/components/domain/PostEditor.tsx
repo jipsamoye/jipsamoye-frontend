@@ -13,6 +13,8 @@ import { POST_CONFIG, ALLOWED_IMAGE_EXTS } from '@/lib/constants';
 
 const { TITLE_MAX, CONTENT_MAX, MAX_IMAGES, MAX_IMAGE_SIZE } = POST_CONFIG;
 
+const TITLE_PRESETS = ['사진 공유해요', '우리 아이 자랑', '오늘의 산책', '귀여운 순간', '오늘의 멍냥'];
+
 function charCountColor(len: number, max: number) {
   if (len >= max) return 'text-red-500';
   if (len >= max * 0.8) return 'text-amber-500';
@@ -209,6 +211,21 @@ export default function PostEditor({
           </span>
         )}
       </div>
+
+      {/* 빠른 제목 프리셋 */}
+      {mode === 'create' && !title && (
+        <div className="flex gap-2 mb-4 flex-wrap">
+          {TITLE_PRESETS.map((preset) => (
+            <button
+              key={preset}
+              onClick={() => setTitle(preset)}
+              className="px-3 py-1.5 text-xs rounded-full border border-gray-100 dark:border-gray-800 text-gray-500 dark:text-gray-400 hover:bg-amber-50 hover:border-amber-200 hover:text-amber-600 dark:hover:bg-amber-950/20 dark:hover:border-amber-800 dark:hover:text-amber-400 transition-all duration-200"
+            >
+              {preset}
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* 내용 */}
       <div className="relative">

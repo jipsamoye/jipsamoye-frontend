@@ -111,6 +111,7 @@ export default function ProfilePage({ params }: { params: Promise<{ nickname: st
     try {
       const res = await api.patch<User>(`/api/users/me?userId=${user.id}`, { coverImageUrl: imageUrl });
       setProfile(res.data);
+      updateUser(res.data);
       setShowCoverEditor(false);
     } catch { /* ignore */ }
     setCoverSaving(false);
@@ -124,6 +125,7 @@ export default function ProfilePage({ params }: { params: Promise<{ nickname: st
     try {
       const res = await api.patch<User>(`/api/users/me?userId=${user.id}`, { profileImageUrl: imageUrl });
       setProfile(res.data);
+      updateUser(res.data);
     } catch { /* ignore */ }
   };
 
