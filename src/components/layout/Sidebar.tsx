@@ -8,12 +8,21 @@ interface NavItem {
   label: string;
   href: string;
   icon: React.ReactNode;
+  highlight?: boolean;
 }
 
 const navItems: NavItem[] = [
   { label: '홈', href: '/', icon: <HomeIcon /> },
   { label: '랭킹', href: '/ranking', icon: <TrophyIcon /> },
   { label: '자유게시판', href: '/board', icon: <ChatBubbleLeftRightIcon /> },
+  { label: '오픈채팅', href: '/chat', icon: <OpenChatIcon /> },
+  { label: 'DM', href: '/dm', icon: <ChatIcon /> },
+];
+
+const mobileNavItems: NavItem[] = [
+  { label: '홈', href: '/', icon: <HomeIcon /> },
+  { label: '랭킹', href: '/ranking', icon: <TrophyIcon /> },
+  { label: '자랑하기', href: '/posts/new', highlight: true, icon: <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg> },
   { label: '오픈채팅', href: '/chat', icon: <OpenChatIcon /> },
   { label: 'DM', href: '/dm', icon: <ChatIcon /> },
 ];
@@ -50,8 +59,22 @@ export default function Sidebar() {
       {/* 모바일 하단 탭바 */}
       <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-gray-950 border-t border-gray-100 dark:border-gray-800">
         <div className="flex justify-around py-2">
-          {navItems.map((item) => {
+          {mobileNavItems.map((item) => {
             const isActive = pathname === item.href;
+            if (item.highlight) {
+              return (
+                <button
+                  key={item.href}
+                  onClick={() => guardedPush(item.href)}
+                  className="flex flex-col items-center gap-1 px-3 py-1 text-xs font-[family-name:var(--font-jua)] text-amber-500"
+                >
+                  <span className="w-8 h-8 flex items-center justify-center bg-amber-500 rounded-full text-white">
+                    {item.icon}
+                  </span>
+                  {item.label}
+                </button>
+              );
+            }
             return (
               <button
                 key={item.href}
