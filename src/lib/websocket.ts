@@ -3,9 +3,12 @@ import { Client, IMessage } from '@stomp/stompjs';
 
 type MessageHandler = (data: unknown) => void;
 
+// 채널 이름 → STOMP destination 매핑
+type Channel = 'notification' | 'chat';
+
 class WebSocketService {
   private client: Client | null = null;
-  private handlers: Map<string, Set<MessageHandler>> = new Map();
+  private channelHandlers: Map<Channel, Set<MessageHandler>> = new Map();
   private subscriptions: Map<string, { unsubscribe: () => void }> = new Map();
   private userId: number | null = null;
   private connected = false;
@@ -25,16 +28,11 @@ class WebSocketService {
         this.connected = true;
         console.log('[WebSocket] STOMP 연결됨');
 
-        // 알림 구독: /sub/notifications/{userId}
-        this.stompSubscribe(
-          `/sub/notifications/${userId}`,
-          'NOTIFICATION'
-        );
+        // 알림 구독
+        this.subscribeChannel('notification', `/sub/notifications/${userId}`);
 
-        // 오픈채팅 구독: /sub/chat/room
-        this.stompSubscribe('/sub/chat/room', 'CHAT_MESSAGE');
-
-        // DM은 채팅방별로 동적 구독 (subscribeDmRoom 메서드 사용)
+        // 오픈채팅 구독
+        this.subscribeChannel('chat', '/sub/chat/room');
       },
       onDisconnect: () => {
         this.connected = false;
@@ -52,16 +50,15 @@ class WebSocketService {
     }
   }
 
-  private stompSubscribe(destination: string, defaultType: string): void {
+  // 채널 단위 STOMP 구독 (내부용)
+  private subscribeChannel(channel: Channel, destination: string): void {
     if (!this.client || !this.connected) return;
 
     const sub = this.client.subscribe(destination, (message: IMessage) => {
       try {
         const data = JSON.parse(message.body);
-        // body에 type 필드가 있으면 그걸 사용, 없으면 defaultType 사용
-        const msgType = (data as Record<string, unknown>).type as string || defaultType;
-        console.log(`[WebSocket] 수신 (${destination}) [${msgType}]:`, data);
-        const handlers = this.handlers.get(msgType);
+        console.log(`[WebSocket] 수신 [${channel}]:`, data);
+        const handlers = this.channelHandlers.get(channel);
         if (handlers) {
           handlers.forEach((handler) => handler(data));
         }
@@ -87,18 +84,19 @@ class WebSocketService {
     }
   }
 
-  subscribe(type: string, handler: MessageHandler): () => void {
-    if (!this.handlers.has(type)) {
-      this.handlers.set(type, new Set());
+  // 채널 핸들러 등록
+  on(channel: Channel, handler: MessageHandler): () => void {
+    if (!this.channelHandlers.has(channel)) {
+      this.channelHandlers.set(channel, new Set());
     }
-    this.handlers.get(type)!.add(handler);
+    this.channelHandlers.get(channel)!.add(handler);
 
     return () => {
-      const handlers = this.handlers.get(type);
+      const handlers = this.channelHandlers.get(channel);
       if (handlers) {
         handlers.delete(handler);
         if (handlers.size === 0) {
-          this.handlers.delete(type);
+          this.channelHandlers.delete(channel);
         }
       }
     };
@@ -113,15 +111,15 @@ class WebSocketService {
     }
   }
 
-  subscribeDmRoom(roomId: number, handler: MessageHandler): () => void {
+  // DM 채팅방 동적 구독
+  onDmRoom(roomId: number, handler: MessageHandler): () => void {
     const destination = `/sub/dm/room/${roomId}`;
 
-    // STOMP 구독
     if (this.client && this.connected) {
       const sub = this.client.subscribe(destination, (message: IMessage) => {
         try {
           const data = JSON.parse(message.body);
-          console.log(`[WebSocket] 수신 (${destination}):`, data);
+          console.log(`[WebSocket] 수신 [dm/${roomId}]:`, data);
           handler(data);
         } catch {
           console.log('[WebSocket] DM 메시지 파싱 실패:', message.body);

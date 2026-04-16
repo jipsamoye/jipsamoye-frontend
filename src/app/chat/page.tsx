@@ -79,9 +79,22 @@ export default function ChatPage() {
   const userRef = useRef(user);
   userRef.current = user;
 
-  // 채팅 메시지 수신
+  // 채팅 채널 수신 (메시지 + 프로필 변경)
   useEffect(() => {
-    const unsubscribe = wsService.subscribe('CHAT_MESSAGE', (data) => {
+    const unsubscribe = wsService.on('chat', (data) => {
+      const parsed = data as Record<string, unknown>;
+
+      if (parsed.type === 'PROFILE_UPDATED') {
+        const profile = data as { userId: number; nickname: string; profileImageUrl: string | null };
+        setMessages((prev) =>
+          prev.map((m) =>
+            m.userId === profile.userId ? { ...m, nickname: profile.nickname, profileImageUrl: profile.profileImageUrl } : m
+          )
+        );
+        return;
+      }
+
+      // 채팅 메시지
       const msg = data as ChatMessage;
       if (!msg.id) return;
       setMessages((prev) => {
@@ -91,19 +104,6 @@ export default function ChatPage() {
       if (!wasNearBottomRef.current && userRef.current && msg.userId !== userRef.current.id) {
         setNewMsgPreview(msg);
       }
-    });
-    return unsubscribe;
-  }, []);
-
-  // 프로필 변경 수신
-  useEffect(() => {
-    const unsubscribe = wsService.subscribe('PROFILE_UPDATED', (data) => {
-      const parsed = data as { userId: number; nickname: string; profileImageUrl: string | null };
-      setMessages((prev) =>
-        prev.map((m) =>
-          m.userId === parsed.userId ? { ...m, nickname: parsed.nickname, profileImageUrl: parsed.profileImageUrl } : m
-        )
-      );
     });
     return unsubscribe;
   }, []);

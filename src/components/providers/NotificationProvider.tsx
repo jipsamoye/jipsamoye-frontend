@@ -95,7 +95,7 @@ export default function NotificationProvider({ children }: NotificationProviderP
     fetchNotifications();
     fetchUnreadCount();
 
-    const unsubscribe = wsService.subscribe('NOTIFICATION', (data) => {
+    const unsubscribe = wsService.on('notification', (data) => {
       const notification = data as Notification;
       setNotifications((prev) => [notification, ...prev]);
       if (!notification.read) {

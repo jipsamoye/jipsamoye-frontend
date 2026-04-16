@@ -45,7 +45,7 @@ export default function DmPage() {
       .catch(() => setMessages([]));
 
     // WebSocket 구독 (실시간 수신)
-    const unsubscribe = wsService.subscribeDmRoom(selectedRoomId, (data) => {
+    const unsubscribe = wsService.onDmRoom(selectedRoomId, (data) => {
       const msg = data as DmMessage;
       setMessages((prev) => {
         if (prev.some((m) => m.id === msg.id)) return prev;
