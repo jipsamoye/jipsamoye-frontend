@@ -1,3 +1,6 @@
+'use client';
+
+import { useState } from 'react';
 import Link from 'next/link';
 import { PetPostListItem } from '@/types/api';
 import { HeartIcon, EyeIcon } from '@/components/layout/icons';
@@ -7,18 +10,24 @@ interface PostCardProps {
 }
 
 export default function PostCard({ post }: PostCardProps) {
+  const [loaded, setLoaded] = useState(false);
+
   return (
     <Link href={`/posts/${post.id}`} className="block group">
       <div className="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-800 rounded-2xl overflow-hidden transition-all duration-200 group-hover:shadow-md group-hover:scale-[1.02]">
-        <div className="aspect-square bg-gray-200 dark:bg-gray-700 overflow-hidden rounded-t-2xl">
+        <div className="aspect-square bg-gray-200 dark:bg-gray-700 overflow-hidden rounded-t-2xl relative">
           {post.thumbnailUrl ? (
-            <img
-              src={post.thumbnailUrl}
-              alt={post.title}
-              loading="lazy"
-              decoding="async"
-              className="w-full h-full object-cover"
-            />
+            <>
+              {!loaded && <div className="absolute inset-0 bg-gray-200 dark:bg-gray-700 animate-pulse" />}
+              <img
+                src={post.thumbnailUrl}
+                alt={post.title}
+                loading="lazy"
+                decoding="async"
+                onLoad={() => setLoaded(true)}
+                className={`w-full h-full object-cover transition-opacity duration-500 ${loaded ? 'opacity-100' : 'opacity-0'}`}
+              />
+            </>
           ) : (
             <div className="w-full h-full flex items-center justify-center text-gray-400 text-4xl">
               🐾

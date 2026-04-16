@@ -1,8 +1,25 @@
 'use client';
 
-import { useRef, useState, useEffect } from 'react';
+import { useRef, useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { HeartIcon } from '@/components/layout/icons';
+
+function FadeImage({ src, alt }: { src: string; alt: string }) {
+  const [loaded, setLoaded] = useState(false);
+  return (
+    <>
+      {!loaded && <div className="absolute inset-0 bg-gray-200 dark:bg-gray-700 animate-pulse" />}
+      <img
+        src={src}
+        alt={alt}
+        loading="lazy"
+        decoding="async"
+        onLoad={() => setLoaded(true)}
+        className={`w-full h-full object-cover transition-opacity duration-500 ${loaded ? 'opacity-100' : 'opacity-0'}`}
+      />
+    </>
+  );
+}
 
 interface PopularItem {
   id: number;
@@ -71,9 +88,9 @@ export default function PopularSlider({ items }: PopularSliderProps) {
             href={`/posts/${item.id}`}
             className="flex-shrink-0 w-[calc(25%-12px)] min-w-[200px] bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-800 rounded-2xl overflow-hidden cursor-pointer hover:shadow-md hover:scale-[1.02] transition-all duration-200"
           >
-            <div className="aspect-square bg-gray-200 dark:bg-gray-700 overflow-hidden">
+            <div className="aspect-square bg-gray-200 dark:bg-gray-700 overflow-hidden relative">
               {item.thumbnailUrl ? (
-                <img src={item.thumbnailUrl} alt={item.label} loading="lazy" decoding="async" className="w-full h-full object-cover" />
+                <FadeImage src={item.thumbnailUrl} alt={item.label} />
               ) : (
                 <div className="w-full h-full flex items-center justify-center text-gray-400 text-4xl">🐾</div>
               )}
