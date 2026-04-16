@@ -131,7 +131,20 @@ export default function PostEditor({
     }
   }, [user]);
 
-  const handleImageUpload = (files: FileList) => {
+  const createThumbnailUrl = async (file: File): Promise<string> => {
+    const bitmap = await createImageBitmap(file, {
+      resizeWidth: 192,
+      resizeHeight: 192,
+      resizeQuality: 'low',
+    });
+    const canvas = new OffscreenCanvas(bitmap.width, bitmap.height);
+    canvas.getContext('2d')!.drawImage(bitmap, 0, 0);
+    bitmap.close();
+    const blob = await canvas.convertToBlob({ type: 'image/webp', quality: 0.5 });
+    return URL.createObjectURL(blob);
+  };
+
+  const handleImageUpload = async (files: FileList) => {
     if (!user) return;
     const totalCount = images.length + files.length;
     if (totalCount > MAX_IMAGES) {
@@ -139,28 +152,29 @@ export default function PostEditor({
       return;
     }
 
-    const newItems: ImageItem[] = [];
+    const validFiles: { file: File; itemId: string }[] = [];
 
     for (const file of Array.from(files)) {
       const ext = file.name.split('.').pop()?.toLowerCase() || 'jpg';
       if (!ALLOWED_IMAGE_EXTS.includes(ext)) continue;
       if (file.size > MAX_IMAGE_SIZE) continue;
-
-      const itemId = `img-${imageIdCounter++}`;
-      const localUrl = URL.createObjectURL(file);
-
-      newItems.push({
-        id: itemId,
-        localUrl,
-        serverUrl: null,
-        status: 'uploading',
-      });
-
-      // 백그라운드로 압축+업로드 시작
-      uploadSingleImage(file, itemId);
+      validFiles.push({ file, itemId: `img-${imageIdCounter++}` });
     }
 
-    setImages((prev) => [...prev, ...newItems]);
+    // 모든 썸네일을 동시에 생성 (~15ms)
+    const thumbnails = await Promise.all(
+      validFiles.map(async ({ file, itemId }) => ({
+        id: itemId,
+        localUrl: await createThumbnailUrl(file),
+        serverUrl: null as string | null,
+        status: 'uploading' as const,
+      }))
+    );
+
+    setImages((prev) => [...prev, ...thumbnails]);
+
+    // 백그라운드로 압축+업로드 시작
+    validFiles.forEach(({ file, itemId }) => uploadSingleImage(file, itemId));
   };
 
   const retryUpload = (itemId: string, file?: File) => {
