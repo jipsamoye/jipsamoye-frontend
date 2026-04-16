@@ -107,12 +107,13 @@ export default function PostEditor({
     if (!user) return;
 
     try {
-      const compressed = await compressImage(file, 'post');
-
-      const res = await api.post<PresignedUrlResponse>(`/api/images/presigned-url?userId=${user.id}`, {
-        dirName: 'posts',
-        ext: 'webp',
-      });
+      const [compressed, res] = await Promise.all([
+        compressImage(file, 'post'),
+        api.post<PresignedUrlResponse>(`/api/images/presigned-url?userId=${user.id}`, {
+          dirName: 'posts',
+          ext: 'webp',
+        }),
+      ]);
 
       await fetch(res.data.presignedUrl, {
         method: 'PUT',
