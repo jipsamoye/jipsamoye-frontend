@@ -26,7 +26,6 @@ const wrapper = ({ children }: { children: ReactNode }) => (
 );
 
 const sampleUser = {
-  id: 7,
   nickname: '츄르맨',
   bio: null,
   profileImageUrl: null,

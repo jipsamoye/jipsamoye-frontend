@@ -112,11 +112,11 @@ export default function DmPage() {
   }, [user]);
 
   const handleCreateRoom = useCallback(
-    async (targetUserId: number) => {
+    async (targetNickname: string) => {
       if (!user) return;
       try {
         const res = await api.post<DmRoom>(
-          `/api/dm/rooms?targetUserId=${targetUserId}`
+          `/api/dm/rooms?targetNickname=${encodeURIComponent(targetNickname)}`
         );
         const newRoom = res.data;
         setRooms((prev) => {
@@ -290,7 +290,7 @@ export default function DmPage() {
                 </p>
               )}
               {messages.map((msg) => {
-                const isMine = msg.senderId === user.id;
+                const isMine = msg.senderNickname === user.nickname;
                 const time = new Date(msg.createdAt).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
 
                 if (isMine) {
@@ -401,7 +401,7 @@ export default function DmPage() {
             ) : (
               filteredFollowing.map((followUser) => (
                 <div
-                  key={followUser.id}
+                  key={followUser.nickname}
                   className="flex items-center justify-between px-2 py-2.5 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
                 >
                   <div className="flex items-center gap-3">
@@ -409,7 +409,7 @@ export default function DmPage() {
                     <span className="text-sm font-medium text-gray-900 dark:text-white">{followUser.nickname}</span>
                   </div>
                   <button
-                    onClick={() => handleCreateRoom(followUser.id)}
+                    onClick={() => handleCreateRoom(followUser.nickname)}
                     className="p-2 rounded-full text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">

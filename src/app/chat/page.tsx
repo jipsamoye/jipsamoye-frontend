@@ -85,10 +85,10 @@ export default function ChatPage() {
       const parsed = data as Record<string, unknown>;
 
       if (parsed.type === 'PROFILE_UPDATED') {
-        const profile = data as { userId: number; nickname: string; profileImageUrl: string | null };
+        const profile = data as { nickname: string; profileImageUrl: string | null };
         setMessages((prev) =>
           prev.map((m) =>
-            m.userId === profile.userId ? { ...m, nickname: profile.nickname, profileImageUrl: profile.profileImageUrl } : m
+            m.senderNickname === profile.nickname ? { ...m, senderProfileImageUrl: profile.profileImageUrl } : m
           )
         );
         return;
@@ -101,7 +101,7 @@ export default function ChatPage() {
         if (prev.some((m) => m.id === msg.id)) return prev;
         return [...prev, msg];
       });
-      if (!wasNearBottomRef.current && userRef.current && msg.userId !== userRef.current.id) {
+      if (!wasNearBottomRef.current && userRef.current && msg.senderNickname !== userRef.current.nickname) {
         setNewMsgPreview(msg);
       }
     });
@@ -199,7 +199,7 @@ export default function ChatPage() {
           </div>
         )}
         {messages.map((msg) => {
-          const isMine = user ? msg.userId === user.id : false;
+          const isMine = user ? msg.senderNickname === user.nickname : false;
 
           if (isMine) {
             return (
@@ -214,9 +214,9 @@ export default function ChatPage() {
 
           return (
             <div key={msg.id} className="flex items-start gap-2">
-              <Avatar src={msg.profileImageUrl} size="sm" />
+              <Avatar src={msg.senderProfileImageUrl} size="sm" />
               <div className="flex-1 min-w-0">
-                <span className="text-xs font-medium text-gray-700 dark:text-gray-300 block mb-1">{msg.nickname}</span>
+                <span className="text-xs font-medium text-gray-700 dark:text-gray-300 block mb-1">{msg.senderNickname}</span>
                 <div className="flex items-end gap-1.5">
                   <div className="inline-block max-w-[85%] lg:max-w-md px-3.5 py-2.5 rounded-2xl rounded-bl-md bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm break-words whitespace-pre-wrap">
                     {msg.content}
@@ -247,8 +247,8 @@ export default function ChatPage() {
             onClick={scrollToBottom}
             className="absolute -top-12 left-6 right-6 flex items-center gap-2 px-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-lg z-10 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200"
           >
-            <Avatar src={newMsgPreview.profileImageUrl} size="xs" />
-            <span className="text-sm font-medium text-gray-700 dark:text-gray-300 flex-shrink-0">{newMsgPreview.nickname}</span>
+            <Avatar src={newMsgPreview.senderProfileImageUrl} size="xs" />
+            <span className="text-sm font-medium text-gray-700 dark:text-gray-300 flex-shrink-0">{newMsgPreview.senderNickname}</span>
             <span className="text-sm text-gray-500 truncate">{newMsgPreview.content}</span>
           </button>
         )}

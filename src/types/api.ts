@@ -24,7 +24,6 @@ export interface SocialLink {
 
 // 유저
 export interface User {
-  id: number;
   nickname: string;
   bio: string | null;
   profileImageUrl: string | null;
@@ -43,7 +42,6 @@ export interface PetPost {
   content: string;
   imageUrls: string[];
   likeCount: number;
-  userId: number;
   nickname: string;
   profileImageUrl: string | null;
   createdAt: string;
@@ -56,7 +54,6 @@ export interface PetPostListItem {
   title: string;
   thumbnailUrl: string | null;
   likeCount: number;
-  userId: number;
   nickname: string;
   createdAt: string;
 }
@@ -65,7 +62,6 @@ export interface PetPostListItem {
 export interface Comment {
   id: number;
   content: string;
-  userId: number;
   nickname: string;
   profileImageUrl: string | null;
   parentId?: number | null;
@@ -76,7 +72,6 @@ export interface Comment {
 
 // 팔로우 유저
 export interface FollowUser {
-  id: number;
   nickname: string;
   profileImageUrl: string | null;
 }
@@ -127,7 +122,6 @@ export interface Notification {
   type: string;
   targetId?: number;
   message: string;
-  senderId: number;
   senderNickname: string;
   senderProfileImageUrl: string | null;
   read: boolean;
@@ -137,9 +131,8 @@ export interface Notification {
 // 채팅 메시지
 export interface ChatMessage {
   id: number;
-  userId: number;
-  nickname: string;
-  profileImageUrl: string | null;
+  senderNickname: string;
+  senderProfileImageUrl: string | null;
   content: string;
   createdAt: string;
 }
@@ -147,7 +140,6 @@ export interface ChatMessage {
 // DM 채팅방
 export interface DmRoom {
   roomId: number;
-  otherUserId: number;
   otherUserNickname: string;
   otherUserProfileImageUrl: string | null;
   lastMessage: string;
@@ -158,7 +150,6 @@ export interface DmRoom {
 // DM 메시지
 export interface DmMessage {
   id: number;
-  senderId: number;
   senderNickname: string;
   content: string;
   imageUrl?: string;

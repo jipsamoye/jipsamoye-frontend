@@ -10,15 +10,15 @@ class WebSocketService {
   private client: Client | null = null;
   private channelHandlers: Map<Channel, Set<MessageHandler>> = new Map();
   private subscriptions: Map<string, { unsubscribe: () => void }> = new Map();
-  private userId: number | null = null;
+  private userNickname: string | null = null;
   private connected = false;
   private authRejected = false;
 
-  connect(userId: number): void {
-    if (this.connected && this.userId === userId) return;
+  connect(userNickname: string): void {
+    if (this.connected && this.userNickname === userNickname) return;
 
     this.disconnect();
-    this.userId = userId;
+    this.userNickname = userNickname;
     this.authRejected = false;
 
     const baseUrl = process.env.NEXT_PUBLIC_WS_URL || 'https://api.jipsamoye.com';
@@ -76,7 +76,7 @@ class WebSocketService {
   }
 
   disconnect(): void {
-    this.userId = null;
+    this.userNickname = null;
     this.connected = false;
     this.subscriptions.clear();
     if (this.client) {

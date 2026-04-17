@@ -18,7 +18,7 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
   useEffect(() => {
     api.get<PetPost>(`/api/posts/${id}`)
       .then((res) => {
-        if (user && res.data.userId !== user.id) {
+        if (user && res.data.nickname !== user.nickname) {
           router.push(`/posts/${id}`);
           return;
         }

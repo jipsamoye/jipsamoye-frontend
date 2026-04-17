@@ -134,7 +134,7 @@ export default function ProfilePage({ params }: { params: Promise<{ nickname: st
   if (loading) return <div className="flex justify-center py-20 text-gray-400">불러오는 중...</div>;
   if (!profile) return <div className="flex justify-center py-20 text-gray-400">유저를 찾을 수 없어요</div>;
 
-  const isMe = user?.id === profile.id;
+  const isMe = user?.nickname === profile.nickname;
 
   return (
     <div ref={wrapperRef}>
@@ -248,7 +248,7 @@ export default function ProfilePage({ params }: { params: Promise<{ nickname: st
                   onClick={async () => {
                     if (!user || !profile) return;
                     try {
-                      await api.post(`/api/dm/rooms?targetUserId=${profile.id}`);
+                      await api.post(`/api/dm/rooms?targetNickname=${encodeURIComponent(profile.nickname)}`);
                     } catch { /* ignore */ }
                     router.push('/dm');
                   }}

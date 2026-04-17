@@ -76,7 +76,7 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
   if (loading) return <div className="flex justify-center py-20 text-gray-400">불러오는 중...</div>;
   if (!post) return <div className="flex justify-center py-20 text-gray-400">게시글을 찾을 수 없어요</div>;
 
-  const isAuthor = user?.id === post.userId;
+  const isAuthor = user?.nickname === post.nickname;
 
   return (
     <div className="max-w-3xl mx-auto">
@@ -118,7 +118,7 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
                     onClick={async () => {
                       setShowPostMenu(false);
                       try {
-                        await api.post(`/api/dm/rooms?targetUserId=${post.userId}`);
+                        await api.post(`/api/dm/rooms?targetNickname=${encodeURIComponent(post.nickname)}`);
                       } catch { /* ignore */ }
                       router.push('/dm');
                     }}
@@ -198,7 +198,7 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
                   onClick={async () => {
                     setShowActionMenu(false);
                     try {
-                      await api.post(`/api/dm/rooms?targetUserId=${post.userId}`);
+                      await api.post(`/api/dm/rooms?targetNickname=${encodeURIComponent(post.nickname)}`);
                     } catch { /* ignore */ }
                     router.push('/dm');
                   }}

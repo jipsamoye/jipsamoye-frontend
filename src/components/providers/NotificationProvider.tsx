@@ -91,7 +91,7 @@ export default function NotificationProvider({ children }: NotificationProviderP
       return;
     }
 
-    wsService.connect(user.id);
+    wsService.connect(user.nickname);
     fetchNotifications();
     fetchUnreadCount();
 

@@ -57,7 +57,6 @@ export default function CommentSection({ postId, user }: CommentSectionProps) {
       const fakeReply: Comment = {
         id: Date.now(),
         content: replyText,
-        userId: user.id,
         nickname: user.nickname,
         profileImageUrl: user.profileImageUrl,
         parentId,
@@ -129,7 +128,7 @@ export default function CommentSection({ postId, user }: CommentSectionProps) {
                     <span className="text-sm font-medium">{comment.nickname}</span>
                     <span className="text-xs text-gray-400">{new Date(comment.createdAt).toLocaleDateString('ko-KR')}</span>
                   </div>
-                  {user?.id === comment.userId && editingId !== comment.id && (
+                  {user?.nickname === comment.nickname && editingId !== comment.id && (
                     <div className="relative" ref={openCommentMenuId === comment.id ? commentMenuRef : undefined}>
                       <button
                         onClick={() => setOpenCommentMenuId(openCommentMenuId === comment.id ? null : comment.id)}
@@ -214,7 +213,7 @@ export default function CommentSection({ postId, user }: CommentSectionProps) {
                       ) : (
                         <p className="text-sm text-gray-700 dark:text-gray-300 mt-1">{reply.content}</p>
                       )}
-                      {user?.id === reply.userId && editingId !== reply.id && (
+                      {user?.nickname === reply.nickname && editingId !== reply.id && (
                         <div className="flex gap-2 mt-1">
                           <button onClick={() => { setEditingId(reply.id); setEditText(reply.content); }} className="text-xs text-gray-400 hover:text-gray-600">수정</button>
                           <button onClick={() => handleDeleteComment(reply.id, comment.id)} className="text-xs text-gray-400 hover:text-red-500">삭제</button>

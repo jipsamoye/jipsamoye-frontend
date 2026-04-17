@@ -59,7 +59,7 @@ describe('wsService', () => {
   });
 
   it('SockJS transportOptions 에 withCredentials: true 를 포함해서 연결한다', () => {
-    wsService.connect(7);
+    wsService.connect('테스터');
 
     const client = clientInstances[0];
     client.config.webSocketFactory();
@@ -73,7 +73,7 @@ describe('wsService', () => {
   });
 
   it('연결 후 알림 채널을 /user/sub/notifications 로 구독한다 (Spring user-destination 기반, userId 미포함)', () => {
-    wsService.connect(7);
+    wsService.connect('테스터');
     const client = clientInstances[0];
     client.config.onConnect();
 
@@ -87,7 +87,7 @@ describe('wsService', () => {
   });
 
   it('send 는 destination 과 JSON 직렬화된 body 로 publish 한다 (userId 없이)', () => {
-    wsService.connect(7);
+    wsService.connect('테스터');
     const client = clientInstances[0];
     client.config.onConnect();
 
@@ -102,7 +102,7 @@ describe('wsService', () => {
   });
 
   it('STOMP ERROR 에 unauthorized 메시지가 있으면 재연결 차단 + 토스트 노출', () => {
-    wsService.connect(7);
+    wsService.connect('테스터');
     const client = clientInstances[0];
     client.config.onConnect();
 
@@ -114,7 +114,7 @@ describe('wsService', () => {
   });
 
   it('STOMP ERROR 에 권한 관련 메시지가 아니면 토스트/차단하지 않는다', () => {
-    wsService.connect(7);
+    wsService.connect('테스터');
     const client = clientInstances[0];
     client.config.onConnect();
 

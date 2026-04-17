@@ -32,7 +32,6 @@ describe('useComments', () => {
     apiMock.post.mockResolvedValueOnce(successRes({
       id: 1,
       content: '귀엽네요',
-      userId: 7,
       nickname: '츄르맨',
       profileImageUrl: null,
       parentId: null,
@@ -55,7 +54,7 @@ describe('useComments', () => {
   it('updateComment/deleteComment 도 userId 파라미터를 붙이지 않는다', async () => {
     apiMock.get.mockResolvedValueOnce(emptyPage);
     apiMock.patch.mockResolvedValueOnce(successRes({
-      id: 1, content: '수정본', userId: 7, nickname: '츄르맨', profileImageUrl: null, parentId: null, createdAt: '', updatedAt: '',
+      id: 1, content: '수정본', nickname: '츄르맨', profileImageUrl: null, parentId: null, createdAt: '', updatedAt: '',
     }));
     apiMock.delete.mockResolvedValueOnce(successRes(null));
 
