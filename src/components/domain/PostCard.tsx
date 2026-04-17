@@ -7,9 +7,10 @@ import { HeartIcon, EyeIcon } from '@/components/layout/icons';
 
 interface PostCardProps {
   post: PetPostListItem;
+  index?: number;
 }
 
-export default function PostCard({ post }: PostCardProps) {
+export default function PostCard({ post, index = 99 }: PostCardProps) {
   const [loaded, setLoaded] = useState(false);
 
   return (
@@ -22,7 +23,8 @@ export default function PostCard({ post }: PostCardProps) {
               <img
                 src={post.thumbnailUrl}
                 alt={post.title}
-                loading="lazy"
+                loading={index < 8 ? 'eager' : 'lazy'}
+                fetchPriority={index < 4 ? 'high' : undefined}
                 decoding="async"
                 onLoad={() => setLoaded(true)}
                 className={`w-full h-full object-cover transition-opacity duration-500 ${loaded ? 'opacity-100' : 'opacity-0'}`}

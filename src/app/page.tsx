@@ -164,8 +164,8 @@ export default function Home() {
         </div>
         {latestPosts.length > 0 ? (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {latestPosts.map((post) => (
-              <PostCard key={post.id} post={post} />
+            {latestPosts.map((post, i) => (
+              <PostCard key={post.id} post={post} index={i} />
             ))}
           </div>
         ) : !loading ? (

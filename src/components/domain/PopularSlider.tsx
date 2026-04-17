@@ -4,7 +4,7 @@ import { useRef, useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { HeartIcon } from '@/components/layout/icons';
 
-function FadeImage({ src, alt }: { src: string; alt: string }) {
+function FadeImage({ src, alt, eager }: { src: string; alt: string; eager?: boolean }) {
   const [loaded, setLoaded] = useState(false);
   return (
     <>
@@ -12,7 +12,8 @@ function FadeImage({ src, alt }: { src: string; alt: string }) {
       <img
         src={src}
         alt={alt}
-        loading="lazy"
+        loading={eager ? 'eager' : 'lazy'}
+        fetchPriority={eager ? 'high' : undefined}
         decoding="async"
         onLoad={() => setLoaded(true)}
         className={`w-full h-full object-cover transition-opacity duration-500 ${loaded ? 'opacity-100' : 'opacity-0'}`}
@@ -82,7 +83,7 @@ export default function PopularSlider({ items }: PopularSliderProps) {
       )}
 
       <div ref={scrollRef} className="flex gap-4 overflow-x-auto scrollbar-hide pb-4">
-        {items.map((item) => (
+        {items.map((item, i) => (
           <Link
             key={item.id}
             href={`/posts/${item.id}`}
@@ -90,7 +91,7 @@ export default function PopularSlider({ items }: PopularSliderProps) {
           >
             <div className="aspect-square bg-gray-200 dark:bg-gray-700 overflow-hidden relative">
               {item.thumbnailUrl ? (
-                <FadeImage src={item.thumbnailUrl} alt={item.label} />
+                <FadeImage src={item.thumbnailUrl} alt={item.label} eager={i < 4} />
               ) : (
                 <div className="w-full h-full flex items-center justify-center text-gray-400 text-4xl">🐾</div>
               )}
