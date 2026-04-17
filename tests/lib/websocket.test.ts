@@ -72,6 +72,20 @@ describe('wsService', () => {
     expect(options.transportOptions['xhr-polling'].withCredentials).toBe(true);
   });
 
+  it('연결 후 알림 채널을 /user/sub/notifications 로 구독한다 (Spring user-destination 기반, userId 미포함)', () => {
+    wsService.connect(7);
+    const client = clientInstances[0];
+    client.config.onConnect();
+
+    const subscribedDestinations = client.subscribe.mock.calls.map((call) => call[0] as string);
+    expect(subscribedDestinations).toContain('/user/sub/notifications');
+
+    const notificationSub = subscribedDestinations.find((d) => d.includes('notifications'));
+    expect(notificationSub).toBe('/user/sub/notifications');
+    expect(notificationSub).not.toMatch(/\/sub\/notifications\/\d+/);
+    expect(notificationSub).not.toMatch(/\/sub\/notifications\/me$/);
+  });
+
   it('send 는 destination 과 JSON 직렬화된 body 로 publish 한다 (userId 없이)', () => {
     wsService.connect(7);
     const client = clientInstances[0];

@@ -34,7 +34,7 @@ class WebSocketService {
       reconnectDelay: 3000,
       onConnect: () => {
         this.connected = true;
-        this.subscribeChannel('notification', `/sub/notifications/${userId}`);
+        this.subscribeChannel('notification', '/user/sub/notifications');
         this.subscribeChannel('chat', '/sub/chat/room');
       },
       onDisconnect: () => {
