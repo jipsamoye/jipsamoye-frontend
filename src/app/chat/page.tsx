@@ -155,7 +155,7 @@ export default function ChatPage() {
   function handleSend() {
     const trimmed = input.trim();
     if (!trimmed || !user) return;
-    wsService.send('/pub/chat/send', { userId: user.id, content: trimmed });
+    wsService.send('/pub/chat/send', { content: trimmed });
     setInput('');
     setTimeout(() => scrollToBottom(), 100);
   }

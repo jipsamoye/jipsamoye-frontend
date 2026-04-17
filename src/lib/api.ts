@@ -1,7 +1,7 @@
 import { ApiResponse } from '@/types/api';
 import { showToast } from '@/components/common/Toast';
 
-const API_BASE_URL = '';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? 'https://api.jipsamoye.com';
 
 let unauthorizedHandler: (() => void) | null = null;
 

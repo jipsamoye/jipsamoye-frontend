@@ -75,7 +75,6 @@ export default function DmPage() {
 
     // WebSocket으로 메시지 전송
     wsService.send('/pub/dm/send', {
-      userId: user.id,
       roomId: selectedRoomId,
       content: inputValue.trim(),
       imageUrl: null,
