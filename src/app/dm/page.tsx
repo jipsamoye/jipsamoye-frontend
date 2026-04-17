@@ -28,7 +28,7 @@ export default function DmPage() {
   useEffect(() => {
     if (!user) return;
     api
-      .get<DmRoom[]>(`/api/dm/rooms?userId=${user.id}`)
+      .get<DmRoom[]>(`/api/dm/rooms`)
       .then((res) => setRooms(res.data ?? []))
       .catch(() => setRooms([]));
   }, [user]);
@@ -40,7 +40,7 @@ export default function DmPage() {
     }
     // REST로 기존 메시지 로드
     api
-      .get<PageResponse<DmMessage>>(`/api/dm/rooms/${selectedRoomId}/messages?userId=${user.id}&page=0&size=50`)
+      .get<PageResponse<DmMessage>>(`/api/dm/rooms/${selectedRoomId}/messages?page=0&size=50`)
       .then((res) => setMessages(res.data?.content ?? []))
       .catch(() => setMessages([]));
 
@@ -117,7 +117,7 @@ export default function DmPage() {
       if (!user) return;
       try {
         const res = await api.post<DmRoom>(
-          `/api/dm/rooms?userId=${user.id}&targetUserId=${targetUserId}`
+          `/api/dm/rooms?targetUserId=${targetUserId}`
         );
         const newRoom = res.data;
         setRooms((prev) => {

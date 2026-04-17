@@ -1,6 +1,13 @@
 import { ApiResponse } from '@/types/api';
+import { showToast } from '@/components/common/Toast';
 
 const API_BASE_URL = '';
+
+let unauthorizedHandler: (() => void) | null = null;
+
+export function setUnauthorizedHandler(handler: () => void) {
+  unauthorizedHandler = handler;
+}
 
 async function request<T>(
   endpoint: string,
@@ -14,6 +21,12 @@ async function request<T>(
     credentials: 'include',
     ...options,
   });
+
+  if (res.status === 401) {
+    showToast('로그인하고 이용해 주세요');
+    unauthorizedHandler?.();
+    throw { status: 401, code: 'UNAUTHORIZED', message: '로그인이 필요합니다.', data: null } as ApiResponse<null>;
+  }
 
   const data: ApiResponse<T> = await res.json();
 

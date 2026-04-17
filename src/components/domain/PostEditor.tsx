@@ -109,7 +109,7 @@ export default function PostEditor({
     try {
       const [compressed, res] = await Promise.all([
         compressImage(file, 'post'),
-        api.post<PresignedUrlResponse>(`/api/images/presigned-url?userId=${user.id}`, {
+        api.post<PresignedUrlResponse>(`/api/images/presigned-url`, {
           dirName: 'posts',
           ext: 'webp',
         }),
@@ -200,7 +200,7 @@ export default function PostEditor({
     setSubmitting(true);
     try {
       if (mode === 'create') {
-        const res = await api.post<PetPost>(`/api/posts?userId=${user.id}`, {
+        const res = await api.post<PetPost>(`/api/posts`, {
           title,
           content,
           imageUrls: completedServerUrls,
@@ -208,7 +208,7 @@ export default function PostEditor({
         setBlocked(false);
         router.push(`/posts/${res.data.id}`);
       } else {
-        await api.patch<PetPost>(`/api/posts/${postId}?userId=${user.id}`, {
+        await api.patch<PetPost>(`/api/posts/${postId}`, {
           title,
           content,
           imageUrls: completedServerUrls,

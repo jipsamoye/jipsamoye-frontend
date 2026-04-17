@@ -1,0 +1,83 @@
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+
+const showToastMock = vi.fn();
+vi.mock('@/components/common/Toast', () => ({
+  showToast: (text: string) => showToastMock(text),
+}));
+
+import { api, setUnauthorizedHandler } from '@/lib/api';
+
+function mockFetchOnce(body: unknown, status = 200) {
+  return vi.fn().mockResolvedValueOnce({
+    status,
+    json: async () => body,
+  });
+}
+
+describe('api request wrapper', () => {
+  beforeEach(() => {
+    showToastMock.mockClear();
+    setUnauthorizedHandler(() => {});
+  });
+
+  it('성공 응답이면 data를 그대로 돌려준다', async () => {
+    const payload = { status: 200, code: 'SUCCESS', message: 'ok', data: { id: 1, nickname: '집사' } };
+    global.fetch = mockFetchOnce(payload) as unknown as typeof fetch;
+
+    const res = await api.get<{ id: number; nickname: string }>('/api/auth/me');
+
+    expect(res.data).toEqual({ id: 1, nickname: '집사' });
+    expect(showToastMock).not.toHaveBeenCalled();
+  });
+
+  it('모든 요청에 credentials: "include" 를 포함한다', async () => {
+    const fetchMock = mockFetchOnce({ status: 200, code: 'SUCCESS', message: '', data: null });
+    global.fetch = fetchMock as unknown as typeof fetch;
+
+    await api.get('/api/posts');
+
+    const options = fetchMock.mock.calls[0][1] as RequestInit;
+    expect(options.credentials).toBe('include');
+  });
+
+  it('POST/PATCH는 body를 JSON 문자열로 직렬화한다', async () => {
+    const fetchMock = mockFetchOnce({ status: 201, code: 'CREATED', message: '', data: null });
+    global.fetch = fetchMock as unknown as typeof fetch;
+
+    await api.post('/api/posts', { title: '자랑' });
+
+    const options = fetchMock.mock.calls[0][1] as RequestInit;
+    expect(options.method).toBe('POST');
+    expect(options.body).toBe(JSON.stringify({ title: '자랑' }));
+  });
+
+  it('401 응답이면 토스트를 띄우고 unauthorizedHandler를 호출한 뒤 UNAUTHORIZED 에러를 throw 한다', async () => {
+    global.fetch = vi.fn().mockResolvedValueOnce({
+      status: 401,
+      json: async () => ({ status: 401, code: 'UNAUTHORIZED', message: '로그인이 필요합니다.', data: null }),
+    }) as unknown as typeof fetch;
+
+    const handler = vi.fn();
+    setUnauthorizedHandler(handler);
+
+    await expect(api.post('/api/posts', { title: 't' })).rejects.toMatchObject({
+      status: 401,
+      code: 'UNAUTHORIZED',
+    });
+
+    expect(showToastMock).toHaveBeenCalledWith('로그인하고 이용해 주세요');
+    expect(handler).toHaveBeenCalledTimes(1);
+  });
+
+  it('비즈니스 에러(code !== SUCCESS/CREATED) 는 토스트 없이 응답을 throw 한다', async () => {
+    global.fetch = mockFetchOnce({
+      status: 200,
+      code: 'INVALID_INPUT',
+      message: '제목을 입력해 주세요',
+      data: null,
+    }) as unknown as typeof fetch;
+
+    await expect(api.post('/api/posts', {})).rejects.toMatchObject({ code: 'INVALID_INPUT' });
+    expect(showToastMock).not.toHaveBeenCalled();
+  });
+});

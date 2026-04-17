@@ -72,7 +72,7 @@ export default function ProfilePage({ params }: { params: Promise<{ nickname: st
   const handleFollow = async () => {
     if (!user) return;
     try {
-      const res = await api.post<boolean>(`/api/users/${decodedNickname}/follow?userId=${user.id}`);
+      const res = await api.post<boolean>(`/api/users/${decodedNickname}/follow`);
       setIsFollowing(res.data);
       setProfile((prev) => prev ? {
         ...prev,
@@ -89,7 +89,7 @@ export default function ProfilePage({ params }: { params: Promise<{ nickname: st
 
     try {
       const compressed = await compressImage(file, preset);
-      const res = await api.post<PresignedUrlResponse>(`/api/images/presigned-url?userId=${user.id}`, { dirName, ext: 'webp' });
+      const res = await api.post<PresignedUrlResponse>(`/api/images/presigned-url`, { dirName, ext: 'webp' });
       await fetch(res.data.presignedUrl, {
         method: 'PUT',
         headers: { 'Content-Type': 'image/webp' },
@@ -111,7 +111,7 @@ export default function ProfilePage({ params }: { params: Promise<{ nickname: st
       return;
     }
     try {
-      const res = await api.patch<User>(`/api/users/me?userId=${user.id}`, { coverImageUrl: imageUrl });
+      const res = await api.patch<User>(`/api/users/me`, { coverImageUrl: imageUrl });
       setProfile(res.data);
       updateUser(res.data);
       setShowCoverEditor(false);
@@ -125,7 +125,7 @@ export default function ProfilePage({ params }: { params: Promise<{ nickname: st
     const imageUrl = await uploadImage(file, 'profiles', 'profile');
     if (!imageUrl) return;
     try {
-      const res = await api.patch<User>(`/api/users/me?userId=${user.id}`, { profileImageUrl: imageUrl });
+      const res = await api.patch<User>(`/api/users/me`, { profileImageUrl: imageUrl });
       setProfile(res.data);
       updateUser(res.data);
     } catch { /* ignore */ }
@@ -248,7 +248,7 @@ export default function ProfilePage({ params }: { params: Promise<{ nickname: st
                   onClick={async () => {
                     if (!user || !profile) return;
                     try {
-                      await api.post(`/api/dm/rooms?userId=${user.id}&targetUserId=${profile.id}`);
+                      await api.post(`/api/dm/rooms?targetUserId=${profile.id}`);
                     } catch { /* ignore */ }
                     router.push('/dm');
                   }}
@@ -303,7 +303,6 @@ export default function ProfilePage({ params }: { params: Promise<{ nickname: st
           isOpen={showEditModal}
           onClose={() => setShowEditModal(false)}
           profile={profile}
-          userId={user.id}
           onSaved={(updatedProfile) => { setProfile(updatedProfile); updateUser(updatedProfile); }}
         />
       )}

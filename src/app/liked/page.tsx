@@ -17,7 +17,7 @@ export default function LikedPostsPage() {
     if (authLoading) return;
     if (!user) { router.push('/'); return; }
 
-    api.get<PageResponse<PetPostListItem>>(`/api/users/me/likes?userId=${user.id}&page=0&size=20`)
+    api.get<PageResponse<PetPostListItem>>(`/api/users/me/likes?page=0&size=20`)
       .then((res) => setPosts(res.data.content))
       .catch(() => setPosts([]))
       .finally(() => setLoading(false));

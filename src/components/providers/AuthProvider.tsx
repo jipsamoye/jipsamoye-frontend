@@ -1,9 +1,8 @@
 'use client';
 
 import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
-import { api } from '@/lib/api';
+import { api, setUnauthorizedHandler } from '@/lib/api';
 import { User } from '@/types/api';
-import { storage } from '@/lib/storage';
 
 interface AuthContextType {
   user: User | null;
@@ -21,25 +20,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const userId = storage.getUserId();
-    if (userId) {
-      api.get<User>(`/api/auth/me?userId=${userId}`)
-        .then((res) => setUser(res.data))
-        .catch(() => {
-          storage.clearUserId();
-          setUser(null);
-        })
-        .finally(() => setLoading(false));
-    } else {
-      setLoading(false);
-    }
+    setUnauthorizedHandler(() => setUser(null));
+
+    api.get<User>('/api/auth/me')
+      .then((res) => setUser(res.data))
+      .catch(() => setUser(null))
+      .finally(() => setLoading(false));
   }, []);
 
   const loginAsGuest = useCallback(async () => {
     try {
       const res = await api.post<User>('/api/auth/guest');
       setUser(res.data);
-      storage.setUserId(String(res.data.id));
       return res.data;
     } catch {
       return null;
@@ -48,7 +40,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = useCallback(async () => {
     try { await api.post('/api/auth/logout'); } catch { /* ignore */ }
-    storage.clearUserId();
     setUser(null);
   }, []);
 
@@ -57,10 +48,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const withdraw = useCallback(async () => {
-    const userId = storage.getUserId();
-    if (!userId) return;
-    try { await api.delete(`/api/auth/withdraw?userId=${userId}`); } catch { /* ignore */ }
-    storage.clearUserId();
+    try { await api.delete('/api/auth/withdraw'); } catch { /* ignore */ }
     setUser(null);
   }, []);
 

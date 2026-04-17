@@ -11,11 +11,10 @@ interface ProfileEditModalProps {
   isOpen: boolean;
   onClose: () => void;
   profile: User;
-  userId: number;
   onSaved: (updatedProfile: User) => void;
 }
 
-export default function ProfileEditModal({ isOpen, onClose, profile, userId, onSaved }: ProfileEditModalProps) {
+export default function ProfileEditModal({ isOpen, onClose, profile, onSaved }: ProfileEditModalProps) {
   const router = useRouter();
   const [editNickname, setEditNickname] = useState(profile.nickname);
   const [editBio, setEditBio] = useState(profile.bio || '');
@@ -73,7 +72,7 @@ export default function ProfileEditModal({ isOpen, onClose, profile, userId, onS
   const handleSaveProfile = async () => {
     setSaving(true);
     try {
-      const res = await api.patch<User>(`/api/users/me?userId=${userId}`, {
+      const res = await api.patch<User>(`/api/users/me`, {
         nickname: editNickname,
         bio: editBio,
         socialLinks: editLinks,

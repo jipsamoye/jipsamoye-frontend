@@ -49,7 +49,7 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
   const handleLike = async () => {
     if (!user) return;
     try {
-      const res = await api.post<boolean>(`/api/posts/${id}/like?userId=${user.id}`);
+      const res = await api.post<boolean>(`/api/posts/${id}/like`);
       setLiked(res.data);
       setPost((prev) => prev ? { ...prev, likeCount: prev.likeCount + (res.data ? 1 : -1) } : prev);
     } catch { /* ignore */ }
@@ -58,7 +58,7 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
   const handleDelete = async () => {
     if (!user || !post) return;
     try {
-      await api.delete(`/api/posts/${id}?userId=${user.id}`);
+      await api.delete(`/api/posts/${id}`);
       router.push('/');
     } catch { /* ignore */ }
   };
@@ -118,7 +118,7 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
                     onClick={async () => {
                       setShowPostMenu(false);
                       try {
-                        await api.post(`/api/dm/rooms?userId=${user.id}&targetUserId=${post.userId}`);
+                        await api.post(`/api/dm/rooms?targetUserId=${post.userId}`);
                       } catch { /* ignore */ }
                       router.push('/dm');
                     }}
@@ -198,7 +198,7 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
                   onClick={async () => {
                     setShowActionMenu(false);
                     try {
-                      await api.post(`/api/dm/rooms?userId=${user.id}&targetUserId=${post.userId}`);
+                      await api.post(`/api/dm/rooms?targetUserId=${post.userId}`);
                     } catch { /* ignore */ }
                     router.push('/dm');
                   }}

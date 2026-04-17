@@ -39,7 +39,7 @@ export default function CommentSection({ postId, user }: CommentSectionProps) {
   const handleComment = async () => {
     if (!user || !commentText.trim()) return;
     try {
-      const res = await api.post<Comment>(`/api/posts/${postId}/comments?userId=${user.id}`, { content: commentText });
+      const res = await api.post<Comment>(`/api/posts/${postId}/comments`, { content: commentText });
       setComments((prev) => [{ ...res.data, replies: [] }, ...prev]);
       setCommentText('');
     } catch { /* ignore */ }
@@ -48,7 +48,7 @@ export default function CommentSection({ postId, user }: CommentSectionProps) {
   const handleReply = async (parentId: number) => {
     if (!user || !replyText.trim()) return;
     try {
-      const res = await api.post<Comment>(`/api/posts/${postId}/comments?userId=${user.id}&parentId=${parentId}`, { content: replyText });
+      const res = await api.post<Comment>(`/api/posts/${postId}/comments?parentId=${parentId}`, { content: replyText });
       const newReply = { ...res.data, parentId, replies: [] };
       setComments((prev) => prev.map((c) => c.id === parentId ? { ...c, replies: [...(c.replies ?? []), newReply] } : c));
       setReplyingTo(null);
@@ -74,7 +74,7 @@ export default function CommentSection({ postId, user }: CommentSectionProps) {
   const handleDeleteComment = async (commentId: number, parentId?: number | null) => {
     if (!user) return;
     try {
-      await api.delete(`/api/comments/${commentId}?userId=${user.id}`);
+      await api.delete(`/api/comments/${commentId}`);
     } catch { /* ignore */ }
     if (parentId) {
       setComments((prev) => prev.map((c) => c.id === parentId ? { ...c, replies: (c.replies ?? []).filter((r) => r.id !== commentId) } : c));
@@ -86,7 +86,7 @@ export default function CommentSection({ postId, user }: CommentSectionProps) {
   const handleEditComment = async (commentId: number, parentId?: number | null) => {
     if (!user || !editText.trim()) return;
     try {
-      const res = await api.patch<Comment>(`/api/comments/${commentId}?userId=${user.id}`, { content: editText });
+      const res = await api.patch<Comment>(`/api/comments/${commentId}`, { content: editText });
       if (parentId) {
         setComments((prev) => prev.map((c) => c.id === parentId ? { ...c, replies: (c.replies ?? []).map((r) => r.id === commentId ? { ...res.data, parentId, replies: [] } : r) } : c));
       } else {

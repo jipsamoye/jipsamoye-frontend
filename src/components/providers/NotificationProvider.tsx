@@ -38,7 +38,7 @@ export default function NotificationProvider({ children }: NotificationProviderP
     if (!user) return;
     try {
       const res = await api.get<{ content: Notification[] }>(
-        `/api/notifications?userId=${user.id}&page=0&size=20`
+        `/api/notifications?page=0&size=20`
       );
       setNotifications(res.data.content);
     } catch {
@@ -50,7 +50,7 @@ export default function NotificationProvider({ children }: NotificationProviderP
     if (!user) return;
     try {
       const res = await api.get<number>(
-        `/api/notifications/unread-count?userId=${user.id}`
+        `/api/notifications/unread-count`
       );
       setUnreadCount(res.data);
     } catch {
@@ -65,7 +65,7 @@ export default function NotificationProvider({ children }: NotificationProviderP
     );
     setUnreadCount((prev) => Math.max(0, prev - 1));
     try {
-      await api.patch(`/api/notifications/${id}/read?userId=${user.id}`);
+      await api.patch(`/api/notifications/${id}/read`);
     } catch {
       // Backend may not be available
     }
@@ -76,7 +76,7 @@ export default function NotificationProvider({ children }: NotificationProviderP
     setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
     setUnreadCount(0);
     try {
-      await api.patch(`/api/notifications/read-all?userId=${user.id}`);
+      await api.patch(`/api/notifications/read-all`);
     } catch {
       // Backend may not be available
     }
