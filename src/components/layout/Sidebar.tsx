@@ -1,30 +1,30 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
-import { HomeIcon, TrophyIcon, ChatBubbleLeftRightIcon, OpenChatIcon, ChatIcon } from './icons';
+import { HomeIcon, TrophyIcon, NoteIcon, OpenChatIcon, ChatIcon } from './icons';
 import { useNavigationGuard } from '@/components/providers/NavigationGuard';
 
 interface NavItem {
   label: string;
   href: string;
-  icon: React.ReactNode;
+  icon: (filled: boolean) => React.ReactNode;
   highlight?: boolean;
 }
 
 const navItems: NavItem[] = [
-  { label: '홈', href: '/', icon: <HomeIcon /> },
-  { label: '랭킹', href: '/ranking', icon: <TrophyIcon /> },
-  { label: '자유게시판', href: '/board', icon: <ChatBubbleLeftRightIcon /> },
-  { label: '오픈채팅', href: '/chat', icon: <OpenChatIcon /> },
-  { label: 'DM', href: '/dm', icon: <ChatIcon /> },
+  { label: '홈', href: '/', icon: (f) => <HomeIcon filled={f} /> },
+  { label: '랭킹', href: '/ranking', icon: (f) => <TrophyIcon filled={f} /> },
+  { label: '자유게시판', href: '/board', icon: (f) => <NoteIcon filled={f} /> },
+  { label: '오픈채팅', href: '/chat', icon: (f) => <OpenChatIcon filled={f} /> },
+  { label: 'DM', href: '/dm', icon: (f) => <ChatIcon filled={f} /> },
 ];
 
 const mobileNavItems: NavItem[] = [
-  { label: '홈', href: '/', icon: <HomeIcon /> },
-  { label: '랭킹', href: '/ranking', icon: <TrophyIcon /> },
-  { label: '자랑하기', href: '/posts/new', highlight: true, icon: <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg> },
-  { label: '오픈채팅', href: '/chat', icon: <OpenChatIcon /> },
-  { label: 'DM', href: '/dm', icon: <ChatIcon /> },
+  { label: '홈', href: '/', icon: (f) => <HomeIcon filled={f} /> },
+  { label: '랭킹', href: '/ranking', icon: (f) => <TrophyIcon filled={f} /> },
+  { label: '자랑하기', href: '/posts/new', highlight: true, icon: () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg> },
+  { label: '오픈채팅', href: '/chat', icon: (f) => <OpenChatIcon filled={f} /> },
+  { label: 'DM', href: '/dm', icon: (f) => <ChatIcon filled={f} /> },
 ];
 
 export default function Sidebar() {
@@ -48,7 +48,7 @@ export default function Sidebar() {
                     : 'text-gray-600 hover:bg-gray-50/70'
                   }`}
               >
-                <span className="w-6 h-6">{item.icon}</span>
+                <span className="w-6 h-6">{item.icon(isActive)}</span>
                 {item.label}
               </button>
             );
@@ -69,7 +69,7 @@ export default function Sidebar() {
                   className="flex flex-col items-center gap-1 px-3 py-1 text-xs font-[family-name:var(--font-jua)] text-amber-500"
                 >
                   <span className="w-8 h-8 flex items-center justify-center bg-amber-500 rounded-full text-white">
-                    {item.icon}
+                    {item.icon(isActive)}
                   </span>
                   {item.label}
                 </button>
@@ -85,7 +85,7 @@ export default function Sidebar() {
                     : 'text-gray-500'
                   }`}
               >
-                <span className="w-6 h-6">{item.icon}</span>
+                <span className="w-6 h-6">{item.icon(isActive)}</span>
                 {item.label}
               </button>
             );
