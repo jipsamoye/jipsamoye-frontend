@@ -1,7 +1,7 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
-import { HomeIcon, TrophyIcon, NoteIcon, OpenChatIcon, ChatIcon } from './icons';
+import { HomeIcon, TrophyIcon, NoteIcon, OpenChatIcon, PaperAirplaneIcon } from './icons';
 import { useNavigationGuard } from '@/components/providers/NavigationGuard';
 
 interface NavItem {
@@ -16,7 +16,7 @@ const navItems: NavItem[] = [
   { label: '랭킹', href: '/ranking', icon: (f) => <TrophyIcon filled={f} /> },
   { label: '자유게시판', href: '/board', icon: (f) => <NoteIcon filled={f} /> },
   { label: '오픈채팅', href: '/chat', icon: (f) => <OpenChatIcon filled={f} /> },
-  { label: 'DM', href: '/dm', icon: (f) => <ChatIcon filled={f} /> },
+  { label: 'DM', href: '/dm', icon: (f) => <PaperAirplaneIcon filled={f} /> },
 ];
 
 const mobileNavItems: NavItem[] = [
@@ -24,7 +24,7 @@ const mobileNavItems: NavItem[] = [
   { label: '랭킹', href: '/ranking', icon: (f) => <TrophyIcon filled={f} /> },
   { label: '자랑하기', href: '/posts/new', highlight: true, icon: () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg> },
   { label: '오픈채팅', href: '/chat', icon: (f) => <OpenChatIcon filled={f} /> },
-  { label: 'DM', href: '/dm', icon: (f) => <ChatIcon filled={f} /> },
+  { label: 'DM', href: '/dm', icon: (f) => <PaperAirplaneIcon filled={f} /> },
 ];
 
 export default function Sidebar() {
