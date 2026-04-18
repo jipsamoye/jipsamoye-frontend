@@ -22,7 +22,7 @@ export default function BoardCommentSection({ boardId, user }: Props) {
   const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    api.get<PageResponse<BoardComment>>(`/api/boards/${boardId}/comments?page=0&size=50`)
+    api.get<PageResponse<BoardComment>>(`/api/boards/${boardId}/comments?page=0&size=50`, { silent: true })
       .then((res) => setComments(res.data.content))
       .catch(() => {});
   }, [boardId]);

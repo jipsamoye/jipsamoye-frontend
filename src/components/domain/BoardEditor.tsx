@@ -3,8 +3,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useEditor, EditorContent, Editor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
-import { Underline } from '@tiptap/extension-underline';
-import { Link } from '@tiptap/extension-link';
 import { Image } from '@tiptap/extension-image';
 import { TextStyle } from '@tiptap/extension-text-style';
 import { Color } from '@tiptap/extension-color';
@@ -144,12 +142,16 @@ export default function BoardEditor({ value, onChange, placeholder = '내용을 
 
   const editor = useEditor({
     extensions: [
-      StarterKit,
-      Underline,
+      StarterKit.configure({
+        link: {
+          openOnClick: false,
+          autolink: true,
+          HTMLAttributes: { class: 'text-amber-500 underline' },
+        },
+      }),
       TextStyle,
       Color,
       Highlight.configure({ multicolor: true }),
-      Link.configure({ openOnClick: false, autolink: true, HTMLAttributes: { class: 'text-amber-500 underline' } }),
       Image.configure({ HTMLAttributes: { class: 'rounded-xl my-4 max-w-full' } }),
     ],
     content: value,

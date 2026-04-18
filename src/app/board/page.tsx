@@ -50,7 +50,7 @@ export default function BoardPage() {
         const categoryParam = tab === 'ALL' ? '' : `category=${tab}&`;
         url = `/api/boards?${categoryParam}page=${pageRef.current}&size=20`;
       }
-      const res = await api.get<PageResponse<BoardListItemType>>(url);
+      const res = await api.get<PageResponse<BoardListItemType>>(url, { silent: true });
       setItems((prev) => {
         const ids = new Set(prev.map((p) => p.id));
         return [...prev, ...res.data.content.filter((p) => !ids.has(p.id))];

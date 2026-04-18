@@ -29,7 +29,7 @@ export default function BoardDetailPage({ params }: { params: Promise<{ id: stri
   const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    api.get<BoardPost>(`/api/boards/${id}`)
+    api.get<BoardPost>(`/api/boards/${id}`, { silent: true })
       .then((res) => setPost(res.data))
       .catch(() => router.replace('/board'))
       .finally(() => setLoading(false));
