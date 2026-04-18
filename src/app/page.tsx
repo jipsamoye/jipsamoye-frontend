@@ -70,21 +70,21 @@ export default function Home() {
 
   return (
     <div className="space-y-10">
-      {/* 배너 — 토스 스타일 깔끔한 카드 */}
+      {/* 배너 — Grimity 스타일 슬림 가로 배너 */}
       <section>
-        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-50 p-8 md:p-12 shadow-sm border border-amber-100/50">
+        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-50 px-5 py-4 md:px-7 md:py-5 shadow-sm border border-amber-100/50">
           <div className="relative z-10">
-            <span className="inline-block px-3 py-1 rounded-full bg-amber-100 text-amber-700 text-xs font-semibold mb-4">
+            <span className="inline-block px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-700 text-[11px] font-semibold mb-1.5">
               반려동물 커뮤니티
             </span>
-            <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-3 font-[family-name:var(--font-jua)]">
+            <h1 className="text-base md:text-lg font-bold text-gray-900 mb-0.5 font-[family-name:var(--font-jua)]">
               우리 애 자랑하러 오세요!
             </h1>
-            <p className="text-sm md:text-base text-gray-500 max-w-lg leading-relaxed">
-              강아지, 고양이와 함께하는 일상을 공유하고<br className="hidden md:block" /> 다른 집사들과 소통해보세요.
+            <p className="text-xs md:text-sm text-gray-500">
+              강아지, 고양이와 함께하는 일상을 공유해 보세요.
             </p>
           </div>
-          <div className="absolute right-6 md:right-16 top-1/2 -translate-y-1/2 text-7xl md:text-9xl opacity-10 select-none">🐾</div>
+          <div className="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 text-4xl md:text-5xl opacity-10 select-none">🐾</div>
         </div>
       </section>
 
