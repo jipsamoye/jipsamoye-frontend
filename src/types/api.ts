@@ -116,6 +116,57 @@ export interface PresignedUrlRequest {
   ext: string;
 }
 
+// 자유게시판 카테고리
+export type BoardCategory = 'GENERAL' | 'QUESTION';
+
+// 자유게시판 검색 타입
+export type BoardSearchType = 'TITLE' | 'TITLE_CONTENT';
+
+// 자유게시판 목록 아이템
+export interface BoardListItem {
+  id: number;
+  category: BoardCategory;
+  title: string;
+  contentPreview: string;
+  commentCount: number;
+  viewCount: number;
+  likeCount: number;
+  nickname: string;
+  createdAt: string;
+}
+
+// 자유게시판 글 상세
+export interface BoardPost {
+  id: number;
+  category: BoardCategory;
+  title: string;
+  content: string;
+  imageUrls: string[] | null;
+  viewCount: number;
+  commentCount: number;
+  likeCount: number;
+  nickname: string;
+  profileImageUrl: string | null;
+  createdAt: string;
+}
+
+// 자유게시판 글 작성/수정 요청
+export interface BoardRequest {
+  category: BoardCategory;
+  title: string;
+  content: string;
+  imageUrls?: string[];
+}
+
+// 자유게시판 댓글
+export interface BoardComment {
+  id: number;
+  nickname: string;
+  profileImageUrl: string | null;
+  content: string;
+  createdAt: string;
+}
+
 // 알림
 export interface Notification {
   id: number;
