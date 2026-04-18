@@ -105,25 +105,25 @@
   --color-purple-900: #41226d;
 
   /* -----------------------------------------------------------
-     Amber 팔레트 — 메인 브랜드 컬러 #E66C4A 기반 스케일
-     기존 bg-amber-500 등 34곳이 자동으로 #E66C4A 로 렌더됨
+     Amber 팔레트 — 메인 브랜드 컬러 #FF734C 기반 스케일
+     기존 bg-amber-500 등의 유틸 클래스가 자동으로 #FF734C 로 렌더됨
      ----------------------------------------------------------- */
-  --color-amber-50: #fdf2ed;
-  --color-amber-100: #fbddd0;
-  --color-amber-200: #f7bba1;
-  --color-amber-300: #f19773;
-  --color-amber-400: #ec7f5a;
-  --color-amber-500: #e66c4a;
-  --color-amber-600: #cc5a3b;
-  --color-amber-700: #a34931;
-  --color-amber-800: #7a3626;
-  --color-amber-900: #52241a;
+  --color-amber-50: #fff3ee;
+  --color-amber-100: #ffdccf;
+  --color-amber-200: #ffba9f;
+  --color-amber-300: #ff9877;
+  --color-amber-400: #ff8461;
+  --color-amber-500: #ff734c;
+  --color-amber-600: #e85e3a;
+  --color-amber-700: #c14a2c;
+  --color-amber-800: #923722;
+  --color-amber-900: #5f2416;
 
   /* -----------------------------------------------------------
      시맨틱 토큰 (bg-primary, text-primary 등으로 사용 가능)
      ----------------------------------------------------------- */
-  --color-primary: #e66c4a;
-  --color-primary-hover: #cc5a3b;
+  --color-primary: #ff734c;
+  --color-primary-hover: #e85e3a;
   --color-surface: #ffffff;
   --color-surface-muted: #f9fafb;
   --color-border: #e5e8eb;

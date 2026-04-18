@@ -65,7 +65,7 @@ export default function Header({ isLoggedIn = false, onLoginClick, onLogout, nic
             <>
               <Link
                 href="/posts/new"
-                className="hidden sm:flex items-center px-4 py-2 bg-gray-900 text-white rounded-xl text-sm font-medium hover:bg-gray-800 transition-all duration-200 font-[family-name:var(--font-jua)]"
+                className="hidden sm:flex items-center px-4 py-2 bg-amber-500 text-white rounded-xl text-sm font-medium hover:bg-amber-600 transition-all duration-200 font-[family-name:var(--font-jua)]"
               >
                 자랑하기
               </Link>
