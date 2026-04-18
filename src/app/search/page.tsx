@@ -41,7 +41,7 @@ export default function SearchPage() {
             onChange={(e) => setKeyword(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
             placeholder="게시글을 검색해보세요"
-            className="w-full pl-12 pr-4 py-4 rounded-2xl border border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-900 text-base focus:outline-none focus:ring-2 focus:ring-amber-300 transition-all duration-200"
+            className="w-full pl-12 pr-4 py-4 rounded-2xl border border-gray-100 bg-gray-50 text-base focus:outline-none focus:ring-2 focus:ring-amber-300 transition-all duration-200"
           />
         </div>
       </div>

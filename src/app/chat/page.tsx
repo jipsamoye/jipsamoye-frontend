@@ -174,8 +174,8 @@ export default function ChatPage() {
   return (
     <div className="flex flex-col h-[calc(100vh-8rem)] lg:h-[calc(100vh-4rem)] -mx-4 -my-6 overflow-hidden">
       {/* 헤더 */}
-      <div className="flex items-center px-6 py-4 border-b border-gray-100 dark:border-gray-800 flex-shrink-0">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">오픈채팅</h1>
+      <div className="flex items-center px-6 py-4 border-b border-gray-100 flex-shrink-0">
+        <h1 className="text-2xl font-bold text-gray-900">오픈채팅</h1>
       </div>
 
       {/* 메시지 목록 */}
@@ -216,9 +216,9 @@ export default function ChatPage() {
             <div key={msg.id} className="flex items-start gap-2">
               <Avatar src={msg.senderProfileImageUrl} size="sm" />
               <div className="flex-1 min-w-0">
-                <span className="text-xs font-medium text-gray-700 dark:text-gray-300 block mb-1">{msg.senderNickname}</span>
+                <span className="text-xs font-medium text-gray-700 block mb-1">{msg.senderNickname}</span>
                 <div className="flex items-end gap-1.5">
-                  <div className="inline-block max-w-[85%] lg:max-w-md px-3.5 py-2.5 rounded-2xl rounded-bl-md bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm break-words whitespace-pre-wrap">
+                  <div className="inline-block max-w-[85%] lg:max-w-md px-3.5 py-2.5 rounded-2xl rounded-bl-md bg-gray-100 text-gray-900 text-sm break-words whitespace-pre-wrap">
                     {msg.content}
                   </div>
                   <span className="text-[10px] text-gray-400 mb-0.5 flex-shrink-0">{formatTime(msg.createdAt)}</span>
@@ -235,7 +235,7 @@ export default function ChatPage() {
         {showScrollBtn && !newMsgPreview && (
           <button
             onClick={scrollToBottom}
-            className="absolute -top-12 right-6 w-10 h-10 rounded-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg flex items-center justify-center text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition-all duration-200 z-10"
+            className="absolute -top-12 right-6 w-10 h-10 rounded-full bg-white border border-gray-200 shadow-lg flex items-center justify-center text-gray-500 hover:text-gray-700 transition-all duration-200 z-10"
           >
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
               <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 13.5 12 21m0 0-7.5-7.5M12 21V3" />
@@ -245,20 +245,20 @@ export default function ChatPage() {
         {newMsgPreview && (
           <button
             onClick={scrollToBottom}
-            className="absolute -top-12 left-6 right-6 flex items-center gap-2 px-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-lg z-10 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200"
+            className="absolute -top-12 left-6 right-6 flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-200 rounded-2xl shadow-lg z-10 hover:bg-gray-50 transition-all duration-200"
           >
             <Avatar src={newMsgPreview.senderProfileImageUrl} size="xs" />
-            <span className="text-sm font-medium text-gray-700 dark:text-gray-300 flex-shrink-0">{newMsgPreview.senderNickname}</span>
+            <span className="text-sm font-medium text-gray-700 flex-shrink-0">{newMsgPreview.senderNickname}</span>
             <span className="text-sm text-gray-500 truncate">{newMsgPreview.content}</span>
           </button>
         )}
       </div>
 
       {/* 입력 영역 */}
-      <div className="px-6 py-4 border-t border-gray-100 dark:border-gray-800">
+      <div className="px-6 py-4 border-t border-gray-100">
         {user ? (
           <div className="flex items-center gap-3">
-            <div className="flex-1 flex items-center gap-2 px-4 py-2.5 bg-gray-50 dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 focus-within:ring-2 focus-within:ring-amber-400 transition-all duration-200">
+            <div className="flex-1 flex items-center gap-2 px-4 py-2.5 bg-gray-50 rounded-2xl border border-gray-100 focus-within:ring-2 focus-within:ring-amber-400 transition-all duration-200">
               {!inputFocused && !input && (
                 <div className="flex-shrink-0">
                   <Avatar src={user.profileImageUrl} size="xs" />
@@ -273,7 +273,7 @@ export default function ChatPage() {
                 onBlur={() => { if (!input) setInputFocused(false); }}
                 placeholder={`${user.nickname}(으)로 메시지 입력`}
                 rows={1}
-                className="flex-1 text-sm bg-transparent text-gray-900 dark:text-white outline-none resize-none max-h-24 overflow-y-auto placeholder-gray-400"
+                className="flex-1 text-sm bg-transparent text-gray-900 outline-none resize-none max-h-24 overflow-y-auto placeholder-gray-400"
                 style={{ minHeight: '20px' }}
               />
             </div>

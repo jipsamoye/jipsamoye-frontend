@@ -92,7 +92,7 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
         <div className="flex items-center gap-2">
           <button
             onClick={() => setShowShareModal(true)}
-            className="p-2 rounded-xl text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200"
+            className="p-2 rounded-xl text-gray-500 hover:text-gray-700 hover:bg-gray-100 transition-all duration-200"
             title="공유"
           >
             <ShareIcon />
@@ -100,15 +100,15 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
           <div className="relative" ref={postMenuRef}>
             <button
               onClick={() => setShowPostMenu(!showPostMenu)}
-              className="p-2 rounded-xl text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200"
+              className="p-2 rounded-xl text-gray-500 hover:text-gray-700 hover:bg-gray-100 transition-all duration-200"
             >
               <EllipsisHorizontalIcon />
             </button>
             {showPostMenu && (
-              <div className="absolute right-0 top-full mt-1 w-36 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-800 rounded-2xl shadow-xl py-1 z-50">
+              <div className="absolute right-0 top-full mt-1 w-36 bg-white border border-gray-100 rounded-2xl shadow-xl py-1 z-50">
                 <button
                   onClick={() => { setShowPostMenu(false); setShowShareModal(true); }}
-                  className="w-full px-4 py-2.5 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2"
+                  className="w-full px-4 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
                 >
                   <LinkIcon />
                   공유하기
@@ -122,7 +122,7 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
                       } catch { /* ignore */ }
                       router.push('/dm');
                     }}
-                    className="w-full px-4 py-2.5 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2"
+                    className="w-full px-4 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75" />
@@ -132,16 +132,16 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
                 )}
                 {isAuthor && (
                   <>
-                    <div className="border-t border-gray-100 dark:border-gray-700 my-1" />
+                    <div className="border-t border-gray-100 my-1" />
                     <button
                       onClick={() => { setShowPostMenu(false); router.push(`/posts/${id}/edit`); }}
-                      className="w-full px-4 py-2.5 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
+                      className="w-full px-4 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50"
                     >
                       수정
                     </button>
                     <button
                       onClick={() => { setShowPostMenu(false); handleDelete(); }}
-                      className="w-full px-4 py-2.5 text-left text-sm text-red-500 hover:bg-gray-50 dark:hover:bg-gray-700"
+                      className="w-full px-4 py-2.5 text-left text-sm text-red-500 hover:bg-gray-50"
                     >
                       삭제
                     </button>
@@ -162,16 +162,16 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
 
       {/* 제목 + 내용 */}
       <h1 className="text-2xl font-bold mb-4">{post.title}</h1>
-      <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap mb-6">{post.content}</p>
+      <p className="text-gray-700 whitespace-pre-wrap mb-6">{post.content}</p>
 
       {/* 좋아요 + ··· 액션 박스 */}
-      <div className="flex items-center gap-2 mb-8 pb-8 border-b border-gray-100 dark:border-gray-800">
+      <div className="flex items-center gap-2 mb-8 pb-8 border-b border-gray-100">
         <button
           onClick={handleLike}
           className={`flex items-center gap-1.5 px-4 py-2 rounded-xl border transition-all duration-200 ${
             liked
-              ? 'border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950 text-red-500'
-              : 'border-gray-100 dark:border-gray-800 text-gray-500 hover:text-red-500 hover:border-red-200 dark:hover:border-red-800'
+              ? 'border-red-200 bg-red-50 text-red-500'
+              : 'border-gray-100 text-gray-500 hover:text-red-500 hover:border-red-200'
           }`}
         >
           <HeartIcon filled={liked} />
@@ -180,15 +180,15 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
         <div className="relative" ref={actionMenuRef}>
           <button
             onClick={() => setShowActionMenu(!showActionMenu)}
-            className="flex items-center px-3 py-2 rounded-xl border border-gray-100 dark:border-gray-800 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600 transition-all duration-200"
+            className="flex items-center px-3 py-2 rounded-xl border border-gray-100 text-gray-500 hover:text-gray-700 hover:border-gray-300 transition-all duration-200"
           >
             <EllipsisHorizontalIcon />
           </button>
           {showActionMenu && (
-            <div className="absolute left-0 bottom-full mb-1 w-40 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-800 rounded-2xl shadow-xl py-1 z-50">
+            <div className="absolute left-0 bottom-full mb-1 w-40 bg-white border border-gray-100 rounded-2xl shadow-xl py-1 z-50">
               <button
                 onClick={() => { setShowActionMenu(false); handleCopyLink(); }}
-                className="w-full px-4 py-2.5 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2"
+                className="w-full px-4 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
               >
                 <LinkIcon />
                 링크 복사하기
@@ -202,7 +202,7 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
                     } catch { /* ignore */ }
                     router.push('/dm');
                   }}
-                  className="w-full px-4 py-2.5 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2"
+                  className="w-full px-4 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75" />
@@ -220,7 +220,7 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
 
       {/* 작성자의 다른 게시글 */}
       {authorPosts.length > 0 && (
-        <section className="border-t border-gray-100 dark:border-gray-800 pt-8">
+        <section className="border-t border-gray-100 pt-8">
           <h3 className="text-lg font-bold mb-4">{post.nickname}님의 다른 게시글</h3>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {authorPosts.slice(0, 4).map((p) => (
@@ -233,7 +233,7 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
       {/* 공유 모달 */}
       <Modal isOpen={showShareModal} onClose={() => setShowShareModal(false)} title="공유">
         <div className="flex flex-col items-center gap-5 py-4">
-          <p className="text-sm text-gray-600 dark:text-gray-400 text-center">
+          <p className="text-sm text-gray-600 text-center">
             집사모여의 게시글을 공유해보세요!
           </p>
           <button

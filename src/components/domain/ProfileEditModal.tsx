@@ -113,12 +113,12 @@ export default function ProfileEditModal({ isOpen, onClose, profile, onSaved }: 
               value={editNickname}
               onChange={(e) => setEditNickname(e.target.value.slice(0, 10))}
               maxLength={10}
-              className={`w-full px-4 py-2.5 rounded-xl border bg-gray-50 dark:bg-gray-800 text-sm focus:outline-none focus:ring-2 transition-all duration-200 ${
+              className={`w-full px-4 py-2.5 rounded-xl border bg-gray-50 text-sm focus:outline-none focus:ring-2 transition-all duration-200 ${
                 nicknameStatus === 'taken' || nicknameStatus === 'invalid'
-                  ? 'border-red-300 dark:border-red-800 focus:ring-red-300'
+                  ? 'border-red-300 focus:ring-red-300'
                   : nicknameStatus === 'available'
-                  ? 'border-green-300 dark:border-green-800 focus:ring-green-300'
-                  : 'border-gray-100 dark:border-gray-800 focus:ring-amber-300'
+                  ? 'border-green-300 focus:ring-green-300'
+                  : 'border-gray-100 focus:ring-amber-300'
               }`}
             />
             <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">
@@ -149,7 +149,7 @@ export default function ProfileEditModal({ isOpen, onClose, profile, onSaved }: 
             maxLength={200}
             rows={3}
             placeholder="자유롭게 소개해주세요."
-            className="w-full px-4 py-2.5 rounded-xl border border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-800 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-amber-300 transition-all duration-200"
+            className="w-full px-4 py-2.5 rounded-xl border border-gray-100 bg-gray-50 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-amber-300 transition-all duration-200"
           />
         </div>
 
@@ -159,18 +159,18 @@ export default function ProfileEditModal({ isOpen, onClose, profile, onSaved }: 
           <div className="flex flex-col gap-3">
             {editLinks.map((link, i) => (
               <div key={i} className="flex items-center gap-2">
-                <span className="flex-shrink-0 w-24 px-3 py-2 bg-gray-100 dark:bg-gray-800 rounded-xl text-sm text-center">
+                <span className="flex-shrink-0 w-24 px-3 py-2 bg-gray-100 rounded-xl text-sm text-center">
                   {link.type === 'INSTAGRAM' ? '인스타그램' : '유튜브'}
                 </span>
                 <input
                   value={link.url}
                   onChange={(e) => updateLinkUrl(i, e.target.value)}
                   placeholder={link.type === 'INSTAGRAM' ? 'https://instagram.com/...' : 'https://youtube.com/@...'}
-                  className="flex-1 px-3 py-2 rounded-xl border border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-amber-300 transition-all duration-200"
+                  className="flex-1 px-3 py-2 rounded-xl border border-gray-100 bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-amber-300 transition-all duration-200"
                 />
                 <button
                   onClick={() => removeLink(i)}
-                  className="flex-shrink-0 w-8 h-8 flex items-center justify-center text-gray-400 hover:text-red-500 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800"
+                  className="flex-shrink-0 w-8 h-8 flex items-center justify-center text-gray-400 hover:text-red-500 rounded-full hover:bg-gray-100"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
@@ -183,7 +183,7 @@ export default function ProfileEditModal({ isOpen, onClose, profile, onSaved }: 
               {!editLinks.some((l) => l.type === 'INSTAGRAM') && (
                 <button
                   onClick={() => addLink('INSTAGRAM')}
-                  className="px-3 py-1.5 border border-gray-100 dark:border-gray-800 rounded-xl text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-200"
+                  className="px-3 py-1.5 border border-gray-100 rounded-xl text-sm text-gray-600 hover:bg-gray-50 transition-all duration-200"
                 >
                   + 인스타그램
                 </button>
@@ -191,7 +191,7 @@ export default function ProfileEditModal({ isOpen, onClose, profile, onSaved }: 
               {!editLinks.some((l) => l.type === 'YOUTUBE') && (
                 <button
                   onClick={() => addLink('YOUTUBE')}
-                  className="px-3 py-1.5 border border-gray-100 dark:border-gray-800 rounded-xl text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-200"
+                  className="px-3 py-1.5 border border-gray-100 rounded-xl text-sm text-gray-600 hover:bg-gray-50 transition-all duration-200"
                 >
                   + 유튜브
                 </button>
@@ -204,7 +204,7 @@ export default function ProfileEditModal({ isOpen, onClose, profile, onSaved }: 
         <button
           onClick={handleSaveProfile}
           disabled={saving || !editNickname.trim() || !hasChanges || nicknameStatus === 'taken' || nicknameStatus === 'invalid' || nicknameStatus === 'checking'}
-          className="w-full py-3 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-2xl font-medium hover:bg-gray-800 dark:hover:bg-gray-100 transition-all duration-200 disabled:opacity-50"
+          className="w-full py-3 bg-gray-900 text-white rounded-2xl font-medium hover:bg-gray-800 transition-all duration-200 disabled:opacity-50"
         >
           {saving ? '저장 중...' : '변경 내용 저장'}
         </button>

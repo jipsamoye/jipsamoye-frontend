@@ -41,13 +41,13 @@ export default function ToastContainer() {
       {toasts.map((toast) => (
         <div
           key={toast.id}
-          className="flex items-center gap-3 px-5 py-3 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-800 rounded-2xl shadow-xl animate-[slideDown_0.3s_ease-out]"
+          className="flex items-center gap-3 px-5 py-3 bg-white border border-gray-100 rounded-2xl shadow-xl animate-[slideDown_0.3s_ease-out]"
         >
           <span className="text-red-500 text-lg">&#x2716;</span>
-          <span className="text-sm font-medium text-gray-900 dark:text-white">{toast.text}</span>
+          <span className="text-sm font-medium text-gray-900">{toast.text}</span>
           <button
             onClick={() => removeToast(toast.id)}
-            className="ml-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+            className="ml-2 text-gray-400 hover:text-gray-600"
           >
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
               <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />

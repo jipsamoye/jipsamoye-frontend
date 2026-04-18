@@ -146,7 +146,7 @@ export default function ProfilePage({ params }: { params: Promise<{ nickname: st
         {profile.coverImageUrl ? (
           <img src={profile.coverImageUrl} alt="커버" loading="lazy" decoding="async" className="w-full h-full object-cover" />
         ) : (
-          <div className="w-full h-full bg-gradient-to-r from-gray-200 to-gray-300 dark:from-gray-800 dark:to-gray-700" />
+          <div className="w-full h-full bg-gradient-to-r from-gray-200 to-gray-300" />
         )}
         {isMe && (
           <>
@@ -175,7 +175,7 @@ export default function ProfilePage({ params }: { params: Promise<{ nickname: st
       </div>
 
       {/* 프로필 정보 */}
-      <div className="border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-950 px-6 py-6">
+      <div className="border-b border-gray-100 bg-white px-6 py-6">
         <div className="flex items-start gap-4">
           <div className="relative flex-shrink-0">
             <Avatar src={profile.profileImageUrl} size="xl" />
@@ -183,9 +183,9 @@ export default function ProfilePage({ params }: { params: Promise<{ nickname: st
               <>
                 <button
                   onClick={() => profileInputRef.current?.click()}
-                  className="absolute bottom-0 right-0 w-8 h-8 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-full flex items-center justify-center shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700"
+                  className="absolute bottom-0 right-0 w-8 h-8 bg-white border border-gray-200 rounded-full flex items-center justify-center shadow-sm hover:bg-gray-50"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4 text-gray-600 dark:text-gray-300">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4 text-gray-600">
                     <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Z" />
                   </svg>
                 </button>
@@ -201,9 +201,9 @@ export default function ProfilePage({ params }: { params: Promise<{ nickname: st
           </div>
           <div className="flex-1">
             <h1 className="text-xl font-bold">{profile.nickname}</h1>
-            <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400 mt-1">
-              <span>팔로워 <strong className="text-gray-900 dark:text-white">{profile.followerCount}</strong></span>
-              <span>팔로잉 <strong className="text-gray-900 dark:text-white">{profile.followingCount}</strong></span>
+            <div className="flex items-center gap-4 text-sm text-gray-500 mt-1">
+              <span>팔로워 <strong className="text-gray-900">{profile.followerCount}</strong></span>
+              <span>팔로잉 <strong className="text-gray-900">{profile.followingCount}</strong></span>
             </div>
             {/* 소셜 링크 */}
             {profile.socialLinks && profile.socialLinks.length > 0 && (
@@ -214,7 +214,7 @@ export default function ProfilePage({ params }: { params: Promise<{ nickname: st
                     href={link.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+                    className="flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700"
                   >
                     {link.type === 'INSTAGRAM' && (
                       <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
@@ -252,7 +252,7 @@ export default function ProfilePage({ params }: { params: Promise<{ nickname: st
                     } catch { /* ignore */ }
                     router.push('/dm');
                   }}
-                  className="p-2 rounded-xl border border-gray-100 dark:border-gray-800 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-200"
+                  className="p-2 rounded-xl border border-gray-100 text-gray-500 hover:text-gray-700 hover:bg-gray-50 transition-all duration-200"
                   title="메시지"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
@@ -264,7 +264,7 @@ export default function ProfilePage({ params }: { params: Promise<{ nickname: st
           </div>
         </div>
         {profile.bio && (
-          <p className="text-sm text-gray-600 dark:text-gray-400 mt-3 ml-28">{profile.bio}</p>
+          <p className="text-sm text-gray-600 mt-3 ml-28">{profile.bio}</p>
         )}
       </div>
 

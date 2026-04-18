@@ -108,7 +108,7 @@ export default function CommentSection({ postId, user }: CommentSectionProps) {
               onChange={(e) => setCommentText(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleComment()}
               placeholder="댓글 달기"
-              className="flex-1 px-4 py-2 rounded-xl border border-gray-100 dark:border-gray-800 bg-transparent text-sm focus:outline-none focus:ring-2 focus:ring-amber-300 transition-all duration-200"
+              className="flex-1 px-4 py-2 rounded-xl border border-gray-100 bg-transparent text-sm focus:outline-none focus:ring-2 focus:ring-amber-300 transition-all duration-200"
             />
             <Button size="sm" onClick={handleComment}>댓글</Button>
           </div>
@@ -132,21 +132,21 @@ export default function CommentSection({ postId, user }: CommentSectionProps) {
                     <div className="relative" ref={openCommentMenuId === comment.id ? commentMenuRef : undefined}>
                       <button
                         onClick={() => setOpenCommentMenuId(openCommentMenuId === comment.id ? null : comment.id)}
-                        className="p-1 rounded text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200"
+                        className="p-1 rounded text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-all duration-200"
                       >
                         <EllipsisVerticalIcon />
                       </button>
                       {openCommentMenuId === comment.id && (
-                        <div className="absolute right-0 top-full mt-1 w-28 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-800 rounded-2xl shadow-xl py-1 z-50">
+                        <div className="absolute right-0 top-full mt-1 w-28 bg-white border border-gray-100 rounded-2xl shadow-xl py-1 z-50">
                           <button
                             onClick={() => { setOpenCommentMenuId(null); setEditingId(comment.id); setEditText(comment.content); }}
-                            className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
+                            className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50"
                           >
                             수정
                           </button>
                           <button
                             onClick={() => { setOpenCommentMenuId(null); handleDeleteComment(comment.id); }}
-                            className="w-full px-4 py-2 text-left text-sm text-red-500 hover:bg-gray-50 dark:hover:bg-gray-700"
+                            className="w-full px-4 py-2 text-left text-sm text-red-500 hover:bg-gray-50"
                           >
                             삭제
                           </button>
@@ -160,14 +160,14 @@ export default function CommentSection({ postId, user }: CommentSectionProps) {
                     <input
                       value={editText}
                       onChange={(e) => setEditText(e.target.value)}
-                      className="flex-1 px-3 py-1 rounded border border-gray-200 dark:border-gray-700 bg-transparent text-sm focus:outline-none"
+                      className="flex-1 px-3 py-1 rounded border border-gray-200 bg-transparent text-sm focus:outline-none"
                     />
                     <Button size="sm" onClick={() => handleEditComment(comment.id)}>저장</Button>
                     <Button variant="ghost" size="sm" onClick={() => setEditingId(null)}>취소</Button>
                   </div>
                 ) : (
                   <>
-                    <p className="text-sm text-gray-700 dark:text-gray-300 mt-1">{comment.content}</p>
+                    <p className="text-sm text-gray-700 mt-1">{comment.content}</p>
                     <div className="flex items-center gap-3 mt-2">
                       <button className="flex items-center gap-1 text-xs text-gray-400 hover:text-red-500 transition-colors">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-3.5 h-3.5">
@@ -191,7 +191,7 @@ export default function CommentSection({ postId, user }: CommentSectionProps) {
 
             {/* 대댓글 목록 */}
             {(comment.replies ?? []).length > 0 && (
-              <div className="ml-12 mt-3 flex flex-col gap-3 border-l-2 border-gray-100 dark:border-gray-800 pl-4">
+              <div className="ml-12 mt-3 flex flex-col gap-3 border-l-2 border-gray-100 pl-4">
                 {(comment.replies ?? []).map((reply) => (
                   <div key={reply.id} className="flex gap-3">
                     <Avatar src={reply.profileImageUrl} size="xs" />
@@ -205,13 +205,13 @@ export default function CommentSection({ postId, user }: CommentSectionProps) {
                           <input
                             value={editText}
                             onChange={(e) => setEditText(e.target.value)}
-                            className="flex-1 px-3 py-1 rounded border border-gray-200 dark:border-gray-700 bg-transparent text-sm focus:outline-none"
+                            className="flex-1 px-3 py-1 rounded border border-gray-200 bg-transparent text-sm focus:outline-none"
                           />
                           <Button size="sm" onClick={() => handleEditComment(reply.id, comment.id)}>저장</Button>
                           <Button variant="ghost" size="sm" onClick={() => setEditingId(null)}>취소</Button>
                         </div>
                       ) : (
-                        <p className="text-sm text-gray-700 dark:text-gray-300 mt-1">{reply.content}</p>
+                        <p className="text-sm text-gray-700 mt-1">{reply.content}</p>
                       )}
                       {user?.nickname === reply.nickname && editingId !== reply.id && (
                         <div className="flex gap-2 mt-1">
@@ -237,7 +237,7 @@ export default function CommentSection({ postId, user }: CommentSectionProps) {
                       onChange={(e) => setReplyText(e.target.value)}
                       onKeyDown={(e) => e.key === 'Enter' && handleReply(comment.id)}
                       placeholder="답글을 입력하세요"
-                      className="w-full px-4 py-2 rounded-xl border border-gray-100 dark:border-gray-800 bg-transparent text-sm focus:outline-none focus:ring-2 focus:ring-amber-300 transition-all duration-200"
+                      className="w-full px-4 py-2 rounded-xl border border-gray-100 bg-transparent text-sm focus:outline-none focus:ring-2 focus:ring-amber-300 transition-all duration-200"
                       style={{ paddingLeft: `${12 + (replyingTo.nickname.length + 1) * 7 + 8}px` }}
                       autoFocus
                     />

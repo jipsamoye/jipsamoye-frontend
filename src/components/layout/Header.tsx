@@ -4,7 +4,6 @@ import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { MagnifyingGlassIcon, BellIcon } from './icons';
-import ThemeToggle from './ThemeToggle';
 import Avatar from '@/components/common/Avatar';
 import { useNavigationGuard } from '@/components/providers/NavigationGuard';
 import { useNotification } from '@/components/providers/NotificationProvider';
@@ -55,30 +54,28 @@ export default function Header({ isLoggedIn = false, onLoginClick, onLogout, nic
   }, []);
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 h-16 bg-white dark:bg-gray-950 border-b border-gray-100 dark:border-gray-800">
+    <header className="fixed top-0 left-0 right-0 z-50 h-16 bg-white border-b border-gray-100">
       <div className="flex items-center justify-between h-full px-4 lg:px-6">
-        <button onClick={() => guardedPush('/')} className="text-2xl font-bold text-gray-900 dark:text-white font-[family-name:var(--font-jua)] lg:pl-4">
+        <button onClick={() => guardedPush('/')} className="text-2xl font-bold text-gray-900 font-[family-name:var(--font-jua)] lg:pl-4">
           집사모여
         </button>
 
         <div className="flex items-center gap-3">
-          <ThemeToggle />
-
           {isLoggedIn ? (
             <>
               <Link
                 href="/posts/new"
-                className="hidden sm:flex items-center px-4 py-2 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-xl text-sm font-medium hover:bg-gray-800 dark:hover:bg-gray-100 transition-all duration-200 font-[family-name:var(--font-jua)]"
+                className="hidden sm:flex items-center px-4 py-2 bg-gray-900 text-white rounded-xl text-sm font-medium hover:bg-gray-800 transition-all duration-200 font-[family-name:var(--font-jua)]"
               >
                 자랑하기
               </Link>
-              <Link href="/search" className="p-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">
+              <Link href="/search" className="p-2 text-gray-600 hover:text-gray-900">
                 <MagnifyingGlassIcon />
               </Link>
               <div className="relative" ref={notificationRef}>
                 <button
                   onClick={() => setShowNotification(!showNotification)}
-                  className="relative p-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+                  className="relative p-2 text-gray-600 hover:text-gray-900"
                 >
                   <BellIcon />
                   {unreadCount > 0 && (
@@ -88,21 +85,21 @@ export default function Header({ isLoggedIn = false, onLoginClick, onLogout, nic
                   )}
                 </button>
                 {showNotification && (
-                  <div className="absolute right-0 top-full mt-2 w-80 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl shadow-xl z-50 overflow-hidden">
-                    <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 dark:border-gray-800">
-                      <h3 className="font-bold text-base text-gray-900 dark:text-white">알림</h3>
+                  <div className="absolute right-0 top-full mt-2 w-80 bg-white border border-gray-100 rounded-2xl shadow-xl z-50 overflow-hidden">
+                    <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
+                      <h3 className="font-bold text-base text-gray-900">알림</h3>
                       <div className="flex items-center gap-2">
                         {notifications.length > 0 && (
                           <button
                             onClick={() => notificationContext.markAllAsRead()}
-                            className="text-xs text-amber-600 dark:text-amber-400 hover:underline"
+                            className="text-xs text-amber-600 hover:underline"
                           >
                             모두 읽기
                           </button>
                         )}
                         <button
                           onClick={() => setShowNotification(false)}
-                          className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                          className="text-gray-400 hover:text-gray-600"
                         >
                           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
@@ -116,13 +113,13 @@ export default function Header({ isLoggedIn = false, onLoginClick, onLogout, nic
                           <button
                             key={notification.id}
                             onClick={() => handleNotificationClick(notification)}
-                            className={`flex items-start gap-3 w-full px-4 py-3 text-left hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors ${
-                              !notification.read ? 'bg-amber-50 dark:bg-amber-950/20' : ''
+                            className={`flex items-start gap-3 w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors ${
+                              !notification.read ? 'bg-amber-50' : ''
                             }`}
                           >
                             <Avatar src={notification.senderProfileImageUrl} size="sm" />
                             <div className="flex-1 min-w-0">
-                              <p className="text-sm text-gray-900 dark:text-gray-100 line-clamp-2">
+                              <p className="text-sm text-gray-900 line-clamp-2">
                                 {notification.message}
                               </p>
                               <p className="text-xs text-gray-400 mt-1">
@@ -147,30 +144,30 @@ export default function Header({ isLoggedIn = false, onLoginClick, onLogout, nic
               <div className="relative" ref={dropdownRef}>
                 <button
                   onClick={() => setShowDropdown(!showDropdown)}
-                  className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+                  className="text-gray-600 hover:text-gray-900"
                 >
                   <Avatar src={profileImageUrl ?? null} size="sm" />
                 </button>
                 {showDropdown && (
-                  <div className="absolute right-0 top-full mt-2 w-44 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl shadow-xl py-1 z-50">
+                  <div className="absolute right-0 top-full mt-2 w-44 bg-white border border-gray-100 rounded-2xl shadow-xl py-1 z-50">
                     <Link
                       href={`/users/${nickname}`}
                       onClick={() => setShowDropdown(false)}
-                      className="block px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
+                      className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100"
                     >
                       내 프로필
                     </Link>
                     <Link
                       href="/liked"
                       onClick={() => setShowDropdown(false)}
-                      className="block px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
+                      className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100"
                     >
                       좋아요한 게시글
                     </Link>
-                    <hr className="my-1 border-gray-100 dark:border-gray-800" />
+                    <hr className="my-1 border-gray-100" />
                     <button
                       onClick={() => { setShowDropdown(false); onLogout?.(); router.push('/'); }}
-                      className="block w-full text-left px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
+                      className="block w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100"
                     >
                       로그아웃
                     </button>
@@ -180,12 +177,12 @@ export default function Header({ isLoggedIn = false, onLoginClick, onLogout, nic
             </>
           ) : (
             <>
-              <Link href="/search" className="p-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">
+              <Link href="/search" className="p-2 text-gray-600 hover:text-gray-900">
                 <MagnifyingGlassIcon />
               </Link>
               <button
                 onClick={onLoginClick}
-                className="px-4 py-2 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-xl text-sm font-medium hover:bg-gray-800 dark:hover:bg-gray-100 transition-all duration-200"
+                className="px-4 py-2 bg-gray-900 text-white rounded-xl text-sm font-medium hover:bg-gray-800 transition-all duration-200"
               >
                 로그인
               </button>

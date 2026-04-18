@@ -15,11 +15,11 @@ export default function PostCard({ post, index = 99 }: PostCardProps) {
 
   return (
     <Link href={`/posts/${post.id}`} className="block group">
-      <div className="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-800 rounded-2xl overflow-hidden transition-all duration-200 group-hover:shadow-md group-hover:scale-[1.02]">
-        <div className="aspect-square bg-gray-200 dark:bg-gray-700 overflow-hidden rounded-t-2xl relative">
+      <div className="bg-white border border-gray-100 rounded-2xl overflow-hidden transition-all duration-200 group-hover:shadow-md group-hover:scale-[1.02]">
+        <div className="aspect-square bg-gray-200 overflow-hidden rounded-t-2xl relative">
           {post.thumbnailUrl ? (
             <>
-              {!loaded && <div className="absolute inset-0 bg-gray-200 dark:bg-gray-700 animate-pulse" />}
+              {!loaded && <div className="absolute inset-0 bg-gray-200 animate-pulse" />}
               <img
                 src={post.thumbnailUrl}
                 alt={post.title}
@@ -38,7 +38,7 @@ export default function PostCard({ post, index = 99 }: PostCardProps) {
         </div>
         <div className="p-3.5">
           <p className="font-medium text-sm truncate">{post.title}</p>
-          <div className="flex items-center gap-2 mt-1 text-xs text-gray-500 dark:text-gray-400">
+          <div className="flex items-center gap-2 mt-1 text-xs text-gray-500">
             <span>{post.nickname}</span>
             <span className="flex items-center gap-1">
               <HeartIcon />

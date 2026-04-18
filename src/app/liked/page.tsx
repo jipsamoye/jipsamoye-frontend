@@ -30,9 +30,9 @@ export default function LikedPostsPage() {
   return (
     <div>
       {/* 탭 */}
-      <div className="border-b border-gray-100 dark:border-gray-800 mb-6">
+      <div className="border-b border-gray-100 mb-6">
         <div className="flex gap-6">
-          <button className="pb-3 border-b-2 border-gray-900 dark:border-white text-sm font-medium text-gray-900 dark:text-white">
+          <button className="pb-3 border-b-2 border-gray-900 text-sm font-medium text-gray-900">
             좋아요한 게시글
           </button>
         </div>

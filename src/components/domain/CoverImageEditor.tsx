@@ -158,7 +158,7 @@ export default function CoverImageEditor({ isOpen, onClose, onSave, saving, init
     <Modal isOpen={isOpen} onClose={handleClose} title="커버 이미지 수정">
       <div className="flex flex-col gap-4">
         {!imageSrc ? (
-          <div className="aspect-[4/3] border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl flex flex-col items-center justify-center cursor-pointer hover:border-amber-400 transition-colors">
+          <div className="aspect-[4/3] border-2 border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center cursor-pointer hover:border-amber-400 transition-colors">
             <div className="text-3xl mb-2">+</div>
             <p className="text-sm text-gray-500">이미지를 선택해주세요</p>
           </div>
@@ -222,7 +222,7 @@ export default function CoverImageEditor({ isOpen, onClose, onSave, saving, init
               <input
                 type="range" min="1" max="3" step="0.01" value={scale}
                 onChange={(e) => setScale(Number(e.target.value))}
-                className="flex-1 h-1 bg-gray-200 dark:bg-gray-700 rounded-full appearance-none cursor-pointer accent-gray-900 dark:accent-white"
+                className="flex-1 h-1 bg-gray-200 rounded-full appearance-none cursor-pointer accent-gray-900"
               />
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-gray-400 flex-shrink-0">
                 <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607ZM10.5 7.5v6m3-3h-6" />
@@ -231,7 +231,7 @@ export default function CoverImageEditor({ isOpen, onClose, onSave, saving, init
 
             <button
               onClick={handleSave} disabled={saving}
-              className="w-full py-3 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-xl font-medium hover:bg-gray-800 dark:hover:bg-gray-100 transition-colors disabled:opacity-50"
+              className="w-full py-3 bg-gray-900 text-white rounded-xl font-medium hover:bg-gray-800 transition-colors disabled:opacity-50"
             >
               {saving ? '저장 중...' : '변경 내용 저장'}
             </button>

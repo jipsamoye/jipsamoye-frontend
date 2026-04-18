@@ -234,7 +234,7 @@ export default function PostEditor({
         onClick={() => fileInputRef.current?.click()}
         onDragOver={(e) => e.preventDefault()}
         onDrop={(e) => { e.preventDefault(); if (e.dataTransfer.files.length) handleImageUpload(e.dataTransfer.files); }}
-        className="border-2 border-dashed border-gray-200 dark:border-gray-600 rounded-2xl p-8 text-center cursor-pointer hover:border-amber-400 transition-all duration-200 mb-6"
+        className="border-2 border-dashed border-gray-200 rounded-2xl p-8 text-center cursor-pointer hover:border-amber-400 transition-all duration-200 mb-6"
       >
         <div className="text-4xl mb-2">+</div>
         <p className="text-sm text-gray-500">JPG / PNG / WEBP</p>
@@ -300,7 +300,7 @@ export default function PostEditor({
           maxLength={TITLE_MAX}
           onFocus={() => setTitleFocused(true)}
           onBlur={() => setTitleFocused(false)}
-          className="w-full text-2xl font-bold pb-4 border-b border-gray-100 dark:border-gray-800 bg-transparent focus:outline-none placeholder-gray-300 dark:placeholder-gray-600 pr-16"
+          className="w-full text-2xl font-bold pb-4 border-b border-gray-100 bg-transparent focus:outline-none placeholder-gray-300 pr-16"
         />
         {titleFocused && (
           <span className={`absolute right-0 bottom-5 text-xs ${charCountColor(title.length, TITLE_MAX)}`}>
@@ -316,7 +316,7 @@ export default function PostEditor({
             <button
               key={preset}
               onClick={() => setTitle(preset)}
-              className="px-3 py-1.5 text-xs rounded-full border border-gray-100 dark:border-gray-800 text-gray-500 dark:text-gray-400 hover:bg-amber-50 hover:border-amber-200 hover:text-amber-600 dark:hover:bg-amber-950/20 dark:hover:border-amber-800 dark:hover:text-amber-400 transition-all duration-200"
+              className="px-3 py-1.5 text-xs rounded-full border border-gray-100 text-gray-500 hover:bg-amber-50 hover:border-amber-200 hover:text-amber-600 transition-all duration-200"
             >
               {preset}
             </button>
@@ -341,7 +341,7 @@ export default function PostEditor({
           rows={12}
           onFocus={() => setContentFocused(true)}
           onBlur={() => setContentFocused(false)}
-          className="w-full bg-transparent resize-none focus:outline-none text-gray-700 dark:text-gray-300 placeholder-gray-300 dark:placeholder-gray-600"
+          className="w-full bg-transparent resize-none focus:outline-none text-gray-700 placeholder-gray-300"
         />
         {contentFocused && (
           <div className={`text-right text-xs -mt-2 mb-2 ${charCountColor(content.length, CONTENT_MAX)}`}>
@@ -350,7 +350,7 @@ export default function PostEditor({
         )}
       </div>
 
-      <hr className="border-gray-100 dark:border-gray-800 mb-8" />
+      <hr className="border-gray-100 mb-8" />
 
       {/* 버튼 */}
       {mode === 'create' ? (

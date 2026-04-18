@@ -1,9 +1,126 @@
 @import "tailwindcss";
 
-@custom-variant dark (&:where(.dark, .dark *));
+/* ==========================================================================
+   Toss Design System 기반 컬러 팔레트
+   Tailwind 4 CSS-first theming. 기본 gray/blue/red 를 Toss TDS 값으로 교체
+   + 추가 포인트 컬러 (orange, yellow, green, teal, purple)
+   + 시맨틱 토큰 (primary, surface, text-primary 등)
+   ========================================================================== */
+@theme {
+  /* Grey (글자/배경 전반) */
+  --color-gray-50: #f9fafb;
+  --color-gray-100: #f2f4f6;
+  --color-gray-200: #e5e8eb;
+  --color-gray-300: #d1d6db;
+  --color-gray-400: #b0b8c1;
+  --color-gray-500: #8b95a1;
+  --color-gray-600: #6b7684;
+  --color-gray-700: #4e5968;
+  --color-gray-800: #333d4b;
+  --color-gray-900: #191f28;
+  --color-gray-950: #0f1319;
+
+  /* Blue (브랜드/링크/CTA) */
+  --color-blue-50: #e8f3ff;
+  --color-blue-100: #c9e2ff;
+  --color-blue-200: #a0caff;
+  --color-blue-300: #72afff;
+  --color-blue-400: #4592ff;
+  --color-blue-500: #3182f6;
+  --color-blue-600: #2272eb;
+  --color-blue-700: #1b64da;
+  --color-blue-800: #1957c2;
+  --color-blue-900: #194aa6;
+
+  /* Red (에러/경고) */
+  --color-red-50: #ffeeee;
+  --color-red-100: #fddcdd;
+  --color-red-200: #feb2b5;
+  --color-red-300: #ff8589;
+  --color-red-400: #ff5c60;
+  --color-red-500: #f04452;
+  --color-red-600: #d93640;
+  --color-red-700: #c2272f;
+  --color-red-800: #a11d26;
+  --color-red-900: #a51926;
+
+  /* Orange */
+  --color-orange-50: #fff4e6;
+  --color-orange-100: #ffdfb8;
+  --color-orange-200: #ffc98a;
+  --color-orange-300: #ffb35c;
+  --color-orange-400: #ff9d2e;
+  --color-orange-500: #ff8a00;
+  --color-orange-600: #e67c00;
+  --color-orange-700: #cc6e00;
+  --color-orange-800: #b36000;
+  --color-orange-900: #995200;
+
+  /* Yellow */
+  --color-yellow-50: #fff9e6;
+  --color-yellow-100: #fff0b8;
+  --color-yellow-200: #ffe78a;
+  --color-yellow-300: #ffde5c;
+  --color-yellow-400: #ffd52e;
+  --color-yellow-500: #f7c300;
+  --color-yellow-600: #e0b000;
+  --color-yellow-700: #c99d00;
+  --color-yellow-800: #b38a00;
+  --color-yellow-900: #9c7700;
+
+  /* Green */
+  --color-green-50: #e6f9e7;
+  --color-green-100: #c3efc4;
+  --color-green-200: #9ae59d;
+  --color-green-300: #70d975;
+  --color-green-400: #4ecc55;
+  --color-green-500: #30b53a;
+  --color-green-600: #26a12f;
+  --color-green-700: #1d8a25;
+  --color-green-800: #16721b;
+  --color-green-900: #0f5a14;
+
+  /* Teal */
+  --color-teal-50: #e6faf8;
+  --color-teal-100: #baf0ec;
+  --color-teal-200: #8ee6df;
+  --color-teal-300: #62dbd2;
+  --color-teal-400: #36d1c5;
+  --color-teal-500: #1abab0;
+  --color-teal-600: #17a49b;
+  --color-teal-700: #138a83;
+  --color-teal-800: #0f716b;
+  --color-teal-900: #0b5854;
+
+  /* Purple */
+  --color-purple-50: #f5eefe;
+  --color-purple-100: #e0ccfc;
+  --color-purple-200: #cbaafa;
+  --color-purple-300: #b688f8;
+  --color-purple-400: #a166f6;
+  --color-purple-500: #8b4dd9;
+  --color-purple-600: #7941c2;
+  --color-purple-700: #6635a6;
+  --color-purple-800: #542c89;
+  --color-purple-900: #41226d;
+
+  /* -----------------------------------------------------------
+     시맨틱 토큰 (bg-primary, text-primary 등으로 사용 가능)
+     ----------------------------------------------------------- */
+  --color-primary: #3182f6;
+  --color-primary-hover: #2272eb;
+  --color-surface: #ffffff;
+  --color-surface-muted: #f9fafb;
+  --color-border: #e5e8eb;
+  --color-text-primary: #191f28;
+  --color-text-secondary: #4e5968;
+  --color-text-tertiary: #8b95a1;
+  --color-danger: #f04452;
+  --color-success: #30b53a;
+}
 
 body {
-  @apply bg-white text-gray-900 dark:bg-gray-950 dark:text-gray-100;
+  @apply bg-white text-gray-900;
   font-family: Arial, Helvetica, sans-serif;
 }
 
@@ -25,7 +142,7 @@ textarea {
   scrollbar-color: transparent transparent;
 }
 textarea:hover, textarea:focus {
-  scrollbar-color: rgba(156, 163, 175, 0.5) transparent;
+  scrollbar-color: rgba(176, 184, 193, 0.5) transparent;
 }
 textarea::-webkit-scrollbar {
   width: 4px;
@@ -36,7 +153,7 @@ textarea::-webkit-scrollbar-thumb {
 }
 textarea:hover::-webkit-scrollbar-thumb,
 textarea:focus::-webkit-scrollbar-thumb {
-  background: rgba(156, 163, 175, 0.5);
+  background: rgba(176, 184, 193, 0.5);
 }
 
 .chat-scrollbar {
@@ -44,7 +161,7 @@ textarea:focus::-webkit-scrollbar-thumb {
   scrollbar-color: transparent transparent;
 }
 .chat-scrollbar:hover {
-  scrollbar-color: rgba(156, 163, 175, 0.3) transparent;
+  scrollbar-color: rgba(176, 184, 193, 0.3) transparent;
 }
 .chat-scrollbar::-webkit-scrollbar {
   width: 4px;
@@ -54,7 +171,7 @@ textarea:focus::-webkit-scrollbar-thumb {
   border-radius: 4px;
 }
 .chat-scrollbar:hover::-webkit-scrollbar-thumb {
-  background: rgba(156, 163, 175, 0.3);
+  background: rgba(176, 184, 193, 0.3);
 }
 
 @keyframes slideDown {

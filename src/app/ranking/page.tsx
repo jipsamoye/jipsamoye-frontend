@@ -29,8 +29,8 @@ export default function RankingPage() {
           onClick={() => setTab('weekly')}
           className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
             tab === 'weekly'
-              ? 'bg-gray-900 dark:bg-white text-white dark:text-gray-900 shadow-sm'
-              : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400'
+              ? 'bg-gray-900 text-white shadow-sm'
+              : 'bg-gray-100 text-gray-600'
           }`}
         >
           주간
@@ -39,8 +39,8 @@ export default function RankingPage() {
           onClick={() => setTab('monthly')}
           className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
             tab === 'monthly'
-              ? 'bg-gray-900 dark:bg-white text-white dark:text-gray-900 shadow-sm'
-              : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400'
+              ? 'bg-gray-900 text-white shadow-sm'
+              : 'bg-gray-100 text-gray-600'
           }`}
         >
           월간
