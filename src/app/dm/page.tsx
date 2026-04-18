@@ -209,12 +209,12 @@ export default function DmPage() {
                         {room.otherUserNickname}
                       </span>
                       <span className="text-xs text-gray-400 dark:text-gray-500 flex-shrink-0 ml-2">
-                        {timeAgo(room.lastMessageAt)}
+                        {room.lastMessageAt ? timeAgo(room.lastMessageAt) : ''}
                       </span>
                     </div>
                     <div className="flex items-center justify-between mt-0.5">
                       <p className="text-sm text-gray-500 dark:text-gray-400 truncate">
-                        {room.lastMessage}
+                        {room.lastMessage ?? '아직 대화가 없어요'}
                       </p>
                       {room.unreadCount > 0 && (
                         <span className="flex-shrink-0 ml-2 inline-flex items-center justify-center w-5 h-5 rounded-full bg-amber-500 text-white text-xs font-bold">

@@ -142,8 +142,8 @@ export interface DmRoom {
   roomId: number;
   otherUserNickname: string;
   otherUserProfileImageUrl: string | null;
-  lastMessage: string;
-  lastMessageAt: string;
+  lastMessage: string | null;
+  lastMessageAt: string | null;
   unreadCount: number;
 }
 
