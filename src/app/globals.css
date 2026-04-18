@@ -105,16 +105,40 @@
   --color-purple-900: #41226d;
 
   /* -----------------------------------------------------------
+     Amber 팔레트 — longblack primary orange (#FF5126) 기반 스케일
+     기존 bg-amber-500 등 34곳이 자동으로 longblack 오렌지로 렌더됨
+     ----------------------------------------------------------- */
+  --color-amber-50: #fff2ee;
+  --color-amber-100: #ffd6cc;
+  --color-amber-200: #ffb09e;
+  --color-amber-300: #ff8b6f;
+  --color-amber-400: #ff6d46;
+  --color-amber-500: #ff5126;
+  --color-amber-600: #e04420;
+  --color-amber-700: #b8371a;
+  --color-amber-800: #8f2b15;
+  --color-amber-900: #661e0f;
+
+  /* -----------------------------------------------------------
+     Longblack accent palette (새 네임스페이스)
+     ----------------------------------------------------------- */
+  --color-accent-purple: #5962ff;
+  --color-accent-purple-light: #9378ff;
+  --color-accent-purple-soft: #b2a1ff;
+  --color-accent-mint: #9fe99e;
+  --color-accent-tan: #d3b18d;
+
+  /* -----------------------------------------------------------
      시맨틱 토큰 (bg-primary, text-primary 등으로 사용 가능)
      ----------------------------------------------------------- */
-  --color-primary: #3182f6;
-  --color-primary-hover: #2272eb;
+  --color-primary: #ff5126;
+  --color-primary-hover: #e04420;
   --color-surface: #ffffff;
-  --color-surface-muted: #f9fafb;
-  --color-border: #e5e8eb;
-  --color-text-primary: #191f28;
+  --color-surface-muted: #f5f5f5;
+  --color-border: #d4d4d4;
+  --color-text-primary: #191919;
   --color-text-secondary: #4e5968;
-  --color-text-tertiary: #8b95a1;
+  --color-text-tertiary: #aaaaaa;
   --color-danger: #f04452;
   --color-success: #30b53a;
 }
