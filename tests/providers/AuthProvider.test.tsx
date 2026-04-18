@@ -55,7 +55,7 @@ describe('AuthProvider', () => {
 
     await waitFor(() => expect(result.current.loading).toBe(false));
 
-    expect(apiMock.get).toHaveBeenCalledWith('/api/auth/me');
+    expect(apiMock.get).toHaveBeenCalledWith('/api/auth/me', { silent: true });
     expect(result.current.user).toEqual(sampleUser);
   });
 

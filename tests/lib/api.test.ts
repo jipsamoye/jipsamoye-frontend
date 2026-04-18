@@ -69,6 +69,24 @@ describe('api request wrapper', () => {
     expect(handler).toHaveBeenCalledTimes(1);
   });
 
+  it('silent 옵션이 true면 401 응답에도 토스트를 띄우지 않지만 unauthorizedHandler 와 throw 는 유지한다', async () => {
+    global.fetch = vi.fn().mockResolvedValueOnce({
+      status: 401,
+      json: async () => ({ status: 401, code: 'UNAUTHORIZED', message: '로그인이 필요합니다.', data: null }),
+    }) as unknown as typeof fetch;
+
+    const handler = vi.fn();
+    setUnauthorizedHandler(handler);
+
+    await expect(api.get('/api/auth/me', { silent: true })).rejects.toMatchObject({
+      status: 401,
+      code: 'UNAUTHORIZED',
+    });
+
+    expect(showToastMock).not.toHaveBeenCalled();
+    expect(handler).toHaveBeenCalledTimes(1);
+  });
+
   it('비즈니스 에러(code !== SUCCESS/CREATED) 는 토스트 없이 응답을 throw 한다', async () => {
     global.fetch = mockFetchOnce({
       status: 200,

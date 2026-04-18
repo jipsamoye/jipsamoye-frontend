@@ -22,7 +22,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     setUnauthorizedHandler(() => setUser(null));
 
-    api.get<User>('/api/auth/me')
+    api.get<User>('/api/auth/me', { silent: true })
       .then((res) => setUser(res.data))
       .catch(() => setUser(null))
       .finally(() => setLoading(false));
