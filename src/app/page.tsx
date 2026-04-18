@@ -82,7 +82,7 @@ export default function Home() {
             <span className="inline-block px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-700 text-[11px] font-semibold mb-1.5">
               반려동물 커뮤니티
             </span>
-            <h1 className="text-base md:text-lg font-bold text-gray-900 mb-0.5 font-[family-name:var(--font-jua)]">
+            <h1 className="text-base md:text-lg font-bold text-gray-900 mb-0.5">
               우리 애 자랑하러 오세요!
             </h1>
             <p className="text-xs md:text-sm text-gray-500">
@@ -96,7 +96,7 @@ export default function Home() {
       {/* 이주의 멍냥 — 토스 스타일 섹션 헤더 */}
       <section>
         <div className="flex items-center justify-between mb-5">
-          <h2 className="text-xl font-bold font-[family-name:var(--font-jua)] text-gray-900">이주의 멍냥</h2>
+          <h2 className="text-xl font-bold text-gray-900">이주의 멍냥</h2>
           <Link href="/ranking" className="text-sm text-gray-400 hover:text-gray-600 transition-colors">
             더보기
           </Link>
@@ -162,7 +162,7 @@ export default function Home() {
       {/* 최신 게시글 — 토스 스타일 */}
       <section>
         <div className="flex items-center justify-between mb-5">
-          <h2 className="text-xl font-bold font-[family-name:var(--font-jua)] text-gray-900">최신 게시글</h2>
+          <h2 className="text-xl font-bold text-gray-900">최신 게시글</h2>
         </div>
         {initialLatestLoading ? (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">

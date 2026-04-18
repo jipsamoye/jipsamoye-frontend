@@ -82,12 +82,12 @@ export default function PopularSlider({ items }: PopularSliderProps) {
         </button>
       )}
 
-      <div ref={scrollRef} className="flex gap-4 overflow-x-auto scrollbar-hide pb-4">
+      <div ref={scrollRef} className="flex gap-4 overflow-x-auto scrollbar-hide px-1 py-3 -mx-1 -my-3">
         {items.map((item, i) => (
           <Link
             key={item.id}
             href={`/posts/${item.id}`}
-            className="flex-shrink-0 w-[calc(25%-12px)] min-w-[200px] bg-white border border-gray-100 rounded-2xl overflow-hidden cursor-pointer hover:shadow-md hover:scale-[1.02] transition-all duration-200"
+            className="flex-shrink-0 w-[calc(25%-12px)] min-w-[200px] bg-white border border-gray-100 rounded-2xl overflow-hidden cursor-pointer transition-all duration-200 hover:shadow-md hover:scale-[1.02]"
           >
             <div className="aspect-square bg-gray-200 overflow-hidden relative">
               {item.thumbnailUrl ? (

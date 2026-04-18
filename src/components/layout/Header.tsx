@@ -57,7 +57,7 @@ export default function Header({ isLoggedIn = false, onLoginClick, onLogout, onM
   return (
     <header className="fixed top-0 left-0 right-0 z-50 h-16 bg-white border-b border-gray-100">
       <div className="flex items-center justify-between h-full px-4 lg:px-6">
-        <button onClick={() => guardedPush('/')} className="text-2xl font-bold text-gray-900 font-[family-name:var(--font-jua)] lg:pl-4">
+        <button onClick={() => guardedPush('/')} className="text-2xl font-bold text-gray-900 lg:pl-4">
           집사모여
         </button>
 
@@ -66,7 +66,7 @@ export default function Header({ isLoggedIn = false, onLoginClick, onLogout, onM
             <>
               <Link
                 href="/posts/new"
-                className="hidden lg:flex items-center px-4 py-2 bg-amber-500 text-white rounded-xl text-sm font-medium hover:bg-amber-600 transition-all duration-200 font-[family-name:var(--font-jua)]"
+                className="hidden lg:flex items-center px-4 py-2 bg-amber-500 text-white rounded-xl text-sm font-medium hover:bg-amber-600 transition-all duration-200"
               >
                 자랑하기
               </Link>

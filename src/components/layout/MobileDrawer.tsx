@@ -78,7 +78,7 @@ export default function MobileDrawer({ isOpen, onClose }: MobileDrawerProps) {
               <button
                 key={item.href}
                 onClick={() => handleNavigate(item.href)}
-                className={`flex items-center gap-4 px-6 py-3.5 text-left text-base font-medium font-[family-name:var(--font-jua)]
+                className={`flex items-center gap-4 px-6 py-3.5 text-left text-base font-medium
                   ${isActive ? 'text-gray-900 bg-gray-50' : 'text-gray-600 hover:bg-gray-50'}`}
               >
                 <span className="w-6 h-6">{item.icon(isActive)}</span>

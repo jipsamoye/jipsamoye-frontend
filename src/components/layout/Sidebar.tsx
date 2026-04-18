@@ -31,7 +31,7 @@ export default function Sidebar() {
             <button
               key={item.href}
               onClick={() => guardedPush(item.href)}
-              className={`flex items-center gap-4 px-3 py-3 rounded-xl text-lg font-medium transition-all duration-200 font-[family-name:var(--font-jua)] text-left
+              className={`flex items-center gap-4 px-3 py-3 rounded-xl text-lg font-medium transition-all duration-200 text-left
                 ${isActive
                   ? 'bg-gray-50 text-gray-900 font-semibold'
                   : 'text-gray-600 hover:bg-gray-50/70'
