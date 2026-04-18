@@ -14,11 +14,12 @@ interface HeaderProps {
   isLoggedIn?: boolean;
   onLoginClick?: () => void;
   onLogout?: () => void;
+  onMobileMenuClick?: () => void;
   nickname?: string;
   profileImageUrl?: string | null;
 }
 
-export default function Header({ isLoggedIn = false, onLoginClick, onLogout, nickname, profileImageUrl }: HeaderProps) {
+export default function Header({ isLoggedIn = false, onLoginClick, onLogout, onMobileMenuClick, nickname, profileImageUrl }: HeaderProps) {
   const { guardedPush } = useNavigationGuard();
   const router = useRouter();
   const [showDropdown, setShowDropdown] = useState(false);
@@ -65,7 +66,7 @@ export default function Header({ isLoggedIn = false, onLoginClick, onLogout, nic
             <>
               <Link
                 href="/posts/new"
-                className="hidden sm:flex items-center px-4 py-2 bg-amber-500 text-white rounded-xl text-sm font-medium hover:bg-amber-600 transition-all duration-200 font-[family-name:var(--font-jua)]"
+                className="hidden lg:flex items-center px-4 py-2 bg-amber-500 text-white rounded-xl text-sm font-medium hover:bg-amber-600 transition-all duration-200 font-[family-name:var(--font-jua)]"
               >
                 자랑하기
               </Link>
@@ -188,6 +189,16 @@ export default function Header({ isLoggedIn = false, onLoginClick, onLogout, nic
               </button>
             </>
           )}
+
+          <button
+            onClick={onMobileMenuClick}
+            className="lg:hidden p-2 text-gray-700 hover:text-gray-900"
+            aria-label="메뉴 열기"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5M3.75 17.25h16.5" />
+            </svg>
+          </button>
         </div>
       </div>
     </header>

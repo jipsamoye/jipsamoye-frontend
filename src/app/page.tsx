@@ -7,10 +7,13 @@ import { PetPostListItem, PageResponse } from '@/types/api';
 import { dummyPopularPosts, dummyLatestPosts } from '@/lib/dummyData';
 import PopularSlider from '@/components/domain/PopularSlider';
 import PostCard from '@/components/domain/PostCard';
+import { PostCardSkeleton, PopularSliderSkeleton } from '@/components/common/Skeleton';
 
 export default function Home() {
   const [popularPosts, setPopularPosts] = useState<PetPostListItem[]>([]);
+  const [popularLoading, setPopularLoading] = useState(true);
   const [latestPosts, setLatestPosts] = useState<PetPostListItem[]>([]);
+  const [initialLatestLoading, setInitialLatestLoading] = useState(true);
   const pageRef = useRef(0);
   const [hasNext, setHasNext] = useState(true);
   const [loading, setLoading] = useState(false);
@@ -20,7 +23,8 @@ export default function Home() {
   useEffect(() => {
     api.get<PetPostListItem[]>('/api/posts/top10')
       .then((res) => setPopularPosts(res.data.length > 0 ? res.data : dummyPopularPosts))
-      .catch(() => setPopularPosts(dummyPopularPosts));
+      .catch(() => setPopularPosts(dummyPopularPosts))
+      .finally(() => setPopularLoading(false));
   }, []);
 
   const loadMore = useCallback(async () => {
@@ -44,6 +48,7 @@ export default function Home() {
     } finally {
       loadingRef.current = false;
       setLoading(false);
+      setInitialLatestLoading(false);
     }
   }, [hasNext]);
 
@@ -93,10 +98,12 @@ export default function Home() {
         <div className="flex items-center justify-between mb-5">
           <h2 className="text-xl font-bold font-[family-name:var(--font-jua)] text-gray-900">이주의 멍냥</h2>
           <Link href="/ranking" className="text-sm text-gray-400 hover:text-gray-600 transition-colors">
-            전체보기 →
+            더보기
           </Link>
         </div>
-        {popularPosts.length > 0 ? (
+        {popularLoading ? (
+          <PopularSliderSkeleton />
+        ) : popularPosts.length > 0 ? (
           <PopularSlider items={popularSliderItems} />
         ) : (
           <div className="text-center py-14 text-gray-400 bg-gray-50 rounded-2xl border border-gray-100">
@@ -118,18 +125,15 @@ export default function Home() {
               </Link>
             </div>
             <div className="space-y-3">
-              <div className="flex items-center gap-3 text-sm text-gray-500">
-                <span className="text-gray-300">📝</span>
+              <div className="flex items-center justify-between gap-3 text-sm text-gray-500">
                 <span className="truncate">혹시 이런 글찍어 보신 분 계시나요?</span>
                 <span className="text-xs text-gray-300 flex-shrink-0">2분 전</span>
               </div>
-              <div className="flex items-center gap-3 text-sm text-gray-500">
-                <span className="text-gray-300">📝</span>
+              <div className="flex items-center justify-between gap-3 text-sm text-gray-500">
                 <span className="truncate">강아지 사료 추천 부탁드려요!</span>
                 <span className="text-xs text-gray-300 flex-shrink-0">15분 전</span>
               </div>
-              <div className="flex items-center gap-3 text-sm text-gray-500">
-                <span className="text-gray-300">📝</span>
+              <div className="flex items-center justify-between gap-3 text-sm text-gray-500">
                 <span className="truncate">고양이 장난감 뭐가 좋을까요</span>
                 <span className="text-xs text-gray-300 flex-shrink-0">1시간 전</span>
               </div>
@@ -142,13 +146,11 @@ export default function Home() {
               <h3 className="font-bold text-gray-900">공지사항</h3>
             </div>
             <div className="space-y-3">
-              <div className="flex items-center gap-3 text-sm text-gray-500">
-                <span className="text-amber-400">📢</span>
+              <div className="flex items-center justify-between gap-3 text-sm text-gray-500">
                 <span className="truncate">집사모여 서비스 오픈 안내</span>
                 <span className="text-xs text-gray-300 flex-shrink-0">2026.04.14</span>
               </div>
-              <div className="flex items-center gap-3 text-sm text-gray-500">
-                <span className="text-amber-400">📢</span>
+              <div className="flex items-center justify-between gap-3 text-sm text-gray-500">
                 <span className="truncate">커뮤니티 이용 규칙 안내</span>
                 <span className="text-xs text-gray-300 flex-shrink-0">2026.04.14</span>
               </div>
@@ -162,21 +164,27 @@ export default function Home() {
         <div className="flex items-center justify-between mb-5">
           <h2 className="text-xl font-bold font-[family-name:var(--font-jua)] text-gray-900">최신 게시글</h2>
         </div>
-        {latestPosts.length > 0 ? (
+        {initialLatestLoading ? (
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <PostCardSkeleton key={i} />
+            ))}
+          </div>
+        ) : latestPosts.length > 0 ? (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {latestPosts.map((post, i) => (
               <PostCard key={post.id} post={post} index={i} />
             ))}
           </div>
-        ) : !loading ? (
+        ) : (
           <div className="text-center py-20 text-gray-400">
             <p className="text-5xl mb-4">🐾</p>
             <p className="text-sm">아직 게시글이 없어요. 첫 번째 집사가 되어보세요!</p>
           </div>
-        ) : null}
+        )}
 
         <div ref={observerRef} className="h-10" />
-        {loading && (
+        {loading && !initialLatestLoading && (
           <div className="flex justify-center py-6">
             <div className="w-6 h-6 border-2 border-amber-300 border-t-transparent rounded-full animate-spin" />
           </div>

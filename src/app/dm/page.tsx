@@ -241,7 +241,7 @@ export default function DmPage() {
             </p>
             <button
               onClick={handleOpenNewMessageModal}
-              className="px-6 py-2.5 bg-gray-900 text-white rounded-2xl text-sm font-medium hover:bg-gray-800 transition-all duration-200"
+              className="px-6 py-2.5 bg-gray-900 text-white rounded-xl text-sm font-medium hover:bg-gray-800 transition-all duration-200"
             >
               새 메세지 보내기
             </button>

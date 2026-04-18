@@ -204,7 +204,7 @@ export default function ProfileEditModal({ isOpen, onClose, profile, onSaved }: 
         <button
           onClick={handleSaveProfile}
           disabled={saving || !editNickname.trim() || !hasChanges || nicknameStatus === 'taken' || nicknameStatus === 'invalid' || nicknameStatus === 'checking'}
-          className="w-full py-3 bg-gray-900 text-white rounded-2xl font-medium hover:bg-gray-800 transition-all duration-200 disabled:opacity-50"
+          className="w-full py-3 bg-gray-900 text-white rounded-xl font-medium hover:bg-gray-800 transition-all duration-200 disabled:opacity-50"
         >
           {saving ? '저장 중...' : '변경 내용 저장'}
         </button>

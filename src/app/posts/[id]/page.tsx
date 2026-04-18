@@ -238,7 +238,7 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
           </p>
           <button
             onClick={handleCopyLink}
-            className="flex items-center gap-2 px-6 py-3 bg-amber-400 hover:bg-amber-500 text-white font-medium rounded-2xl transition-all duration-200 w-full justify-center"
+            className="flex items-center gap-2 px-6 py-3 bg-amber-400 hover:bg-amber-500 text-white font-medium rounded-xl transition-all duration-200 w-full justify-center"
           >
             <LinkIcon />
             링크 복사하기
