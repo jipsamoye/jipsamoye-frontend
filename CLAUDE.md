@@ -20,50 +20,59 @@
 - **배포:** Vercel
 - **백엔드:** Spring Boot (별도 레포: jipsamoye/jipsamoye-backend)
 
+## 인프라 (운영)
+
+- **도메인:** jipsamoye.com (Cloudflare DNS)
+- **프론트:** Vercel (`www.jipsamoye.com` / `jipsamoye.com` 모두 `cname.vercel-dns.com`)
+- **백엔드 API:** `api.jipsamoye.com` → Cloudflare Proxied → EC2(43.203.161.158) → Spring Boot
+- **이미지 CDN:** `images.jipsamoye.com` → Cloudflare Worker (`image-cdn`, **캐싱 전용**) → S3 `jipsamoye-bucket`
+- **이미지 리사이즈:** 현재 없음 (원본 서빙). 추후 **AWS Lambda**로 on-the-fly 리사이즈 추가 예정.
+  - Lambda 도입 시 프론트는 `srcset` + 크기별 URL 생성 유틸(`src/lib/imageUrl.ts` 예정)을 함께 도입해야 함.
+
 ## 백엔드 API
 
 - **로컬:** http://localhost:8080
-- **운영:** http://43.203.165.97
-- **Swagger:** http://43.203.165.97/swagger-ui/index.html
+- **운영:** http://43.203.161.158
+- **Swagger:** http://43.203.161.158/swagger-ui/index.html
 
 ### API 엔드포인트 요약
 
 **인증**
 - `POST /api/auth/guest` — 둘러보기 임시 계정 생성 + 세션 발급
-- `GET /api/auth/me?userId=` — 현재 로그인 유저 정보
+- `GET /api/auth/me` — 현재 로그인 유저 정보
 - `POST /api/auth/logout` — 로그아웃
-- `DELETE /api/auth/withdraw?userId=` — 회원 탈퇴
+- `DELETE /api/auth/withdraw` — 회원 탈퇴
 
 **게시글**
 - `GET /api/posts?page=0&size=20` — 게시글 목록 (최신순, 페이지네이션)
 - `GET /api/posts/{id}` — 게시글 상세
-- `POST /api/posts?userId=` — 게시글 작성
-- `PATCH /api/posts/{id}?userId=` — 게시글 수정
-- `DELETE /api/posts/{id}?userId=` — 게시글 삭제 (soft delete)
+- `POST /api/posts` — 게시글 작성
+- `PATCH /api/posts/{id}` — 게시글 수정
+- `DELETE /api/posts/{id}` — 게시글 삭제 (soft delete)
 - `GET /api/posts/popular` — 오늘의 멍냥 (인기 게시글, 1시간 캐싱)
 - `GET /api/posts/search?q={keyword}&page=0&size=20` — 검색
 
 **댓글**
 - `GET /api/posts/{postId}/comments?page=0&size=20` — 댓글 목록
-- `POST /api/posts/{postId}/comments?userId=` — 댓글 작성
-- `PATCH /api/comments/{id}?userId=` — 댓글 수정
-- `DELETE /api/comments/{id}?userId=` — 댓글 삭제
+- `POST /api/posts/{postId}/comments` — 댓글 작성
+- `PATCH /api/comments/{id}` — 댓글 수정
+- `DELETE /api/comments/{id}` — 댓글 삭제
 
 **좋아요**
-- `POST /api/posts/{postId}/like?userId=` — 좋아요 토글 (true: 추가, false: 취소)
+- `POST /api/posts/{postId}/like` — 좋아요 토글 (true: 추가, false: 취소)
 
 **팔로우**
-- `POST /api/users/{nickname}/follow?userId=` — 팔로우 토글
+- `POST /api/users/{nickname}/follow` — 팔로우 토글
 - `GET /api/users/{nickname}/followers?page=0&size=20` — 팔로워 목록
 - `GET /api/users/{nickname}/following?page=0&size=20` — 팔로잉 목록
 
 **유저**
 - `GET /api/users/{nickname}` — 프로필 조회
-- `PATCH /api/users/me?userId=` — 프로필 수정
+- `PATCH /api/users/me` — 프로필 수정
 - `GET /api/users/{nickname}/posts?page=0&size=20` — 유저 게시글 목록
 
 **이미지**
-- `POST /api/images/presigned-url?userId=` — S3 Presigned URL 발급
+- `POST /api/images/presigned-url` — S3 Presigned URL 발급
 
 ### API 응답 형식 (성공/에러 동일)
 
@@ -165,7 +174,7 @@ src/
 
 ## 주의사항
 
-- 인증은 현재 userId를 RequestParam으로 전달 (추후 세션 기반으로 전환)
+- 인증은 **세션 기반** (HttpOnly 쿠키). API 호출은 모두 `credentials: 'include'`로 쿠키 자동 전송. 기존 `?userId=` RequestParam 방식은 폐기됨.
 - 탈퇴한 유저의 게시글/댓글은 "탈퇴한 사용자"로 표시됨
 - 프로필 기본 이미지는 프론트에서 처리 (profileImageUrl이 null이면 기본 이미지)
 - S3 이미지 URL 형식: https://jipsamoye-bucket.s3.ap-northeast-2.amazonaws.com/{path}
