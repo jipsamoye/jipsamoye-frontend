@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import ClientLayout from "@/components/layout/ClientLayout";
+import { resourceHints } from "./resource-hints";
 
 export const viewport: Viewport = {
   width: 'device-width',
@@ -24,6 +25,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ko" className="h-full" suppressHydrationWarning>
+      <head>
+        {resourceHints.map((hint) => (
+          <link key={hint.href} rel={hint.rel} href={hint.href} crossOrigin={hint.crossOrigin} />
+        ))}
+      </head>
       <body className="min-h-full">
         <ClientLayout>{children}</ClientLayout>
       </body>
