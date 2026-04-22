@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 import { api, setUnauthorizedHandler } from '@/lib/api';
+import { hasSessionHint, clearSessionHint } from '@/lib/auth';
 import { User } from '@/types/api';
 
 interface AuthContextType {
@@ -20,11 +21,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    setUnauthorizedHandler(() => setUser(null));
+    setUnauthorizedHandler(() => {
+      clearSessionHint();
+      setUser(null);
+    });
+
+    if (!hasSessionHint()) {
+      // 힌트 쿠키 없음 → 비로그인 확정. 마운트 직후 1회 실행이라 cascade 없음.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setLoading(false);
+      return;
+    }
 
     api.get<User>('/api/auth/me', { silent: true })
       .then((res) => setUser(res.data))
-      .catch(() => setUser(null))
+      .catch(() => {
+        clearSessionHint();
+        setUser(null);
+      })
       .finally(() => setLoading(false));
   }, []);
 
