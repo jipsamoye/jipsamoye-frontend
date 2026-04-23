@@ -6,6 +6,7 @@ import { api } from '@/lib/api';
 import { PetPost, PetPostListItem, PageResponse } from '@/types/api';
 import { useAuthContext } from '@/components/providers/AuthProvider';
 import Avatar from '@/components/common/Avatar';
+import DetailImage from '@/components/common/DetailImage';
 import Modal from '@/components/common/Modal';
 import PostCard from '@/components/domain/PostCard';
 import CommentSection from '@/components/domain/CommentSection';
@@ -156,7 +157,13 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
       {/* 이미지 (세로 나열) */}
       <div className="flex flex-col gap-2 mb-6">
         {post.imageUrls.map((url, i) => (
-          <img key={i} src={url} alt={`${post.title} ${i + 1}`} loading="lazy" decoding="async" className="w-full rounded-2xl object-cover" />
+          <DetailImage
+            key={i}
+            src={url}
+            alt={`${post.title} ${i + 1}`}
+            loading={i === 0 ? 'eager' : 'lazy'}
+            className="w-full rounded-2xl object-cover"
+          />
         ))}
       </div>
 

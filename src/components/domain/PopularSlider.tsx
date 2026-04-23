@@ -3,18 +3,19 @@
 import { useRef, useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { HeartIcon } from '@/components/layout/icons';
+import Thumbnail from '@/components/common/Thumbnail';
 
 function FadeImage({ src, alt, eager }: { src: string; alt: string; eager?: boolean }) {
   const [loaded, setLoaded] = useState(false);
   return (
     <>
       {!loaded && <div className="absolute inset-0 bg-gray-200 animate-pulse" />}
-      <img
+      <Thumbnail
         src={src}
         alt={alt}
+        sizes="(max-width: 768px) 50vw, 199px"
         loading={eager ? 'eager' : 'lazy'}
-        fetchPriority={eager ? 'high' : undefined}
-        decoding="async"
+        fetchPriority={eager ? 'high' : 'auto'}
         onLoad={() => setLoaded(true)}
         className={`w-full h-full object-cover transition-opacity duration-500 ${loaded ? 'opacity-100' : 'opacity-0'}`}
       />
