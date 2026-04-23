@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
-import { compressImage } from '@/lib/imageCompress';
+import { compressImage, extFromMimeType } from '@/lib/imageCompress';
 
 // 지정한 mime + size(byte) + 이름을 가진 File 생성. 실제 픽셀 데이터는 필요 없음.
 function makeFile(type: string, size: number, name: string): File {
@@ -70,6 +70,42 @@ describe('compressImage — Fast Path (early return)', () => {
     stubBitmap(1920, 640);
     const file = makeFile('image/jpeg', 500 * 1024, 'cover.jpg');
     const result = await compressImage(file, 'cover');
+    expect(result).toBe(file);
+  });
+});
+
+describe('extFromMimeType', () => {
+  it('image/jpeg → "jpg"', () => {
+    expect(extFromMimeType('image/jpeg')).toBe('jpg');
+  });
+
+  it('image/png → "png"', () => {
+    expect(extFromMimeType('image/png')).toBe('png');
+  });
+
+  it('image/webp → "webp"', () => {
+    expect(extFromMimeType('image/webp')).toBe('webp');
+  });
+
+  it('알 수 없는/빈 타입 → "webp" (fallback)', () => {
+    expect(extFromMimeType('image/heic')).toBe('webp');
+    expect(extFromMimeType('')).toBe('webp');
+    expect(extFromMimeType('application/octet-stream')).toBe('webp');
+  });
+});
+
+describe('compressImage — probe 실패 시 복원력', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it('createImageBitmap이 reject 해도 원본 파일 반환 (backward compat)', async () => {
+    vi.stubGlobal('createImageBitmap', vi.fn(async () => {
+      throw new Error('corrupt image data');
+    }));
+    const file = makeFile('image/jpeg', 300 * 1024, 'broken.jpg');
+    const result = await compressImage(file, 'post');
+    // 과거 WebP-only early-return 동작과 호환 — 손상 파일도 원본 그대로 업로드 시도
     expect(result).toBe(file);
   });
 });

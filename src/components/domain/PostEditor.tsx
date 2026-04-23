@@ -10,7 +10,7 @@ import { useFormGuard } from '@/hooks/useFormGuard';
 import Button from '@/components/common/Button';
 import { showToast } from '@/components/common/Toast';
 import { POST_CONFIG, ALLOWED_IMAGE_EXTS } from '@/lib/constants';
-import { compressImage } from '@/lib/imageCompress';
+import { compressImage, extFromMimeType } from '@/lib/imageCompress';
 
 const { TITLE_MAX, CONTENT_MAX, MAX_IMAGES, MAX_IMAGE_SIZE } = POST_CONFIG;
 
@@ -107,17 +107,17 @@ export default function PostEditor({
     if (!user) return;
 
     try {
-      const [compressed, res] = await Promise.all([
-        compressImage(file, 'post'),
-        api.post<PresignedUrlResponse>(`/api/images/presigned-url`, {
-          dirName: 'posts',
-          ext: 'webp',
-        }),
-      ]);
+      // 압축 결과가 fast path로 원본(JPEG/PNG)일 수 있어, ext/Content-Type을
+      // 실제 타입에 맞춰야 S3 메타와 바이트가 일치. 따라서 직렬 호출 필요.
+      const compressed = await compressImage(file, 'post');
+      const res = await api.post<PresignedUrlResponse>(`/api/images/presigned-url`, {
+        dirName: 'posts',
+        ext: extFromMimeType(compressed.type),
+      });
 
       await fetch(res.data.presignedUrl, {
         method: 'PUT',
-        headers: { 'Content-Type': 'image/webp' },
+        headers: { 'Content-Type': compressed.type },
         body: compressed,
       });
 

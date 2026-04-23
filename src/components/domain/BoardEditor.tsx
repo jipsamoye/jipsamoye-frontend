@@ -9,7 +9,7 @@ import { Color } from '@tiptap/extension-color';
 import { Highlight } from '@tiptap/extension-highlight';
 import { api } from '@/lib/api';
 import { PresignedUrlResponse } from '@/types/api';
-import { compressImage } from '@/lib/imageCompress';
+import { compressImage, extFromMimeType } from '@/lib/imageCompress';
 import { showToast } from '@/components/common/Toast';
 
 interface BoardEditorProps {
@@ -175,16 +175,15 @@ export default function BoardEditor({ value, onChange, placeholder = '내용을 
 
   const handleImageUpload = async (file: File) => {
     try {
-      const [compressed, res] = await Promise.all([
-        compressImage(file, 'post'),
-        api.post<PresignedUrlResponse>('/api/images/presigned-url', {
-          dirName: 'boards',
-          ext: 'webp',
-        }),
-      ]);
+      // fast path에서 원본이 그대로 반환될 수 있어 직렬 처리 필요 (S3 메타/바이트 정합성).
+      const compressed = await compressImage(file, 'post');
+      const res = await api.post<PresignedUrlResponse>('/api/images/presigned-url', {
+        dirName: 'boards',
+        ext: extFromMimeType(compressed.type),
+      });
       await fetch(res.data.presignedUrl, {
         method: 'PUT',
-        headers: { 'Content-Type': 'image/webp' },
+        headers: { 'Content-Type': compressed.type },
         body: compressed,
       });
       editor?.chain().focus().setImage({ src: res.data.imageUrl }).run();
