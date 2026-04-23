@@ -8,14 +8,15 @@ interface PresetConfig {
 }
 
 const PRESETS: Record<ImagePreset, PresetConfig> = {
-  post:    { maxWidth: 2048, maxSizeBytes: 1024 * 1024, minQuality: 0.80 },
-  profile: { maxWidth: 400,  maxSizeBytes: 60 * 1024,   minQuality: 0.45 },
-  cover:   { maxWidth: 1200, maxHeight: 400, maxSizeBytes: 150 * 1024, minQuality: 0.3 },
+  post:    { maxWidth: 1600, maxSizeBytes: 2 * 1024 * 1024, minQuality: 0.90 },
+  profile: { maxWidth: 800,  maxSizeBytes: 500 * 1024,      minQuality: 0.85 },
+  cover:   { maxWidth: 1920, maxHeight: 640, maxSizeBytes: 1 * 1024 * 1024, minQuality: 0.85 },
 };
 
+const WEB_SAFE_TYPES = new Set(['image/jpeg', 'image/webp', 'image/png']);
 const MIN_DIMENSION = 360;
 const DOWNSCALE_STEP = 0.8;
-const QUALITY_START = 0.85;
+const QUALITY_START = 0.95;
 
 /**
  * 목표 용량에 수렴할 때까지 quality 조정 → 해상도 축소 순으로 시도.
@@ -23,7 +24,7 @@ const QUALITY_START = 0.85;
  * 최적화 3단 구조:
  *  1. 첫 인코딩으로 용량 측정
  *  2. 초과 시 "스마트 예측"으로 목표 quality 한 번에 계산 → 1회 재인코딩
- *  3. 그래도 초과 시 해상도 축소 (minQuality ≥ 0.70 환경에선 거의 발생 안 함)
+ *  3. 그래도 초과 시 해상도 축소 (minQuality ≥ 0.85 환경에선 거의 발생 안 함)
  *
  * Canvas의 `imageSmoothingQuality: 'high'` 로 리샘플링 품질 강제 —
  * 기본값 'low'는 bilinear 저품질이라 털 같은 고주파 디테일에서 aliasing 발생.
@@ -31,9 +32,14 @@ const QUALITY_START = 0.85;
 export async function compressImage(file: File, preset: ImagePreset): Promise<File> {
   const cfg = PRESETS[preset];
 
-  // 이미 WebP + 충분히 작으면 스킵
-  if (file.type === 'image/webp' && file.size <= cfg.maxSizeBytes) {
-    return file;
+  // Fast path: web-safe 포맷(JPEG/WebP/PNG) + 용량/해상도 모두 적정 → 원본 그대로 통과.
+  // 재인코딩 단계를 생략해 double-lossy 누적을 막는다 (fur noodle artifact 원천 방지).
+  if (WEB_SAFE_TYPES.has(file.type) && file.size <= cfg.maxSizeBytes) {
+    const probe = await createImageBitmap(file);
+    const fits = probe.width <= cfg.maxWidth &&
+                 (!cfg.maxHeight || probe.height <= cfg.maxHeight);
+    probe.close();
+    if (fits) return file;
   }
 
   const bitmap = await createImageBitmap(file);
@@ -61,14 +67,14 @@ export async function compressImage(file: File, preset: ImagePreset): Promise<Fi
     blob = await renderBlob(bitmap, width, height, quality);
   }
 
-  // Fallback: 여전히 초과면 해상도 축소 (minQuality 0.80 환경에선 거의 발생 안 함)
+  // Fallback: 여전히 초과면 해상도 축소 (minQuality 0.85 환경에선 거의 발생 안 함)
   while (blob.size > cfg.maxSizeBytes) {
     const nextWidth = Math.round(width * DOWNSCALE_STEP);
     const nextHeight = Math.round(height * DOWNSCALE_STEP);
     if (nextWidth < MIN_DIMENSION) break;
     width = nextWidth;
     height = nextHeight;
-    quality = Math.max(cfg.minQuality, 0.75);
+    quality = Math.max(cfg.minQuality, 0.85);
     blob = await renderBlob(bitmap, width, height, quality);
   }
 
