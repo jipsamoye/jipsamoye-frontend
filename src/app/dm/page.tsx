@@ -5,6 +5,7 @@ import { useAuthContext } from '@/components/providers/AuthProvider';
 import { api } from '@/lib/api';
 import { wsService } from '@/lib/websocket';
 import Avatar from '@/components/common/Avatar';
+import Thumbnail from '@/components/common/Thumbnail';
 import Modal from '@/components/common/Modal';
 import { timeAgo } from '@/lib/utils';
 import type { DmRoom, DmMessage, FollowUser, PageResponse } from '@/types/api';
@@ -306,7 +307,7 @@ export default function DmPage() {
                       </div>
                       <div className="max-w-[75%] px-3.5 py-2.5 rounded-2xl rounded-br-md bg-amber-500 text-white text-sm break-words whitespace-pre-wrap">
                         {msg.imageUrl && (
-                          <img src={msg.imageUrl} alt="첨부 이미지" loading="lazy" decoding="async" className="max-w-full rounded-lg mb-1" />
+                          <Thumbnail src={msg.imageUrl} alt="첨부 이미지" sizes="(max-width: 640px) 75vw, 400px" className="max-w-full rounded-lg mb-1" />
                         )}
                         {msg.content}
                       </div>
@@ -322,7 +323,7 @@ export default function DmPage() {
                       <div className="flex items-end gap-1.5">
                         <div className="inline-block max-w-[85%] px-3.5 py-2.5 rounded-2xl rounded-bl-md bg-gray-100 text-gray-900 text-sm break-words whitespace-pre-wrap">
                           {msg.imageUrl && (
-                            <img src={msg.imageUrl} alt="첨부 이미지" loading="lazy" decoding="async" className="max-w-full rounded-lg mb-1" />
+                            <Thumbnail src={msg.imageUrl} alt="첨부 이미지" sizes="(max-width: 640px) 85vw, 400px" className="max-w-full rounded-lg mb-1" />
                           )}
                           {msg.content}
                         </div>

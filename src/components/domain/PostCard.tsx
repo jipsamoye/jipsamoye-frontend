@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { PetPostListItem } from '@/types/api';
 import { HeartIcon, EyeIcon } from '@/components/layout/icons';
+import Thumbnail from '@/components/common/Thumbnail';
 
 interface PostCardProps {
   post: PetPostListItem;
@@ -20,12 +21,12 @@ export default function PostCard({ post, index = 99 }: PostCardProps) {
           {post.thumbnailUrl ? (
             <>
               {!loaded && <div className="absolute inset-0 bg-gray-200 animate-pulse" />}
-              <img
+              <Thumbnail
                 src={post.thumbnailUrl}
                 alt={post.title}
+                sizes="(max-width: 768px) 50vw, 253px"
                 loading={index < 8 ? 'eager' : 'lazy'}
-                fetchPriority={index < 4 ? 'high' : undefined}
-                decoding="async"
+                fetchPriority={index < 4 ? 'high' : 'auto'}
                 onLoad={() => setLoaded(true)}
                 className={`w-full h-full object-cover transition-opacity duration-500 ${loaded ? 'opacity-100' : 'opacity-0'}`}
               />
