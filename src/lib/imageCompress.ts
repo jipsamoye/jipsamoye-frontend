@@ -16,7 +16,7 @@ const PRESETS: Record<ImagePreset, PresetConfig> = {
 const WEB_SAFE_TYPES = new Set(['image/jpeg', 'image/webp', 'image/png']);
 const MIN_DIMENSION = 360;
 const DOWNSCALE_STEP = 0.8;
-const QUALITY_START = 0.90;
+const QUALITY_START = 0.92;
 
 /**
  * MIME → S3 object 확장자. `compressImage` 가 fast path에서 원본(JPEG/PNG)을
