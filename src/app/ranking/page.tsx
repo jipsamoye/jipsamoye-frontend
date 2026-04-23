@@ -5,6 +5,7 @@ import { api } from '@/lib/api';
 import { PetPostListItem } from '@/types/api';
 import { dummyPopularPosts } from '@/lib/dummyData';
 import PostCard from '@/components/domain/PostCard';
+import { PostCardSkeleton } from '@/components/common/Skeleton';
 
 export default function RankingPage() {
   const [tab, setTab] = useState<'weekly' | 'monthly'>('weekly');
@@ -48,7 +49,11 @@ export default function RankingPage() {
       </div>
 
       {loading ? (
-        <div className="flex justify-center py-20 text-gray-400">불러오는 중...</div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <PostCardSkeleton key={i} />
+          ))}
+        </div>
       ) : posts.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {posts.map((post) => (
