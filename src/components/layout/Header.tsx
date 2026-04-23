@@ -2,11 +2,12 @@
 
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { MagnifyingGlassIcon, BellIcon } from './icons';
 import Avatar from '@/components/common/Avatar';
 import { useNavigationGuard } from '@/components/providers/NavigationGuard';
 import { useNotification } from '@/components/providers/NotificationProvider';
+import { useHomeRefresh } from '@/components/providers/HomeRefreshProvider';
 import { timeAgo } from '@/lib/utils';
 import type { Notification } from '@/types/api';
 
@@ -21,8 +22,19 @@ interface HeaderProps {
 
 export default function Header({ isLoggedIn = false, onLoginClick, onLogout, onMobileMenuClick, nickname, profileImageUrl }: HeaderProps) {
   const { guardedPush } = useNavigationGuard();
+  const { refreshHome } = useHomeRefresh();
   const router = useRouter();
+  const pathname = usePathname();
   const [showDropdown, setShowDropdown] = useState(false);
+
+  const handleLogoClick = () => {
+    if (pathname === '/') {
+      refreshHome();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+      guardedPush('/');
+    }
+  };
   const [showNotification, setShowNotification] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const notificationRef = useRef<HTMLDivElement>(null);
@@ -57,7 +69,7 @@ export default function Header({ isLoggedIn = false, onLoginClick, onLogout, onM
   return (
     <header className="fixed top-0 left-0 right-0 z-50 h-16 bg-white border-b border-gray-100">
       <div className="flex items-center justify-between h-full px-4 lg:px-6">
-        <button onClick={() => guardedPush('/')} className="text-2xl font-bold text-gray-900 lg:pl-4">
+        <button onClick={handleLogoClick} className="text-2xl font-bold text-gray-900 lg:pl-4">
           집사모여
         </button>
 
