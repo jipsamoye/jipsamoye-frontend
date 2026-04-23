@@ -16,11 +16,17 @@ const PRESETS: Record<ImagePreset, PresetConfig> = {
 const MIN_DIMENSION = 360;
 const DOWNSCALE_STEP = 0.8;
 const QUALITY_START = 0.85;
-const QUALITY_DECREMENT = 0.15;
 
 /**
- * 목표 용량에 수렴할 때까지 quality 감소 → 해상도 축소 → 반복
- * 고해상도 원본이어도 반드시 maxSizeBytes 이하(or 거의)로 떨어짐
+ * 목표 용량에 수렴할 때까지 quality 조정 → 해상도 축소 순으로 시도.
+ *
+ * 최적화 3단 구조:
+ *  1. 첫 인코딩으로 용량 측정
+ *  2. 초과 시 "스마트 예측"으로 목표 quality 한 번에 계산 → 1회 재인코딩
+ *  3. 그래도 초과 시 해상도 축소 (minQuality ≥ 0.70 환경에선 거의 발생 안 함)
+ *
+ * Canvas의 `imageSmoothingQuality: 'high'` 로 리샘플링 품질 강제 —
+ * 기본값 'low'는 bilinear 저품질이라 털 같은 고주파 디테일에서 aliasing 발생.
  */
 export async function compressImage(file: File, preset: ImagePreset): Promise<File> {
   const cfg = PRESETS[preset];
@@ -44,22 +50,25 @@ export async function compressImage(file: File, preset: ImagePreset): Promise<Fi
 
   let blob: Blob = await renderBlob(bitmap, width, height, quality);
 
-  // 목표 용량까지 수렴
-  while (blob.size > cfg.maxSizeBytes) {
-    // 1순위: quality 낮춰보기
-    if (quality - QUALITY_DECREMENT >= cfg.minQuality) {
-      quality -= QUALITY_DECREMENT;
-      blob = await renderBlob(bitmap, width, height, quality);
-      continue;
-    }
+  // 스마트 quality 예측 — 여러 번 깎지 않고 한 번에 목표 근처로 수렴
+  // 파일 크기는 quality에 대해 대략 log 관계라 log2(ratio) × 0.15 만큼 깎음
+  if (blob.size > cfg.maxSizeBytes) {
+    const ratio = blob.size / cfg.maxSizeBytes;
+    quality = Math.max(
+      cfg.minQuality,
+      QUALITY_START - Math.log2(ratio) * 0.15,
+    );
+    blob = await renderBlob(bitmap, width, height, quality);
+  }
 
-    // 2순위: 해상도 축소 후 quality 리셋
+  // Fallback: 여전히 초과면 해상도 축소 (minQuality 0.80 환경에선 거의 발생 안 함)
+  while (blob.size > cfg.maxSizeBytes) {
     const nextWidth = Math.round(width * DOWNSCALE_STEP);
     const nextHeight = Math.round(height * DOWNSCALE_STEP);
-    if (nextWidth < MIN_DIMENSION) break; // 너무 작아지면 중단
+    if (nextWidth < MIN_DIMENSION) break;
     width = nextWidth;
     height = nextHeight;
-    quality = Math.max(cfg.minQuality, 0.7);
+    quality = Math.max(cfg.minQuality, 0.75);
     blob = await renderBlob(bitmap, width, height, quality);
   }
 
@@ -78,6 +87,8 @@ async function renderBlob(
 ): Promise<Blob> {
   const canvas = new OffscreenCanvas(width, height);
   const ctx = canvas.getContext('2d')!;
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = 'high';
   ctx.drawImage(bitmap, 0, 0, width, height);
   return canvas.convertToBlob({ type: 'image/webp', quality });
 }
