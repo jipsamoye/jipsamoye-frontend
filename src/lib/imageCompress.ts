@@ -8,7 +8,7 @@ interface PresetConfig {
 }
 
 const PRESETS: Record<ImagePreset, PresetConfig> = {
-  post:    { maxWidth: 1600, maxSizeBytes: 2 * 1024 * 1024, minQuality: 0.90 },
+  post:    { maxWidth: 1200, maxSizeBytes: 2 * 1024 * 1024, minQuality: 0.90 },
   profile: { maxWidth: 800,  maxSizeBytes: 500 * 1024,      minQuality: 0.85 },
   cover:   { maxWidth: 1920, maxHeight: 640, maxSizeBytes: 1 * 1024 * 1024, minQuality: 0.85 },
 };

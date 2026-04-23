@@ -42,8 +42,8 @@ describe('compressImage — Fast Path (early return)', () => {
     vi.unstubAllGlobals();
   });
 
-  it('JPEG 300KB 1400×1050 post 프리셋 → 원본 그대로 반환', async () => {
-    stubBitmap(1400, 1050);
+  it('JPEG 300KB 1100×825 post 프리셋 → 원본 그대로 반환', async () => {
+    stubBitmap(1100, 825);
     const file = makeFile('image/jpeg', 300 * 1024, 'dog.jpg');
     const result = await compressImage(file, 'post');
     expect(result).toBe(file);
@@ -126,7 +126,7 @@ describe('compressImage — Fallback 경로 (재인코딩)', () => {
   });
 
   it('용량 초과 (3MB JPEG) post 프리셋 → fallback 진입 + WebP 변환', async () => {
-    stubBitmap(1400, 1050); // 해상도는 OK 지만 용량 초과
+    stubBitmap(1100, 825); // 해상도는 OK 지만 용량 초과
     stubOffscreenCanvas(500 * 1024);
     const file = makeFile('image/jpeg', 3 * 1024 * 1024, 'big.jpg');
     const result = await compressImage(file, 'post');
