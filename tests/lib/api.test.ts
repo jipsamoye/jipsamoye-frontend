@@ -40,6 +40,28 @@ describe('api request wrapper', () => {
     expect(options.credentials).toBe('include');
   });
 
+  it('상대 경로로 fetch를 호출한다 (next.config rewrite로 같은 출처 처리)', async () => {
+    const fetchMock = mockFetchOnce({ status: 200, code: 'SUCCESS', message: '', data: null });
+    global.fetch = fetchMock as unknown as typeof fetch;
+
+    await api.get('/api/posts');
+
+    const url = fetchMock.mock.calls[0][0] as string;
+    expect(url).toBe('/api/posts');
+    expect(url).not.toMatch(/^https?:\/\//);
+  });
+
+  it('POST 요청도 절대 URL 없이 상대 경로로 호출한다', async () => {
+    const fetchMock = mockFetchOnce({ status: 201, code: 'CREATED', message: '', data: null });
+    global.fetch = fetchMock as unknown as typeof fetch;
+
+    await api.post('/api/posts/1/like');
+
+    const url = fetchMock.mock.calls[0][0] as string;
+    expect(url).toBe('/api/posts/1/like');
+    expect(url).not.toMatch(/^https?:\/\//);
+  });
+
   it('POST/PATCH는 body를 JSON 문자열로 직렬화한다', async () => {
     const fetchMock = mockFetchOnce({ status: 201, code: 'CREATED', message: '', data: null });
     global.fetch = fetchMock as unknown as typeof fetch;
