@@ -16,7 +16,7 @@ const PRESETS: Record<ImagePreset, PresetConfig> = {
 const WEB_SAFE_TYPES = new Set(['image/jpeg', 'image/webp', 'image/png']);
 const MIN_DIMENSION = 360;
 const DOWNSCALE_STEP = 0.8;
-const QUALITY_START = 0.95;
+const QUALITY_START = 0.90;
 
 /**
  * 목표 용량에 수렴할 때까지 quality 조정 → 해상도 축소 순으로 시도.
