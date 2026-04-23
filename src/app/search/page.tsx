@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { api } from '@/lib/api';
 import { PetPostListItem, PageResponse } from '@/types/api';
 import PostCard from '@/components/domain/PostCard';
+import { PostCardSkeleton } from '@/components/common/Skeleton';
 import { MagnifyingGlassIcon } from '@/components/layout/icons';
 
 export default function SearchPage() {
@@ -48,7 +49,11 @@ export default function SearchPage() {
 
       {/* 검색 결과 */}
       {loading ? (
-        <div className="flex justify-center py-20 text-gray-400">검색 중...</div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <PostCardSkeleton key={i} />
+          ))}
+        </div>
       ) : searched && posts.length === 0 ? (
         <div className="text-center py-20 text-gray-400">
           <p className="text-4xl mb-4">🔍</p>

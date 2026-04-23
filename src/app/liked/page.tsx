@@ -6,6 +6,7 @@ import { api } from '@/lib/api';
 import { PetPostListItem, PageResponse } from '@/types/api';
 import { useAuthContext } from '@/components/providers/AuthProvider';
 import PostCard from '@/components/domain/PostCard';
+import { PostCardSkeleton } from '@/components/common/Skeleton';
 
 export default function LikedPostsPage() {
   const router = useRouter();
@@ -23,9 +24,7 @@ export default function LikedPostsPage() {
       .finally(() => setLoading(false));
   }, [user, authLoading, router]);
 
-  if (authLoading || loading) {
-    return <div className="flex justify-center py-20 text-gray-400">불러오는 중...</div>;
-  }
+  const isLoading = authLoading || loading;
 
   return (
     <div>
@@ -39,7 +38,13 @@ export default function LikedPostsPage() {
       </div>
 
       {/* 게시글 목록 */}
-      {posts.length > 0 ? (
+      {isLoading ? (
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <PostCardSkeleton key={i} />
+          ))}
+        </div>
+      ) : posts.length > 0 ? (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {posts.map((post) => (
             <PostCard key={post.id} post={post} />
