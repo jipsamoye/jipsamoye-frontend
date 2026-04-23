@@ -19,6 +19,20 @@ const DOWNSCALE_STEP = 0.8;
 const QUALITY_START = 0.90;
 
 /**
+ * MIME → S3 object 확장자. `compressImage` 가 fast path에서 원본(JPEG/PNG)을
+ * 그대로 돌려줄 수 있어, 호출부가 presigned URL 요청 시 실제 타입에 맞춰 ext를
+ * 동적으로 전달해야 한다. 메타/바이트 불일치를 방지.
+ */
+export function extFromMimeType(type: string): string {
+  switch (type) {
+    case 'image/jpeg': return 'jpg';
+    case 'image/png':  return 'png';
+    case 'image/webp': return 'webp';
+    default:           return 'webp';
+  }
+}
+
+/**
  * 목표 용량에 수렴할 때까지 quality 조정 → 해상도 축소 순으로 시도.
  *
  * 최적화 3단 구조:
@@ -35,11 +49,20 @@ export async function compressImage(file: File, preset: ImagePreset): Promise<Fi
   // Fast path: web-safe 포맷(JPEG/WebP/PNG) + 용량/해상도 모두 적정 → 원본 그대로 통과.
   // 재인코딩 단계를 생략해 double-lossy 누적을 막는다 (fur noodle artifact 원천 방지).
   if (WEB_SAFE_TYPES.has(file.type) && file.size <= cfg.maxSizeBytes) {
-    const probe = await createImageBitmap(file);
-    const fits = probe.width <= cfg.maxWidth &&
-                 (!cfg.maxHeight || probe.height <= cfg.maxHeight);
-    probe.close();
-    if (fits) return file;
+    let probe: ImageBitmap | null = null;
+    try {
+      probe = await createImageBitmap(file);
+      const fits = probe.width <= cfg.maxWidth &&
+                   (!cfg.maxHeight || probe.height <= cfg.maxHeight);
+      if (fits) return file;
+    } catch {
+      // probe 디코드 실패 — 드물게 손상/스푸핑 파일. 과거(WebP-only early-return)
+      // 동작과 호환되게 원본을 그대로 돌려준다. Fallback 경로도 동일하게 실패하므로
+      // 에러 전파보다 원본 통과가 덜 파괴적.
+      return file;
+    } finally {
+      probe?.close();
+    }
   }
 
   const bitmap = await createImageBitmap(file);

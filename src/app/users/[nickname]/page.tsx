@@ -11,7 +11,7 @@ import PostCard from '@/components/domain/PostCard';
 import CoverImageEditor from '@/components/domain/CoverImageEditor';
 import ProfileEditModal from '@/components/domain/ProfileEditModal';
 import { ALLOWED_IMAGE_EXTS, POST_CONFIG } from '@/lib/constants';
-import { compressImage } from '@/lib/imageCompress';
+import { compressImage, extFromMimeType } from '@/lib/imageCompress';
 
 export default function ProfilePage({ params }: { params: Promise<{ nickname: string }> }) {
   const { nickname } = use(params);
@@ -89,10 +89,13 @@ export default function ProfilePage({ params }: { params: Promise<{ nickname: st
 
     try {
       const compressed = await compressImage(file, preset);
-      const res = await api.post<PresignedUrlResponse>(`/api/images/presigned-url`, { dirName, ext: 'webp' });
+      const res = await api.post<PresignedUrlResponse>(`/api/images/presigned-url`, {
+        dirName,
+        ext: extFromMimeType(compressed.type),
+      });
       await fetch(res.data.presignedUrl, {
         method: 'PUT',
-        headers: { 'Content-Type': 'image/webp' },
+        headers: { 'Content-Type': compressed.type },
         body: compressed,
       });
       return res.data.imageUrl;
