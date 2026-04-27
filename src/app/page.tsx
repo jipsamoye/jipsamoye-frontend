@@ -2,18 +2,21 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { api } from '@/lib/api';
-import { PetPostListItem, PageResponse } from '@/types/api';
+import { PetPostListItem, PageResponse, BoardListItem } from '@/types/api';
 import { dummyPopularPosts, dummyLatestPosts } from '@/lib/dummyData';
 import PopularSlider from '@/components/domain/PopularSlider';
 import PostCard from '@/components/domain/PostCard';
 import { PostCardSkeleton, PopularSliderSkeleton } from '@/components/common/Skeleton';
 
 export default function Home() {
+  const router = useRouter();
   const [popularPosts, setPopularPosts] = useState<PetPostListItem[]>([]);
   const [popularLoading, setPopularLoading] = useState(true);
   const [latestPosts, setLatestPosts] = useState<PetPostListItem[]>([]);
   const [initialLatestLoading, setInitialLatestLoading] = useState(true);
+  const [boardPosts, setBoardPosts] = useState<BoardListItem[]>([]);
   const pageRef = useRef(0);
   const [hasNext, setHasNext] = useState(true);
   const [loading, setLoading] = useState(false);
@@ -25,6 +28,10 @@ export default function Home() {
       .then((res) => setPopularPosts(res.data.length > 0 ? res.data : dummyPopularPosts))
       .catch(() => setPopularPosts(dummyPopularPosts))
       .finally(() => setPopularLoading(false));
+
+    api.get<PageResponse<BoardListItem>>('/api/boards?page=0&size=5', { silent: true })
+      .then((res) => setBoardPosts(res.data.content))
+      .catch(() => {});
   }, []);
 
   const loadMore = useCallback(async () => {
@@ -76,7 +83,7 @@ export default function Home() {
 
   return (
     <div className="space-y-10">
-      {/* 배너 — Grimity 스타일 슬림 가로 배너 */}
+      {/* 배너 */}
       <section>
         <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-50 px-5 py-4 md:px-7 md:py-5 shadow-sm border border-amber-100/50">
           <div className="relative z-10">
@@ -94,10 +101,10 @@ export default function Home() {
         </div>
       </section>
 
-      {/* 이주의 멍냥 — 토스 스타일 섹션 헤더 */}
+      {/* 이주의 자랑 */}
       <section>
         <div className="flex items-center justify-between mb-5">
-          <h2 className="text-xl font-bold text-gray-900">이주의 자랑</h2>
+          <h2 className="text-2xl font-bold text-gray-900">이주의 자랑</h2>
           <Link href="/ranking" className="text-sm text-gray-400 hover:text-gray-600 transition-colors">
             더보기
           </Link>
@@ -114,56 +121,61 @@ export default function Home() {
         )}
       </section>
 
-      {/* 자유게시판 + 공지사항 — 토스 스타일 카드 분할 */}
+      {/* 자유게시판 최신 글 + 공지사항 */}
       <section>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
           {/* 자유게시판 최신 글 */}
           <div className="bg-white rounded-2xl border border-gray-100 p-5">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="font-bold text-gray-900">자유게시판 최신 글</h3>
-              <Link href="/board" className="text-xs text-gray-400 hover:text-gray-600 transition-colors">
+              <h3 className="text-xl font-bold text-gray-900">자유게시판 최신 글</h3>
+              <Link href="/board" className="text-sm text-gray-400 hover:text-gray-600 transition-colors">
                 더보기
               </Link>
             </div>
             <div className="space-y-3">
-              <div className="flex items-center justify-between gap-3 text-sm text-gray-500">
-                <span className="truncate">혹시 이런 글찍어 보신 분 계시나요?</span>
-                <span className="text-xs text-gray-300 flex-shrink-0">2분 전</span>
-              </div>
-              <div className="flex items-center justify-between gap-3 text-sm text-gray-500">
-                <span className="truncate">강아지 사료 추천 부탁드려요!</span>
-                <span className="text-xs text-gray-300 flex-shrink-0">15분 전</span>
-              </div>
-              <div className="flex items-center justify-between gap-3 text-sm text-gray-500">
-                <span className="truncate">고양이 장난감 뭐가 좋을까요</span>
-                <span className="text-xs text-gray-300 flex-shrink-0">1시간 전</span>
-              </div>
+              {boardPosts.length > 0 ? boardPosts.map((post) => (
+                <button
+                  key={post.id}
+                  type="button"
+                  onClick={() => router.push(`/board/${post.id}`)}
+                  className="w-full flex items-center justify-between gap-3 text-left hover:opacity-70 transition-opacity"
+                >
+                  <span className="text-sm text-gray-700 truncate">{post.title}</span>
+                  <span className="text-xs text-gray-400 flex-shrink-0">
+                    {new Date(post.createdAt).toLocaleDateString('ko-KR', { month: '2-digit', day: '2-digit' })}
+                  </span>
+                </button>
+              )) : (
+                <p className="text-sm text-gray-400">아직 게시글이 없어요</p>
+              )}
             </div>
           </div>
 
           {/* 공지사항 */}
           <div className="bg-white rounded-2xl border border-gray-100 p-5">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="font-bold text-gray-900">공지사항</h3>
+              <h3 className="text-xl font-bold text-gray-900">공지사항</h3>
             </div>
             <div className="space-y-3">
-              <div className="flex items-center justify-between gap-3 text-sm text-gray-500">
-                <span className="truncate">집사모여 서비스 오픈 안내</span>
-                <span className="text-xs text-gray-300 flex-shrink-0">2026.04.14</span>
+              <div className="flex items-center justify-between gap-3">
+                <span className="text-sm text-gray-700 truncate">집사모여 서비스 오픈 안내</span>
+                <span className="text-xs text-gray-400 flex-shrink-0">04. 14.</span>
               </div>
-              <div className="flex items-center justify-between gap-3 text-sm text-gray-500">
-                <span className="truncate">커뮤니티 이용 규칙 안내</span>
-                <span className="text-xs text-gray-300 flex-shrink-0">2026.04.14</span>
+              <div className="flex items-center justify-between gap-3">
+                <span className="text-sm text-gray-700 truncate">커뮤니티 이용 규칙 안내</span>
+                <span className="text-xs text-gray-400 flex-shrink-0">04. 14.</span>
               </div>
             </div>
           </div>
+
         </div>
       </section>
 
-      {/* 최신 게시글 — 토스 스타일 */}
+      {/* 최신 자랑 */}
       <section>
         <div className="flex items-center justify-between mb-5">
-          <h2 className="text-xl font-bold text-gray-900">최신 자랑</h2>
+          <h2 className="text-2xl font-bold text-gray-900">최신 자랑</h2>
         </div>
         {initialLatestLoading ? (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
