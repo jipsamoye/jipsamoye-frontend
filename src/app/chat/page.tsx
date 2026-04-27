@@ -35,7 +35,7 @@ export default function ChatPage() {
   useEffect(() => {
     async function loadMessages() {
       try {
-        const res = await api.get<{ messages: ChatMessage[]; hasMore: boolean }>('/api/chat/messages?size=30');
+        const res = await api.get<{ messages: ChatMessage[]; hasMore: boolean }>('/api/chat/messages?size=30', { silent: true });
         setMessages(res.data?.messages ?? []);
         setHasMore(res.data?.hasMore ?? false);
       } catch {
@@ -57,7 +57,7 @@ export default function ChatPage() {
     const prevScrollHeight = container?.scrollHeight ?? 0;
 
     try {
-      const res = await api.get<{ messages: ChatMessage[]; hasMore: boolean }>(`/api/chat/messages?size=30&beforeId=${oldestId}`);
+      const res = await api.get<{ messages: ChatMessage[]; hasMore: boolean }>(`/api/chat/messages?size=30&beforeId=${oldestId}`, { silent: true });
       const older = res.data?.messages ?? [];
       setHasMore(res.data?.hasMore ?? false);
       if (older.length > 0) {
@@ -174,7 +174,7 @@ export default function ChatPage() {
   return (
     <div className="flex flex-col h-[calc(100vh-8rem)] lg:h-[calc(100vh-4rem)] -mx-4 -my-6 overflow-hidden">
       {/* 헤더 */}
-      <div className="flex items-center px-6 py-4 border-b border-gray-100 flex-shrink-0">
+      <div className="flex items-center px-6 pt-6 pb-4 border-b border-gray-100 flex-shrink-0">
         <h1 className="text-2xl font-bold text-gray-900">오픈채팅</h1>
       </div>
 

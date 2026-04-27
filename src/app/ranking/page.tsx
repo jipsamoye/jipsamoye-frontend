@@ -22,7 +22,7 @@ export default function RankingPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-6">인기 게시글 순위</h1>
+      <h1 className="text-2xl font-bold text-gray-900 mb-6">인기 게시글 순위</h1>
 
       {/* 탭 */}
       <div className="flex gap-2 mb-6">

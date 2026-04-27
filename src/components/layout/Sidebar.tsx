@@ -23,7 +23,7 @@ export default function Sidebar() {
   const { guardedPush } = useNavigationGuard();
 
   return (
-    <aside className="hidden lg:flex flex-col fixed left-0 top-16 w-52 h-[calc(100vh-4rem)] border-r border-gray-100 bg-white p-4">
+    <aside className="hidden lg:flex flex-col fixed left-0 top-16 w-64 h-[calc(100vh-4rem)] border-r border-gray-300 bg-white p-4">
       <nav className="flex flex-col gap-1">
         {navItems.map((item) => {
           const isActive = pathname === item.href;
@@ -37,8 +37,10 @@ export default function Sidebar() {
                   : 'text-gray-600 hover:bg-gray-50/70'
                 }`}
             >
-              <span className="w-6 h-6">{item.icon(isActive)}</span>
-              {item.label}
+              <span className={`inline-flex items-center justify-center w-6 h-6 ${isActive ? 'text-amber-500' : ''}`}>
+                {item.icon(isActive)}
+              </span>
+              <span className="leading-none">{item.label}</span>
             </button>
           );
         })}

@@ -29,8 +29,8 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
       />
       <Sidebar />
       <MobileDrawer isOpen={showMobileMenu} onClose={() => setShowMobileMenu(false)} />
-      <main className="pt-16 lg:pl-52 overflow-x-hidden">
-        <div className="max-w-7xl mx-auto px-4 py-6">
+      <main className="pt-16 lg:pl-64 overflow-x-hidden">
+        <div className="px-4 lg:px-8 pt-4 pb-6">
           <div key={refreshKey}>{children}</div>
         </div>
       </main>

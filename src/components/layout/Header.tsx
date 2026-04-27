@@ -67,8 +67,8 @@ export default function Header({ isLoggedIn = false, onLoginClick, onLogout, onM
   }, []);
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 h-16 bg-white border-b border-gray-100">
-      <div className="flex items-center justify-between h-full px-4 lg:px-6">
+    <header className="fixed top-0 left-0 right-0 z-50 h-16 bg-white border-b border-gray-300">
+      <div className="flex items-center justify-between h-full px-4 lg:pl-6 lg:pr-8">
         <button onClick={handleLogoClick} className="text-2xl font-bold text-gray-900 lg:pl-4">
           집사모여
         </button>
@@ -78,19 +78,19 @@ export default function Header({ isLoggedIn = false, onLoginClick, onLogout, onM
             <>
               <Link
                 href="/posts/new"
-                className="hidden lg:flex items-center px-4 py-2 bg-amber-500 text-white rounded-xl text-sm font-medium hover:bg-amber-600 transition-all duration-200"
+                className="hidden lg:flex items-center px-6 py-2 bg-amber-500 text-white rounded-xl text-base font-medium hover:bg-amber-600 transition-all duration-200"
               >
                 자랑하기
               </Link>
-              <Link href="/search" className="p-2 text-gray-600 hover:text-gray-900">
-                <MagnifyingGlassIcon />
+              <Link href="/search" className="p-2.5 text-gray-800 hover:text-gray-900">
+                <MagnifyingGlassIcon className="w-6 h-6" />
               </Link>
               <div className="relative" ref={notificationRef}>
                 <button
                   onClick={() => setShowNotification(!showNotification)}
-                  className="relative p-2 text-gray-600 hover:text-gray-900"
+                  className="relative p-2.5 text-gray-800 hover:text-gray-900"
                 >
-                  <BellIcon />
+                  <BellIcon className="w-6 h-6" />
                   {unreadCount > 0 && (
                     <span className="absolute top-0.5 right-0.5 flex items-center justify-center min-w-[18px] h-[18px] px-1 text-[10px] font-bold text-white bg-red-500 rounded-full leading-none">
                       {unreadCount > 9 ? '9+' : unreadCount}
@@ -157,7 +157,7 @@ export default function Header({ isLoggedIn = false, onLoginClick, onLogout, onM
               <div className="relative" ref={dropdownRef}>
                 <button
                   onClick={() => setShowDropdown(!showDropdown)}
-                  className="text-gray-600 hover:text-gray-900"
+                  className="pl-2.5 py-2.5 text-gray-800 hover:text-gray-900"
                 >
                   <Avatar src={profileImageUrl ?? null} size="sm" />
                 </button>
@@ -190,12 +190,12 @@ export default function Header({ isLoggedIn = false, onLoginClick, onLogout, onM
             </>
           ) : (
             <>
-              <Link href="/search" className="p-2 text-gray-600 hover:text-gray-900">
-                <MagnifyingGlassIcon />
+              <Link href="/search" className="p-2.5 text-gray-800 hover:text-gray-900">
+                <MagnifyingGlassIcon className="w-6 h-6" />
               </Link>
               <button
                 onClick={onLoginClick}
-                className="px-4 py-2 bg-gray-900 text-white rounded-xl text-sm font-medium hover:bg-gray-800 transition-all duration-200"
+                className="px-6 py-2 bg-amber-500 text-white rounded-xl text-base font-medium hover:bg-amber-600 transition-all duration-200"
               >
                 로그인
               </button>

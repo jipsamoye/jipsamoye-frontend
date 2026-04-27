@@ -167,7 +167,7 @@ export default function DmPage() {
         className={`w-full lg:w-80 lg:flex-shrink-0 border-r border-gray-200 flex flex-col bg-white
           ${mobileView === 'list' ? 'flex' : 'hidden lg:flex'}`}
       >
-        <div className="p-5 pb-3">
+        <div className="pt-6 px-5 pb-3">
           <h2 className="text-2xl font-bold text-gray-900">DM</h2>
         </div>
 

@@ -71,6 +71,7 @@ export default function Home() {
     thumbnailUrl: p.thumbnailUrl,
     likeCount: p.likeCount,
     nickname: p.nickname,
+    profileImageUrl: p.profileImageUrl,
   }));
 
   return (
@@ -96,7 +97,7 @@ export default function Home() {
       {/* 이주의 멍냥 — 토스 스타일 섹션 헤더 */}
       <section>
         <div className="flex items-center justify-between mb-5">
-          <h2 className="text-xl font-bold text-gray-900">이주의 멍냥</h2>
+          <h2 className="text-xl font-bold text-gray-900">이주의 자랑</h2>
           <Link href="/ranking" className="text-sm text-gray-400 hover:text-gray-600 transition-colors">
             더보기
           </Link>
@@ -162,7 +163,7 @@ export default function Home() {
       {/* 최신 게시글 — 토스 스타일 */}
       <section>
         <div className="flex items-center justify-between mb-5">
-          <h2 className="text-xl font-bold text-gray-900">최신 게시글</h2>
+          <h2 className="text-xl font-bold text-gray-900">최신 자랑</h2>
         </div>
         {initialLatestLoading ? (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
