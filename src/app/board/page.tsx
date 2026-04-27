@@ -1,10 +1,11 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { api } from '@/lib/api';
 import { BoardListItem as BoardListItemType, BoardCategory, BoardSearchType, PageResponse } from '@/types/api';
 import BoardListItem from '@/components/domain/BoardListItem';
 import Skeleton from '@/components/common/Skeleton';
+import Pagination from '@/components/common/Pagination';
 import { MagnifyingGlassIcon } from '@/components/layout/icons';
 
 type Tab = 'ALL' | BoardCategory;
@@ -15,91 +16,77 @@ const TABS: { value: Tab; label: string }[] = [
   { value: 'QUESTION', label: '질문' },
 ];
 
+const PAGE_SIZE = 20;
+
 export default function BoardPage() {
   const [tab, setTab] = useState<Tab>('ALL');
   const [items, setItems] = useState<BoardListItemType[]>([]);
-  const [initialLoading, setInitialLoading] = useState(true);
-  const [loading, setLoading] = useState(false);
-  const [hasNext, setHasNext] = useState(true);
-  const pageRef = useRef(0);
-  const loadingRef = useRef(false);
-  const observerRef = useRef<HTMLDivElement>(null);
+  const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(0);
 
-  const [searchOpen, setSearchOpen] = useState(false);
   const [searchType, setSearchType] = useState<BoardSearchType>('TITLE_CONTENT');
   const [searchInput, setSearchInput] = useState('');
   const [activeQuery, setActiveQuery] = useState<string | null>(null);
 
-  const reset = useCallback(() => {
-    setItems([]);
-    setHasNext(true);
-    pageRef.current = 0;
-    setInitialLoading(true);
-  }, []);
-
-  const loadMore = useCallback(async () => {
-    if (loadingRef.current || !hasNext) return;
-    loadingRef.current = true;
+  useEffect(() => {
+    let cancelled = false;
     setLoading(true);
-    try {
-      let url: string;
-      if (activeQuery) {
-        url = `/api/boards/search?q=${encodeURIComponent(activeQuery)}&type=${searchType}&page=${pageRef.current}&size=20`;
-      } else {
-        const categoryParam = tab === 'ALL' ? '' : `category=${tab}&`;
-        url = `/api/boards?${categoryParam}page=${pageRef.current}&size=20`;
-      }
-      const res = await api.get<PageResponse<BoardListItemType>>(url, { silent: true });
-      setItems((prev) => {
-        const ids = new Set(prev.map((p) => p.id));
-        return [...prev, ...res.data.content.filter((p) => !ids.has(p.id))];
+
+    const apiPage = currentPage - 1;
+    const url = activeQuery
+      ? `/api/boards/search?q=${encodeURIComponent(activeQuery)}&type=${searchType}&page=${apiPage}&size=${PAGE_SIZE}`
+      : `/api/boards?${tab === 'ALL' ? '' : `category=${tab}&`}page=${apiPage}&size=${PAGE_SIZE}`;
+
+    api.get<PageResponse<BoardListItemType>>(url, { silent: true })
+      .then((res) => {
+        if (cancelled) return;
+        setItems(res.data.content);
+        setTotalPages(res.data.totalPages);
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setItems([]);
+        setTotalPages(0);
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
       });
-      setHasNext(res.data.hasNext);
-      pageRef.current += 1;
-    } catch {
-      setHasNext(false);
-    } finally {
-      loadingRef.current = false;
-      setLoading(false);
-      setInitialLoading(false);
+
+    return () => {
+      cancelled = true;
+    };
+  }, [currentPage, tab, activeQuery, searchType]);
+
+  const handleTabChange = (value: Tab) => {
+    setTab(value);
+    setCurrentPage(1);
+    if (activeQuery) {
+      setSearchInput('');
+      setActiveQuery(null);
     }
-  }, [hasNext, tab, activeQuery, searchType]);
-
-  useEffect(() => {
-    reset();
-  }, [tab, activeQuery, searchType, reset]);
-
-  useEffect(() => {
-    if (items.length === 0 && hasNext && !loadingRef.current) {
-      loadMore();
-    }
-  }, [items.length, hasNext, loadMore]);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting) loadMore();
-      },
-      { threshold: 0.1 }
-    );
-    if (observerRef.current) observer.observe(observerRef.current);
-    return () => observer.disconnect();
-  }, [loadMore]);
+  };
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const trimmed = searchInput.trim();
     setActiveQuery(trimmed ? trimmed : null);
+    setCurrentPage(1);
   };
 
   const clearSearch = () => {
     setSearchInput('');
     setActiveQuery(null);
-    setSearchOpen(false);
+    setCurrentPage(1);
   };
 
+  const handlePageChange = useCallback((page: number) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, []);
+
   return (
-    <div>
+    <div className="max-w-4xl mx-auto">
       <div className="flex items-center mb-6">
         <h1 className="text-2xl font-bold text-gray-900">전체 글</h1>
       </div>
@@ -109,10 +96,7 @@ export default function BoardPage() {
           {TABS.map((t) => (
             <button
               key={t.value}
-              onClick={() => {
-                setTab(t.value);
-                if (activeQuery) clearSearch();
-              }}
+              onClick={() => handleTabChange(t.value)}
               className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors
                 ${tab === t.value && !activeQuery
                   ? 'bg-amber-50 text-amber-600'
@@ -140,7 +124,6 @@ export default function BoardPage() {
               onChange={(e) => setSearchInput(e.target.value)}
               placeholder="검색어를 입력해주세요"
               className="h-9 pl-9 pr-3 rounded-xl border border-gray-200 bg-white text-sm w-56 focus:outline-none focus:ring-2 focus:ring-amber-300"
-              onFocus={() => setSearchOpen(true)}
             />
             <button
               type="submit"
@@ -171,7 +154,7 @@ export default function BoardPage() {
         </div>
       )}
 
-      {initialLoading ? (
+      {loading ? (
         <div className="flex flex-col">
           {Array.from({ length: 8 }).map((_, i) => (
             <div key={i} className="flex items-start gap-4 py-4 border-b border-gray-100">
@@ -185,24 +168,20 @@ export default function BoardPage() {
           ))}
         </div>
       ) : items.length > 0 ? (
-        <div className="flex flex-col">
-          {items.map((item) => (
-            <BoardListItem key={item.id} item={item} />
-          ))}
-        </div>
+        <>
+          <div className="flex flex-col">
+            {items.map((item) => (
+              <BoardListItem key={item.id} item={item} />
+            ))}
+          </div>
+          <Pagination currentPage={currentPage} totalPages={totalPages} onChange={handlePageChange} />
+        </>
       ) : (
         <div className="text-center py-20 text-gray-400">
           <p className="text-4xl mb-3">📋</p>
           <p className="text-sm">
             {activeQuery ? '검색 결과가 없어요' : '아직 작성된 글이 없어요'}
           </p>
-        </div>
-      )}
-
-      <div ref={observerRef} className="h-10" />
-      {loading && !initialLoading && (
-        <div className="flex justify-center py-6">
-          <div className="w-6 h-6 border-2 border-amber-300 border-t-transparent rounded-full animate-spin" />
         </div>
       )}
     </div>
