@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { api } from '@/lib/api';
 import { PetPostListItem, PageResponse, BoardListItem } from '@/types/api';
 import { dummyPopularPosts, dummyLatestPosts } from '@/lib/dummyData';
@@ -12,6 +12,8 @@ import { PostCardSkeleton, PopularSliderSkeleton } from '@/components/common/Ske
 
 export default function Home() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const sectionParam = searchParams.get('section');
   const [popularPosts, setPopularPosts] = useState<PetPostListItem[]>([]);
   const [popularLoading, setPopularLoading] = useState(true);
   const [latestPosts, setLatestPosts] = useState<PetPostListItem[]>([]);
@@ -22,6 +24,7 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const loadingRef = useRef(false);
   const observerRef = useRef<HTMLDivElement>(null);
+  const latestSectionRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
     api.get<PetPostListItem[]>('/api/posts/top10')
@@ -71,6 +74,13 @@ export default function Home() {
     if (observerRef.current) observer.observe(observerRef.current);
     return () => observer.disconnect();
   }, [loadMore]);
+
+  // ?section=latest 진입 시 최신 자랑 섹션으로 부드럽게 스크롤
+  useEffect(() => {
+    if (sectionParam === 'latest' && !initialLatestLoading && latestSectionRef.current) {
+      latestSectionRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, [sectionParam, initialLatestLoading]);
 
   const popularSliderItems = popularPosts.map((p) => ({
     id: p.id,
@@ -173,7 +183,7 @@ export default function Home() {
       </section>
 
       {/* 최신 자랑 */}
-      <section>
+      <section ref={latestSectionRef} id="latest">
         <div className="flex items-center justify-between mb-5">
           <h2 className="text-2xl font-bold text-gray-900">최신 자랑</h2>
         </div>
