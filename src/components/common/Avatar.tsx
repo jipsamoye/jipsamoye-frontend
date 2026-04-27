@@ -8,7 +8,7 @@ import { isResizableUrl, toThumbnailUrl } from '@/lib/imageUrl';
 interface AvatarProps {
   src: string | null;
   alt?: string;
-  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
+  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl';
 }
 
 const sizeClasses = {
@@ -17,6 +17,7 @@ const sizeClasses = {
   md: 'w-10 h-10',
   lg: 'w-16 h-16',
   xl: 'w-24 h-24',
+  '2xl': 'w-40 h-40',
 };
 
 /**

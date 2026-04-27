@@ -2,8 +2,10 @@
 
 import { useRef, useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
-import { HeartIcon } from '@/components/layout/icons';
+import { useRouter } from 'next/navigation';
 import Thumbnail from '@/components/common/Thumbnail';
+import Avatar from '@/components/common/Avatar';
+import ProfileHoverCard from '@/components/domain/ProfileHoverCard';
 
 function FadeImage({ src, alt, eager }: { src: string; alt: string; eager?: boolean }) {
   const [loaded, setLoaded] = useState(false);
@@ -29,6 +31,7 @@ interface PopularItem {
   thumbnailUrl?: string | null;
   likeCount?: number;
   nickname?: string;
+  profileImageUrl?: string | null;
 }
 
 interface PopularSliderProps {
@@ -37,8 +40,15 @@ interface PopularSliderProps {
 
 export default function PopularSlider({ items }: PopularSliderProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
+
+  const goToProfile = (nickname: string) => (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    router.push(`/users/${encodeURIComponent(nickname)}`);
+  };
 
   const checkScroll = () => {
     const el = scrollRef.current;
@@ -88,7 +98,7 @@ export default function PopularSlider({ items }: PopularSliderProps) {
           <Link
             key={item.id}
             href={`/posts/${item.id}`}
-            className="flex-shrink-0 w-[calc(25%-12px)] min-w-[200px] bg-white border border-gray-100 rounded-2xl overflow-hidden cursor-pointer transition-all duration-200 hover:shadow-md hover:scale-[1.02]"
+            className="flex-shrink-0 w-[calc(25%-12px)] min-w-[200px] bg-white border border-gray-200 rounded-2xl overflow-hidden cursor-pointer transition-all duration-200 hover:shadow-md hover:scale-[1.02]"
           >
             <div className="aspect-square bg-gray-200 overflow-hidden relative">
               {item.thumbnailUrl ? (
@@ -98,11 +108,27 @@ export default function PopularSlider({ items }: PopularSliderProps) {
               )}
             </div>
             <div className="p-3">
-              <p className="font-medium text-sm truncate">{item.label}</p>
-              <div className="flex items-center gap-2 mt-1 text-xs text-gray-500">
-                {item.nickname && <span>{item.nickname}</span>}
+              <p className="font-semibold text-sm text-gray-900 truncate">{item.label}</p>
+              <div className="flex items-center justify-between mt-2">
+                {item.nickname ? (
+                  <ProfileHoverCard nickname={item.nickname}>
+                    <button
+                      type="button"
+                      onClick={goToProfile(item.nickname)}
+                      className="flex items-center gap-2 min-w-0 hover:opacity-70 transition-opacity"
+                      aria-label={`${item.nickname} 프로필 보기`}
+                    >
+                      <Avatar src={item.profileImageUrl ?? null} size="sm" />
+                      <span className="text-xs text-gray-500 truncate hover:text-gray-700">{item.nickname}</span>
+                    </button>
+                  </ProfileHoverCard>
+                ) : (
+                  <span />
+                )}
                 {item.likeCount !== undefined && (
-                  <span className="flex items-center gap-1"><HeartIcon /> {item.likeCount}</span>
+                  <span className="flex items-center gap-1 text-xs text-amber-600 font-medium tabular-nums flex-shrink-0">
+                    ❤ {item.likeCount}
+                  </span>
                 )}
               </div>
             </div>
