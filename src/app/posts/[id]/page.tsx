@@ -12,6 +12,7 @@ import PostCard from '@/components/domain/PostCard';
 import CommentSection from '@/components/domain/CommentSection';
 import { HeartIcon, ShareIcon, LinkIcon } from '@/components/layout/icons';
 import { showToast } from '@/components/common/Toast';
+import { formatDateTime } from '@/lib/utils';
 
 export default function PostDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -109,7 +110,7 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
           <div className="text-left">
             <p className="text-sm font-semibold text-gray-900">{post.nickname}</p>
             <p className="text-xs text-gray-400">
-              {new Date(post.createdAt).toLocaleDateString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })}
+              {formatDateTime(post.createdAt)}
             </p>
           </div>
         </button>

@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { api } from '@/lib/api';
 import { PetPostListItem, PageResponse, BoardListItem } from '@/types/api';
 import { dummyPopularPosts, dummyLatestPosts } from '@/lib/dummyData';
+import { timeAgoOrDate } from '@/lib/utils';
 import PopularSlider from '@/components/domain/PopularSlider';
 import PostCard from '@/components/domain/PostCard';
 import { PostCardSkeleton, PopularSliderSkeleton } from '@/components/common/Skeleton';
@@ -153,7 +154,7 @@ function HomeContent() {
                 >
                   <span className="text-sm text-gray-700 truncate">{post.title}</span>
                   <span className="text-xs text-gray-400 flex-shrink-0">
-                    {new Date(post.createdAt).toLocaleDateString('ko-KR', { month: '2-digit', day: '2-digit' })}
+                    {timeAgoOrDate(post.createdAt)}
                   </span>
                 </button>
               )) : (

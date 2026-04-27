@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { api } from '@/lib/api';
 import { Comment, PageResponse, User } from '@/types/api';
+import { formatDate } from '@/lib/utils';
 import Avatar from '@/components/common/Avatar';
 import Button from '@/components/common/Button';
 import { EllipsisVerticalIcon } from '@/components/layout/icons';
@@ -130,7 +131,7 @@ export default function CommentSection({ postId, user, onCountChange }: CommentS
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <span className="text-sm font-medium">{comment.nickname}</span>
-                    <span className="text-xs text-gray-400">{new Date(comment.createdAt).toLocaleDateString('ko-KR')}</span>
+                    <span className="text-xs text-gray-400">{formatDate(comment.createdAt)}</span>
                   </div>
                   {user?.nickname === comment.nickname && editingId !== comment.id && (
                     <div className="relative" ref={openCommentMenuId === comment.id ? commentMenuRef : undefined}>
@@ -202,7 +203,7 @@ export default function CommentSection({ postId, user, onCountChange }: CommentS
                     <div className="flex-1">
                       <div className="flex items-center gap-2">
                         <span className="text-sm font-medium">{reply.nickname}</span>
-                        <span className="text-xs text-gray-400">{new Date(reply.createdAt).toLocaleDateString('ko-KR')}</span>
+                        <span className="text-xs text-gray-400">{formatDate(reply.createdAt)}</span>
                       </div>
                       {editingId === reply.id ? (
                         <div className="flex gap-2 mt-1">
