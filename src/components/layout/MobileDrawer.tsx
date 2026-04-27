@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react';
 import { usePathname } from 'next/navigation';
-import { HomeIcon, TrophyIcon, NoteIcon, OpenChatIcon, PaperAirplaneIcon } from './icons';
+import { HomeIcon, TrophyIcon, NoteIcon, OpenChatIcon, PaperAirplaneIcon, UsersIcon } from './icons';
 import { useNavigationGuard } from '@/components/providers/NavigationGuard';
 
 interface NavItem {
@@ -13,6 +13,7 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   { label: '홈', href: '/', icon: (f) => <HomeIcon filled={f} /> },
+  { label: '구독', href: '/feed', icon: (f) => <UsersIcon filled={f} /> },
   { label: '랭킹', href: '/ranking', icon: (f) => <TrophyIcon filled={f} /> },
   { label: '자유게시판', href: '/board', icon: (f) => <NoteIcon filled={f} /> },
   { label: '오픈채팅', href: '/chat', icon: (f) => <OpenChatIcon filled={f} /> },
@@ -79,9 +80,9 @@ export default function MobileDrawer({ isOpen, onClose }: MobileDrawerProps) {
                 key={item.href}
                 onClick={() => handleNavigate(item.href)}
                 className={`flex items-center gap-4 px-6 py-3.5 text-left text-base font-medium
-                  ${isActive ? 'text-gray-900 bg-gray-50' : 'text-gray-600 hover:bg-gray-50'}`}
+                  ${isActive ? 'text-amber-500 bg-gray-50 font-semibold' : 'text-gray-900 hover:bg-gray-50'}`}
               >
-                <span className="w-6 h-6">{item.icon(isActive)}</span>
+                <span className="inline-flex items-center justify-center w-6 h-6 text-amber-500">{item.icon(true)}</span>
                 {item.label}
               </button>
             );

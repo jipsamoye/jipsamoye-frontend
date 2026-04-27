@@ -1,7 +1,7 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
-import { HomeIcon, TrophyIcon, NoteIcon, OpenChatIcon, PaperAirplaneIcon } from './icons';
+import { HomeIcon, TrophyIcon, NoteIcon, OpenChatIcon, PaperAirplaneIcon, UsersIcon } from './icons';
 import { useNavigationGuard } from '@/components/providers/NavigationGuard';
 
 interface NavItem {
@@ -12,6 +12,7 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   { label: '홈', href: '/', icon: (f) => <HomeIcon filled={f} /> },
+  { label: '구독', href: '/feed', icon: (f) => <UsersIcon filled={f} /> },
   { label: '랭킹', href: '/ranking', icon: (f) => <TrophyIcon filled={f} /> },
   { label: '자유게시판', href: '/board', icon: (f) => <NoteIcon filled={f} /> },
   { label: '오픈채팅', href: '/chat', icon: (f) => <OpenChatIcon filled={f} /> },
@@ -33,12 +34,12 @@ export default function Sidebar() {
               onClick={() => guardedPush(item.href)}
               className={`flex items-center gap-4 px-3 py-3 rounded-xl text-lg font-medium transition-all duration-200 text-left
                 ${isActive
-                  ? 'bg-gray-50 text-gray-900 font-semibold'
-                  : 'text-gray-600 hover:bg-gray-50/70'
+                  ? 'bg-gray-50 text-amber-500 font-semibold'
+                  : 'text-gray-900 hover:bg-gray-50/70'
                 }`}
             >
-              <span className={`inline-flex items-center justify-center w-6 h-6 ${isActive ? 'text-amber-500' : ''}`}>
-                {item.icon(isActive)}
+              <span className="inline-flex items-center justify-center w-6 h-6 text-amber-500">
+                {item.icon(true)}
               </span>
               <span className="leading-none">{item.label}</span>
             </button>
