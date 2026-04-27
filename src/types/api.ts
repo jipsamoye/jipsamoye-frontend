@@ -32,6 +32,8 @@ export interface User {
   postCount: number;
   followerCount: number;
   followingCount: number;
+  totalLikeCount: number;
+  ranking: number | null;
   createdAt: string;
 }
 
@@ -55,6 +57,7 @@ export interface PetPostListItem {
   thumbnailUrl: string | null;
   likeCount: number;
   nickname: string;
+  profileImageUrl?: string | null;
   createdAt: string;
 }
 
