@@ -136,6 +136,7 @@ export interface BoardListItem {
   viewCount: number;
   likeCount: number;
   nickname: string;
+  profileImageUrl?: string | null;
   createdAt: string;
 }
 
