@@ -1,0 +1,583 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>집사모여 — 토스 톤 시안 (기존 틀 유지)</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        fontFamily: { sans: ['Pretendard Variable', 'Pretendard', 'system-ui'] },
+        colors: {
+          gray: {
+            50: '#f9fafb', 100: '#f2f4f6', 200: '#e5e8eb', 300: '#d1d6db',
+            400: '#b0b8c1', 500: '#8b95a1', 600: '#6b7684', 700: '#4e5968',
+            800: '#333d4b', 900: '#191f28',
+          },
+          amber: {
+            50: '#fff3ee', 100: '#ffdccf', 200: '#ffba9f', 300: '#ff9877',
+            400: '#ff8461', 500: '#ff734c', 600: '#e85e3a', 700: '#c14a2c',
+            800: '#923722', 900: '#5f2416',
+          },
+          orange: {
+            50: '#fff4e6', 100: '#ffdfb8', 200: '#ffc98a', 300: '#ffb35c',
+            400: '#ff9d2e', 500: '#ff8a00', 600: '#e67c00', 700: '#cc6e00',
+          },
+        },
+      },
+    },
+  };
+</script>
+<style>
+  body { font-family: 'Pretendard Variable', Pretendard, system-ui; -webkit-font-smoothing: antialiased; background: #fff; }
+  .num { font-variant-numeric: tabular-nums; }
+  .scroll-x::-webkit-scrollbar { display: none; }
+  .scroll-x { scrollbar-width: none; }
+  .pop { transition: transform 0.12s ease, box-shadow 0.2s ease, border-color 0.2s ease; }
+  .pop:active { transform: scale(0.98); }
+  .lift:hover { transform: translateY(-2px); box-shadow: 0 8px 20px -10px rgba(245, 158, 11, 0.25); }
+  .heart { display: inline-flex; align-items: center; gap: 4px; }
+</style>
+</head>
+<body class="text-gray-900">
+
+<!-- 비교 안내 배너 -->
+<div class="bg-amber-50 border-b border-amber-200 text-amber-700 text-sm px-6 py-2 flex items-center gap-2">
+  <span class="font-semibold">🎨 토스 톤 시안 (기존 4섹션 틀 유지)</span>
+  <span class="text-amber-600">·  http://localhost:3000 의 메인과 비교</span>
+</div>
+
+<!-- 헤더 -->
+<header class="sticky top-0 z-30 h-16 bg-white border-b border-gray-300">
+  <div class="flex items-center justify-between h-full pl-6 pr-8">
+    <h1 class="text-2xl font-bold tracking-tight">집사모여</h1>
+    <div class="flex items-center gap-3">
+      <button class="pop hidden lg:flex items-center px-6 py-2 bg-amber-500 text-white rounded-xl text-base font-semibold hover:bg-amber-600">자랑하기</button>
+      <button class="pop p-2.5 text-gray-800"><svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"/></svg></button>
+      <button class="pop relative p-2.5 text-gray-800">
+        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0"/></svg>
+        <span class="absolute top-1 right-1 w-2 h-2 rounded-full bg-amber-500"></span>
+      </button>
+      <button class="pop pl-2.5 py-2.5"><span class="block w-9 h-9 rounded-full bg-gray-100"></span></button>
+    </div>
+  </div>
+</header>
+
+<div class="flex">
+  <!-- 사이드바 (현재 우리 디자인 그대로) -->
+  <aside class="hidden lg:flex flex-col w-64 h-[calc(100vh-4rem)] sticky top-16 border-r border-gray-300 p-4 bg-white">
+    <nav class="flex flex-col gap-1">
+      <button class="flex items-center gap-4 px-3 py-3 rounded-xl text-lg font-semibold bg-gray-50 text-gray-900">
+        <span class="inline-flex items-center justify-center w-6 h-6 text-amber-500"><svg viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5"><path d="M11.47 3.84a.75.75 0 0 1 1.06 0l8.69 8.69a.75.75 0 1 0 1.06-1.06l-8.69-8.69a2.25 2.25 0 0 0-3.18 0l-8.69 8.69a.75.75 0 0 0 1.06 1.06l8.69-8.69Z"/><path d="M12 5.43 3.84 13.6a.75.75 0 0 0-.22.53v6.13a1.5 1.5 0 0 0 1.5 1.5h3.75a.75.75 0 0 0 .75-.75v-4.5a.75.75 0 0 1 .75-.75h3a.75.75 0 0 1 .75.75v4.5c0 .41.34.75.75.75h3.75a1.5 1.5 0 0 0 1.5-1.5v-6.13a.75.75 0 0 0-.22-.53L12 5.43Z"/></svg></span>
+        <span class="leading-none">홈</span>
+      </button>
+      <button class="flex items-center gap-4 px-3 py-3 rounded-xl text-lg font-medium text-gray-600 hover:bg-gray-50/70">
+        <span class="inline-flex items-center justify-center w-6 h-6"><svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 18.75h-9m9 0a3 3 0 0 1 3 3h-15a3 3 0 0 1 3-3m9 0v-3.375c0-.621-.503-1.125-1.125-1.125h-.871M7.5 18.75v-3.375c0-.621.504-1.125 1.125-1.125h.872m5.007 0H9.497m5.007 0a7.454 7.454 0 0 1-.982-3.172M9.497 14.25a7.454 7.454 0 0 0 .981-3.172M5.25 4.236c-.982.143-1.954.317-2.916.52A6.003 6.003 0 0 0 7.73 9.728M5.25 4.236V4.5c0 2.108.966 3.99 2.48 5.228M5.25 4.236V2.721C7.456 2.41 9.71 2.25 12 2.25c2.291 0 4.545.16 6.75.47v1.516M18.75 4.236c.982.143 1.954.317 2.916.52A6.003 6.003 0 0 1 16.27 9.728M18.75 4.236V4.5c0 2.108-.966 3.99-2.48 5.228m0 0a6.023 6.023 0 0 1-2.52.577m0 0a6.023 6.023 0 0 1-2.52-.577"/></svg></span>
+        <span class="leading-none">랭킹</span>
+      </button>
+      <button class="flex items-center gap-4 px-3 py-3 rounded-xl text-lg font-medium text-gray-600 hover:bg-gray-50/70">
+        <span class="inline-flex items-center justify-center w-6 h-6"><svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75 2.25 2.25 0 0 0-.1-.664m-5.8 0A2.251 2.251 0 0 1 13.5 2.25H15c1.012 0 1.867.668 2.15 1.586M8.25 8.25H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25Z"/></svg></span>
+        <span class="leading-none">자유게시판</span>
+      </button>
+      <button class="flex items-center gap-4 px-3 py-3 rounded-xl text-lg font-medium text-gray-600 hover:bg-gray-50/70">
+        <span class="inline-flex items-center justify-center w-6 h-6"><svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M20.25 8.51c.88.28 1.5 1.13 1.5 2.1v4.29c0 1.13-.85 2.1-1.98 2.19-.34.03-.68.05-1.02.07v3.09l-3-3c-1.35 0-2.69-.05-4.02-.16a2.12 2.12 0 0 1-.83-.24m9.35-8.34a2.12 2.12 0 0 0-.48-.1 48.64 48.64 0 0 0-8.05 0c-1.13.1-1.98 1.06-1.98 2.2v4.28c0 .84.46 1.58 1.16 1.95m9.35-8.33V6.64c0-1.62-1.15-3.03-2.76-3.24A48.45 48.45 0 0 0 11.25 3c-2.12 0-4.2.14-6.24.4-1.61.21-2.76 1.62-2.76 3.24v6.22c0 1.62 1.15 3.03 2.76 3.24.58.07 1.16.13 1.74.19V21l4.16-4.16"/></svg></span>
+        <span class="leading-none">오픈채팅</span>
+      </button>
+      <button class="flex items-center gap-4 px-3 py-3 rounded-xl text-lg font-medium text-gray-600 hover:bg-gray-50/70">
+        <span class="inline-flex items-center justify-center w-6 h-6"><svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 12 3.27 3.13A59.77 59.77 0 0 1 21.49 12 59.77 59.77 0 0 1 3.27 20.88L6 12Zm0 0h7.5"/></svg></span>
+        <span class="leading-none">DM</span>
+      </button>
+    </nav>
+  </aside>
+
+  <!-- 메인 (기존 4섹션 그대로 유지, 톤만 다듬음) -->
+  <main class="flex-1 px-8 pt-6 pb-24">
+
+    <!-- 🔍 프로필 이미지 배치 — 4가지 옵션 비교 (시안용 임시 섹션) -->
+    <section class="mb-12">
+      <div class="flex items-center gap-2 mb-1">
+        <span class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 text-[11px] font-bold">시안용 비교</span>
+        <h2 class="text-xl font-bold text-gray-900">카드에 프로필 이미지 어떻게 넣을까?</h2>
+      </div>
+      <p class="text-sm text-gray-500 mb-5">같은 카드를 4가지 변형으로. 마음에 드는 안 골라주세요.</p>
+
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+
+        <!-- 옵션 A: 메타 영역 인라인 (추천) -->
+        <div>
+          <article class="pop lift rounded-2xl overflow-hidden bg-white border border-gray-200">
+            <div class="aspect-square bg-gradient-to-br from-amber-300 to-orange-400"></div>
+            <div class="p-3">
+              <p class="font-semibold text-sm text-gray-900 truncate">오늘의 산책 ☀️</p>
+              <div class="flex items-center justify-between mt-2">
+                <div class="flex items-center gap-1.5 min-w-0">
+                  <span class="w-5 h-5 rounded-full bg-gradient-to-br from-amber-300 to-pink-300 flex-shrink-0"></span>
+                  <span class="text-xs text-gray-500 truncate">집사_뽀삐</span>
+                </div>
+                <span class="heart text-xs text-amber-600 num font-medium flex-shrink-0">❤ 128</span>
+              </div>
+            </div>
+          </article>
+          <div class="mt-2.5 px-1">
+            <div class="flex items-center gap-1.5">
+              <span class="px-1.5 py-0.5 rounded bg-amber-500 text-white text-[10px] font-bold">A · 추천</span>
+              <span class="text-xs font-semibold text-gray-700">메타 영역 인라인</span>
+            </div>
+            <p class="text-[11px] text-gray-500 mt-1 leading-snug">닉네임 옆 작은 원형 프로필(20px). 깔끔, 정보 압축. 토스/그리미티가 가장 많이 쓰는 패턴.</p>
+          </div>
+        </div>
+
+        <!-- 옵션 B: 이미지 우측 상단 오버레이 -->
+        <div>
+          <article class="pop lift rounded-2xl overflow-hidden bg-white border border-gray-200">
+            <div class="aspect-square bg-gradient-to-br from-pink-300 to-rose-400 relative">
+              <div class="absolute top-3 right-3 w-8 h-8 rounded-full bg-gradient-to-br from-amber-300 to-pink-300 ring-2 ring-white shadow-md"></div>
+            </div>
+            <div class="p-3">
+              <p class="font-semibold text-sm text-gray-900 truncate">목욕 후 보송보송</p>
+              <div class="flex items-center justify-between mt-1.5">
+                <span class="text-xs text-gray-500 truncate">고양이맘</span>
+                <span class="heart text-xs text-amber-600 num font-medium">❤ 96</span>
+              </div>
+            </div>
+          </article>
+          <div class="mt-2.5 px-1">
+            <div class="flex items-center gap-1.5">
+              <span class="px-1.5 py-0.5 rounded bg-gray-200 text-gray-700 text-[10px] font-bold">B</span>
+              <span class="text-xs font-semibold text-gray-700">우상단 오버레이</span>
+            </div>
+            <p class="text-[11px] text-gray-500 mt-1 leading-snug">사진 위 우측 상단에 32px 프로필 + 흰 링. 인스타 톤. 시각적으로 화려하지만 사진을 살짝 가림.</p>
+          </div>
+        </div>
+
+        <!-- 옵션 C: 이미지 하단 좌측에 50% 걸침 -->
+        <div>
+          <article class="pop lift rounded-2xl overflow-hidden bg-white border border-gray-200">
+            <div class="aspect-square bg-gradient-to-br from-blue-300 to-indigo-400 relative">
+              <div class="absolute -bottom-4 left-3 w-10 h-10 rounded-full bg-gradient-to-br from-amber-300 to-pink-300 ring-2 ring-white shadow-md z-10"></div>
+            </div>
+            <div class="p-3 pt-5">
+              <p class="font-semibold text-sm text-gray-900 truncate">새 장난감 푹 빠진 우리 애</p>
+              <div class="flex items-center justify-between mt-1.5">
+                <span class="text-xs text-gray-500 truncate">멍멍이아빠</span>
+                <span class="heart text-xs text-amber-600 num font-medium">❤ 87</span>
+              </div>
+            </div>
+          </article>
+          <div class="mt-2.5 px-1">
+            <div class="flex items-center gap-1.5">
+              <span class="px-1.5 py-0.5 rounded bg-gray-200 text-gray-700 text-[10px] font-bold">C</span>
+              <span class="text-xs font-semibold text-gray-700">사진/메타 경계 걸침</span>
+            </div>
+            <p class="text-[11px] text-gray-500 mt-1 leading-snug">사진 하단 좌측에 40px 프로필이 반쯤 걸침. 작가 강조 강함, 모던. 카드 height 살짝 늘어남.</p>
+          </div>
+        </div>
+
+        <!-- 옵션 D: 좌상단 오버레이 + 닉네임 같이 (랭크 뱃지 자리) -->
+        <div>
+          <article class="pop lift rounded-2xl overflow-hidden bg-white border border-gray-200">
+            <div class="aspect-square bg-gradient-to-br from-emerald-300 to-teal-400 relative">
+              <div class="absolute top-2.5 left-2.5 flex items-center gap-1.5 px-1 pr-2 py-1 rounded-full bg-black/40 backdrop-blur-sm">
+                <span class="w-5 h-5 rounded-full bg-gradient-to-br from-amber-300 to-pink-300 flex-shrink-0"></span>
+                <span class="text-[11px] font-medium text-white truncate max-w-[80px]">집사_은비</span>
+              </div>
+            </div>
+            <div class="p-3">
+              <p class="font-semibold text-sm text-gray-900 truncate">잠자는 모습이 천사</p>
+              <div class="flex items-center justify-end mt-1.5">
+                <span class="heart text-xs text-amber-600 num font-medium">❤ 72</span>
+              </div>
+            </div>
+          </article>
+          <div class="mt-2.5 px-1">
+            <div class="flex items-center gap-1.5">
+              <span class="px-1.5 py-0.5 rounded bg-gray-200 text-gray-700 text-[10px] font-bold">D</span>
+              <span class="text-xs font-semibold text-gray-700">좌상단 칩</span>
+            </div>
+            <p class="text-[11px] text-gray-500 mt-1 leading-snug">사진 위 반투명 칩에 프로필 + 닉네임 한 번에. 메타 영역이 깔끔해짐. 사진 일부 가림.</p>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- 추천 이유 -->
+      <div class="mt-6 rounded-2xl bg-amber-50 border border-amber-100 p-4">
+        <p class="text-sm font-semibold text-amber-700 mb-1">💡 제 추천: <span class="bg-amber-500 text-white px-1.5 py-0.5 rounded text-xs">A</span> · 메타 영역 인라인</p>
+        <ul class="text-xs text-amber-900/80 mt-2 space-y-1 leading-relaxed">
+          <li>• 사진을 가리지 않아 자랑 컨텐츠가 주인공으로 남음 (이 사이트의 핵심)</li>
+          <li>• 카드 height 변화 없음 → 기존 그리드 레이아웃 그대로 유지</li>
+          <li>• 토스/그리미티/인스타 모두 이 패턴이 표준 → 학습 비용 0</li>
+          <li>• 구현이 가장 작음: 메타 줄에 작은 원 1개 추가</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- 🔍 옵션 A 사이즈 비교 -->
+    <section class="mb-12">
+      <div class="flex items-center gap-2 mb-1">
+        <span class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 text-[11px] font-bold">시안용 비교</span>
+        <h2 class="text-xl font-bold text-gray-900">프로필 이미지 사이즈 — 4가지 비교</h2>
+      </div>
+      <p class="text-sm text-gray-500 mb-5">옵션 A(메타 영역 인라인) 기준. 같은 카드, 사이즈만 다름.</p>
+
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+
+        <!-- 20px (w-5 h-5) -->
+        <div>
+          <article class="pop lift rounded-2xl overflow-hidden bg-white border border-gray-200">
+            <div class="aspect-square bg-gradient-to-br from-amber-300 to-orange-400"></div>
+            <div class="p-3">
+              <p class="font-semibold text-sm text-gray-900 truncate">오늘의 산책 ☀️</p>
+              <div class="flex items-center justify-between mt-2">
+                <div class="flex items-center gap-1.5 min-w-0">
+                  <span class="w-5 h-5 rounded-full bg-gradient-to-br from-amber-300 to-pink-300 flex-shrink-0"></span>
+                  <span class="text-xs text-gray-500 truncate">집사_뽀삐</span>
+                </div>
+                <span class="heart text-xs text-amber-600 num font-medium flex-shrink-0">❤ 128</span>
+              </div>
+            </div>
+          </article>
+          <div class="mt-2.5 px-1">
+            <div class="flex items-center gap-1.5">
+              <span class="px-1.5 py-0.5 rounded bg-gray-200 text-gray-700 text-[10px] font-bold">20px</span>
+              <span class="text-xs font-semibold text-gray-700">w-5 h-5</span>
+            </div>
+            <p class="text-[11px] text-gray-500 mt-1 leading-snug">"있는지 없는지" 시그널만. 닉네임 폰트와 거의 같은 크기라 종속물처럼 보임.</p>
+          </div>
+        </div>
+
+        <!-- 24px (w-6 h-6) — 추천 -->
+        <div>
+          <article class="pop lift rounded-2xl overflow-hidden bg-white border border-gray-200 ring-2 ring-amber-400 ring-offset-2">
+            <div class="aspect-square bg-gradient-to-br from-pink-300 to-rose-400"></div>
+            <div class="p-3">
+              <p class="font-semibold text-sm text-gray-900 truncate">목욕 후 보송보송</p>
+              <div class="flex items-center justify-between mt-2">
+                <div class="flex items-center gap-2 min-w-0">
+                  <span class="w-6 h-6 rounded-full bg-gradient-to-br from-amber-300 to-pink-300 flex-shrink-0"></span>
+                  <span class="text-xs text-gray-500 truncate">고양이맘</span>
+                </div>
+                <span class="heart text-xs text-amber-600 num font-medium flex-shrink-0">❤ 96</span>
+              </div>
+            </div>
+          </article>
+          <div class="mt-2.5 px-1">
+            <div class="flex items-center gap-1.5">
+              <span class="px-1.5 py-0.5 rounded bg-amber-500 text-white text-[10px] font-bold">24px · 추천</span>
+              <span class="text-xs font-semibold text-gray-700">w-6 h-6</span>
+            </div>
+            <p class="text-[11px] text-gray-500 mt-1 leading-snug">닉네임 폰트보다 1.5~2배. 작가 인지 OK + 사진 100% 보존 + 카드 height 변화 0.</p>
+          </div>
+        </div>
+
+        <!-- 28px (w-7 h-7) -->
+        <div>
+          <article class="pop lift rounded-2xl overflow-hidden bg-white border border-gray-200">
+            <div class="aspect-square bg-gradient-to-br from-blue-300 to-indigo-400"></div>
+            <div class="p-3">
+              <p class="font-semibold text-sm text-gray-900 truncate">새 장난감 푹 빠진 우리 애</p>
+              <div class="flex items-center justify-between mt-2">
+                <div class="flex items-center gap-2 min-w-0">
+                  <span class="w-7 h-7 rounded-full bg-gradient-to-br from-amber-300 to-pink-300 flex-shrink-0"></span>
+                  <span class="text-xs text-gray-500 truncate">멍멍이아빠</span>
+                </div>
+                <span class="heart text-xs text-amber-600 num font-medium flex-shrink-0">❤ 87</span>
+              </div>
+            </div>
+          </article>
+          <div class="mt-2.5 px-1">
+            <div class="flex items-center gap-1.5">
+              <span class="px-1.5 py-0.5 rounded bg-gray-200 text-gray-700 text-[10px] font-bold">28px</span>
+              <span class="text-xs font-semibold text-gray-700">w-7 h-7</span>
+            </div>
+            <p class="text-[11px] text-gray-500 mt-1 leading-snug">작가 인지 강조. 메타 영역 height가 살짝 더 잡힘. 사람 강조 톤이면 OK.</p>
+          </div>
+        </div>
+
+        <!-- 32px (w-8 h-8) -->
+        <div>
+          <article class="pop lift rounded-2xl overflow-hidden bg-white border border-gray-200">
+            <div class="aspect-square bg-gradient-to-br from-emerald-300 to-teal-400"></div>
+            <div class="p-3">
+              <p class="font-semibold text-sm text-gray-900 truncate">잠자는 모습이 천사</p>
+              <div class="flex items-center justify-between mt-2">
+                <div class="flex items-center gap-2 min-w-0">
+                  <span class="w-8 h-8 rounded-full bg-gradient-to-br from-amber-300 to-pink-300 flex-shrink-0"></span>
+                  <span class="text-xs text-gray-500 truncate">집사_은비</span>
+                </div>
+                <span class="heart text-xs text-amber-600 num font-medium flex-shrink-0">❤ 72</span>
+              </div>
+            </div>
+          </article>
+          <div class="mt-2.5 px-1">
+            <div class="flex items-center gap-1.5">
+              <span class="px-1.5 py-0.5 rounded bg-gray-200 text-gray-700 text-[10px] font-bold">32px</span>
+              <span class="text-xs font-semibold text-gray-700">w-8 h-8</span>
+            </div>
+            <p class="text-[11px] text-gray-500 mt-1 leading-snug">인스타급. 사람 부각 강함. 단 사진 카드 정보 위계가 살짝 흔들 — 작가가 사진과 동급으로 인지될 수 있음.</p>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- 추천 이유 -->
+      <div class="mt-6 rounded-2xl bg-amber-50 border border-amber-100 p-4">
+        <p class="text-sm font-semibold text-amber-700 mb-1">💡 제 추천: <span class="bg-amber-500 text-white px-1.5 py-0.5 rounded text-xs">24px</span> · w-6 h-6</p>
+        <ul class="text-xs text-amber-900/80 mt-2 space-y-1 leading-relaxed">
+          <li>• <strong>닉네임 폰트(12-14px)보다 1.5~2배</strong> — 프로필이 *주체*로 인지되는 골디락스 사이즈</li>
+          <li>• <strong>사진 컨텐츠 영역 손실 0</strong> — 메타 영역 안에서만 자라남</li>
+          <li>• <strong>토스/그리미티/핀터레스트 카드 하단 프로필 표준</strong> — 학습 비용 0</li>
+          <li>• <strong>카드 height 변화 거의 없음</strong> — 메타 영역 line-height가 16~20px라 24px 프로필이 들어가도 추가 padding 미미</li>
+          <li>• 28px도 좋은 선택지 — 사람 강조 톤 원하면 한 단계 더. 32px는 인스타급이라 사진 자랑 사이트에는 살짝 강함</li>
+        </ul>
+      </div>
+    </section>
+    <hr class="border-gray-200 mb-10" />
+
+    <!-- ① 배너 (기존 자리·기존 카피, 패딩/위계만 토스 톤 정리) -->
+    <section class="mb-10">
+      <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-50 px-7 py-6 border border-amber-100">
+        <div class="relative z-10">
+          <span class="inline-block px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-700 text-[11px] font-semibold mb-2">반려동물 커뮤니티</span>
+          <h2 class="text-lg md:text-xl font-bold text-gray-900 mb-1">우리 애 자랑하러 오세요!</h2>
+          <p class="text-sm text-gray-600">강아지, 고양이와 함께하는 일상을 공유해 보세요.</p>
+        </div>
+        <div class="absolute right-6 top-1/2 -translate-y-1/2 text-5xl opacity-10 select-none">🐾</div>
+      </div>
+    </section>
+
+    <!-- ② 이주의 자랑 (기존 가로 슬라이더, 카드 폴리싱 + 페이드 마스크) -->
+    <section class="mb-10">
+      <div class="flex items-center justify-between mb-5">
+        <h2 class="text-xl font-bold text-gray-900">이주의 자랑</h2>
+        <a class="text-sm text-gray-400 hover:text-gray-600" href="#">더보기</a>
+      </div>
+      <div class="relative">
+        <div class="flex gap-4 overflow-x-auto scroll-x pb-1 -mx-1 px-1">
+          <article class="pop lift flex-shrink-0 w-48 rounded-2xl overflow-hidden bg-white border border-gray-200">
+            <div class="aspect-square bg-gradient-to-br from-amber-300 to-orange-400 relative">
+              <span class="absolute top-2 left-2 inline-flex items-center justify-center w-7 h-7 rounded-full bg-amber-500 text-white text-sm font-bold shadow-sm">1</span>
+            </div>
+            <div class="p-3">
+              <p class="font-semibold text-gray-900 text-sm truncate">오늘의 산책 ☀️</p>
+              <div class="flex items-center justify-between mt-1.5">
+                <span class="text-xs text-gray-500 truncate">집사_뽀삐</span>
+                <span class="heart text-xs text-amber-600 num font-medium">❤ 128</span>
+              </div>
+            </div>
+          </article>
+          <article class="pop lift flex-shrink-0 w-48 rounded-2xl overflow-hidden bg-white border border-gray-200">
+            <div class="aspect-square bg-gradient-to-br from-pink-300 to-rose-400 relative">
+              <span class="absolute top-2 left-2 inline-flex items-center justify-center w-7 h-7 rounded-full bg-gray-700 text-white text-sm font-bold shadow-sm">2</span>
+            </div>
+            <div class="p-3">
+              <p class="font-semibold text-gray-900 text-sm truncate">목욕 후 보송보송</p>
+              <div class="flex items-center justify-between mt-1.5">
+                <span class="text-xs text-gray-500 truncate">고양이맘</span>
+                <span class="heart text-xs text-amber-600 num font-medium">❤ 96</span>
+              </div>
+            </div>
+          </article>
+          <article class="pop lift flex-shrink-0 w-48 rounded-2xl overflow-hidden bg-white border border-gray-200">
+            <div class="aspect-square bg-gradient-to-br from-blue-300 to-indigo-400 relative">
+              <span class="absolute top-2 left-2 inline-flex items-center justify-center w-7 h-7 rounded-full bg-gray-500 text-white text-sm font-bold shadow-sm">3</span>
+            </div>
+            <div class="p-3">
+              <p class="font-semibold text-gray-900 text-sm truncate">새 장난감 푹 빠진 우리 애</p>
+              <div class="flex items-center justify-between mt-1.5">
+                <span class="text-xs text-gray-500 truncate">멍멍이아빠</span>
+                <span class="heart text-xs text-amber-600 num font-medium">❤ 87</span>
+              </div>
+            </div>
+          </article>
+          <article class="pop lift flex-shrink-0 w-48 rounded-2xl overflow-hidden bg-white border border-gray-200">
+            <div class="aspect-square bg-gradient-to-br from-emerald-300 to-teal-400"></div>
+            <div class="p-3">
+              <p class="font-semibold text-gray-900 text-sm truncate">잠자는 모습이 천사</p>
+              <div class="flex items-center justify-between mt-1.5">
+                <span class="text-xs text-gray-500 truncate">집사_은비</span>
+                <span class="heart text-xs text-amber-600 num font-medium">❤ 72</span>
+              </div>
+            </div>
+          </article>
+          <article class="pop lift flex-shrink-0 w-48 rounded-2xl overflow-hidden bg-white border border-gray-200">
+            <div class="aspect-square bg-gradient-to-br from-violet-300 to-purple-400"></div>
+            <div class="p-3">
+              <p class="font-semibold text-gray-900 text-sm truncate">애기 때 사진 찾았어요</p>
+              <div class="flex items-center justify-between mt-1.5">
+                <span class="text-xs text-gray-500 truncate">집사_콩이</span>
+                <span class="heart text-xs text-amber-600 num font-medium">❤ 54</span>
+              </div>
+            </div>
+          </article>
+          <article class="pop lift flex-shrink-0 w-48 rounded-2xl overflow-hidden bg-white border border-gray-200">
+            <div class="aspect-square bg-gradient-to-br from-yellow-300 to-amber-400"></div>
+            <div class="p-3">
+              <p class="font-semibold text-gray-900 text-sm truncate">간식 줄 때 표정 ㅋㅋㅋ</p>
+              <div class="flex items-center justify-between mt-1.5">
+                <span class="text-xs text-gray-500 truncate">집사_초코</span>
+                <span class="heart text-xs text-amber-600 num font-medium">❤ 41</span>
+              </div>
+            </div>
+          </article>
+        </div>
+        <!-- 우측 페이드 마스크 -->
+        <div class="absolute right-0 top-0 bottom-0 w-12 bg-gradient-to-l from-white to-transparent pointer-events-none"></div>
+      </div>
+    </section>
+
+    <!-- ③ 자유게시판 + 공지 (기존 2칸 그리드, 항목에 미리보기 한 줄 + hover) -->
+    <section class="mb-10">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="bg-white rounded-2xl border border-gray-200 p-5">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="font-bold text-gray-900">자유게시판 최신 글</h3>
+            <a href="#" class="text-xs text-amber-600 font-medium hover:text-amber-700">더보기</a>
+          </div>
+          <ul class="divide-y divide-gray-100 -mx-2">
+            <li class="px-2 py-2.5 hover:bg-amber-50/40 rounded-lg cursor-pointer transition-colors">
+              <div class="flex items-center justify-between gap-3">
+                <span class="truncate text-sm text-gray-800 font-medium">혹시 이런 글찍어 보신 분 계시나요?</span>
+                <span class="text-xs text-gray-400 flex-shrink-0 num">2분 전</span>
+              </div>
+              <p class="text-xs text-gray-500 mt-1 truncate">갑자기 자기 발 핥는 행동이 늘었어요...</p>
+            </li>
+            <li class="px-2 py-2.5 hover:bg-amber-50/40 rounded-lg cursor-pointer transition-colors">
+              <div class="flex items-center justify-between gap-3">
+                <span class="truncate text-sm text-gray-800 font-medium">강아지 사료 추천 부탁드려요!</span>
+                <span class="text-xs text-gray-400 flex-shrink-0 num">15분 전</span>
+              </div>
+              <p class="text-xs text-gray-500 mt-1 truncate">12개월 푸들인데 요즘 입맛이 없는지...</p>
+            </li>
+            <li class="px-2 py-2.5 hover:bg-amber-50/40 rounded-lg cursor-pointer transition-colors">
+              <div class="flex items-center justify-between gap-3">
+                <span class="truncate text-sm text-gray-800 font-medium">고양이 장난감 뭐가 좋을까요</span>
+                <span class="text-xs text-gray-400 flex-shrink-0 num">1시간 전</span>
+              </div>
+              <p class="text-xs text-gray-500 mt-1 truncate">3살 코숏인데 깃털 장난감은 이제 안 좋아하네요</p>
+            </li>
+          </ul>
+        </div>
+
+        <div class="bg-white rounded-2xl border border-gray-200 p-5">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="font-bold text-gray-900">공지사항</h3>
+          </div>
+          <ul class="divide-y divide-gray-100 -mx-2">
+            <li class="px-2 py-2.5 hover:bg-amber-50/40 rounded-lg cursor-pointer transition-colors">
+              <div class="flex items-center justify-between gap-3">
+                <span class="flex items-center gap-2 truncate">
+                  <span class="px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-700 text-[10px] font-bold flex-shrink-0">NEW</span>
+                  <span class="truncate text-sm text-gray-800 font-medium">집사모여 서비스 오픈 안내</span>
+                </span>
+                <span class="text-xs text-gray-400 flex-shrink-0 num">2026.04.14</span>
+              </div>
+            </li>
+            <li class="px-2 py-2.5 hover:bg-amber-50/40 rounded-lg cursor-pointer transition-colors">
+              <div class="flex items-center justify-between gap-3">
+                <span class="truncate text-sm text-gray-800 font-medium">커뮤니티 이용 규칙 안내</span>
+                <span class="text-xs text-gray-400 flex-shrink-0 num">2026.04.14</span>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- ④ 최신 자랑 (기존 4열 그리드, 카드에 lift hover + 좋아요 amber 액센트) -->
+    <section>
+      <div class="flex items-center justify-between mb-5">
+        <h2 class="text-xl font-bold text-gray-900">최신 자랑</h2>
+      </div>
+      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        <article class="pop lift rounded-2xl overflow-hidden bg-white border border-gray-200">
+          <div class="aspect-square bg-gradient-to-br from-amber-200 to-orange-300"></div>
+          <div class="p-3">
+            <p class="font-semibold text-sm text-gray-900 truncate">햇살 가득한 오후</p>
+            <div class="flex items-center justify-between mt-1.5">
+              <span class="text-xs text-gray-500 truncate">집사_뽀삐</span>
+              <span class="heart text-xs text-amber-600 num font-medium">❤ 24</span>
+            </div>
+          </div>
+        </article>
+        <article class="pop lift rounded-2xl overflow-hidden bg-white border border-gray-200">
+          <div class="aspect-square bg-gradient-to-br from-rose-200 to-pink-300"></div>
+          <div class="p-3">
+            <p class="font-semibold text-sm text-gray-900 truncate">미용 마치고 한 컷</p>
+            <div class="flex items-center justify-between mt-1.5">
+              <span class="text-xs text-gray-500 truncate">집사_라떼</span>
+              <span class="heart text-xs text-amber-600 num font-medium">❤ 19</span>
+            </div>
+          </div>
+        </article>
+        <article class="pop lift rounded-2xl overflow-hidden bg-white border border-gray-200">
+          <div class="aspect-square bg-gradient-to-br from-sky-200 to-blue-300"></div>
+          <div class="p-3">
+            <p class="font-semibold text-sm text-gray-900 truncate">베란다 명상 중</p>
+            <div class="flex items-center justify-between mt-1.5">
+              <span class="text-xs text-gray-500 truncate">집사_민트</span>
+              <span class="heart text-xs text-amber-600 num font-medium">❤ 17</span>
+            </div>
+          </div>
+        </article>
+        <article class="pop lift rounded-2xl overflow-hidden bg-white border border-gray-200">
+          <div class="aspect-square bg-gradient-to-br from-emerald-200 to-teal-300"></div>
+          <div class="p-3">
+            <p class="font-semibold text-sm text-gray-900 truncate">새 장난감 들고 자랑</p>
+            <div class="flex items-center justify-between mt-1.5">
+              <span class="text-xs text-gray-500 truncate">집사_콩이</span>
+              <span class="heart text-xs text-amber-600 num font-medium">❤ 13</span>
+            </div>
+          </div>
+        </article>
+        <article class="pop lift rounded-2xl overflow-hidden bg-white border border-gray-200">
+          <div class="aspect-square bg-gradient-to-br from-violet-200 to-purple-300"></div>
+          <div class="p-3">
+            <p class="font-semibold text-sm text-gray-900 truncate">놀이 시간 중 표정</p>
+            <div class="flex items-center justify-between mt-1.5">
+              <span class="text-xs text-gray-500 truncate">집사_은비</span>
+              <span class="heart text-xs text-amber-600 num font-medium">❤ 11</span>
+            </div>
+          </div>
+        </article>
+        <article class="pop lift rounded-2xl overflow-hidden bg-white border border-gray-200">
+          <div class="aspect-square bg-gradient-to-br from-yellow-200 to-amber-300"></div>
+          <div class="p-3">
+            <p class="font-semibold text-sm text-gray-900 truncate">간식 줄 때 표정 ㅋㅋ</p>
+            <div class="flex items-center justify-between mt-1.5">
+              <span class="text-xs text-gray-500 truncate">집사_초코</span>
+              <span class="heart text-xs text-amber-600 num font-medium">❤ 9</span>
+            </div>
+          </div>
+        </article>
+        <article class="pop lift rounded-2xl overflow-hidden bg-white border border-gray-200">
+          <div class="aspect-square bg-gradient-to-br from-orange-200 to-amber-300"></div>
+          <div class="p-3">
+            <p class="font-semibold text-sm text-gray-900 truncate">산책길 발견한 친구</p>
+            <div class="flex items-center justify-between mt-1.5">
+              <span class="text-xs text-gray-500 truncate">집사_도담</span>
+              <span class="heart text-xs text-amber-600 num font-medium">❤ 7</span>
+            </div>
+          </div>
+        </article>
+        <article class="pop lift rounded-2xl overflow-hidden bg-white border border-gray-200">
+          <div class="aspect-square bg-gradient-to-br from-fuchsia-200 to-rose-300"></div>
+          <div class="p-3">
+            <p class="font-semibold text-sm text-gray-900 truncate">잠든 우리 애</p>
+            <div class="flex items-center justify-between mt-1.5">
+              <span class="text-xs text-gray-500 truncate">집사_보리</span>
+              <span class="heart text-xs text-amber-600 num font-medium">❤ 5</span>
+            </div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+</body>
+</html>

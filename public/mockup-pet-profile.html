@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>집사모여 — 반려동물 프로필 시안</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        fontFamily: { sans: ['Pretendard Variable', 'Pretendard', 'system-ui'] },
+        colors: {
+          gray: {
+            50: '#f9fafb', 100: '#f2f4f6', 200: '#e5e8eb', 300: '#d1d6db',
+            400: '#b0b8c1', 500: '#8b95a1', 600: '#6b7684', 700: '#4e5968',
+            800: '#333d4b', 900: '#191f28',
+          },
+          amber: {
+            50: '#fff3ee', 100: '#ffdccf', 200: '#ffba9f', 300: '#ff9877',
+            400: '#ff8461', 500: '#ff734c', 600: '#e85e3a', 700: '#c14a2c',
+            800: '#923722', 900: '#5f2416',
+          },
+          orange: {
+            50: '#fff4e6', 100: '#ffdfb8', 200: '#ffc98a', 300: '#ffb35c',
+            400: '#ff9d2e', 500: '#ff8a00', 600: '#e67c00', 700: '#cc6e00',
+          },
+        },
+      },
+    },
+  };
+</script>
+<style>
+  body { font-family: 'Pretendard Variable', Pretendard, system-ui; -webkit-font-smoothing: antialiased; background: #fff; }
+  .num { font-variant-numeric: tabular-nums; }
+  .pop { transition: transform 0.12s ease, box-shadow 0.2s ease; }
+  .pop:active { transform: scale(0.98); }
+</style>
+</head>
+<body class="text-gray-900">
+
+<!-- 시안용 안내 -->
+<div class="bg-amber-50 border-b border-amber-200 text-amber-700 text-sm px-6 py-2">
+  <span class="font-semibold">🐾 반려동물 프로필 페이지 시안 v2</span>
+  <span class="text-amber-600 ml-2">· 이미지 #18 구조 + 우리 amber 스타일</span>
+</div>
+
+<div class="max-w-[1280px] mx-auto px-6 py-8">
+
+  <!-- URL 라벨 -->
+  <div class="text-sm text-gray-400 mb-3 px-1">jipsamoye.com/pets/aYoUnG</div>
+
+  <!-- 메인 프로필 카드 -->
+  <article class="bg-white border border-amber-200 rounded-3xl p-7">
+    <div class="flex items-start gap-7">
+
+      <!-- 좌측: 펫 이미지 + 닉네임 -->
+      <div class="flex-shrink-0 flex flex-col items-center w-44">
+        <div class="w-40 h-40 rounded-full bg-gradient-to-br from-amber-100 via-orange-100 to-yellow-100 flex items-center justify-center text-7xl select-none ring-4 ring-white shadow-md overflow-hidden">
+          🐩
+        </div>
+        <h1 class="mt-4 text-2xl font-bold text-gray-900">aYoUnG</h1>
+      </div>
+
+      <!-- 가운데: 소개글 + 통계 -->
+      <div class="flex-1 min-w-0 flex flex-col gap-4">
+
+        <!-- 자기소개 박스 (회색 라운드) -->
+        <div class="bg-gray-50 rounded-2xl px-5 py-4 text-sm text-gray-800 leading-relaxed">
+          <p>안녕! 내이름은 김구찌야</p>
+          <p>올해 <span class="num">12</span>살이고, 누나랑 여행다니는게 취미야</p>
+          <p>하루하루 추억이 늘어나고 있어서 행보케</p>
+          <p>나의 행보칸 추억들을 공유할게?</p>
+        </div>
+
+        <!-- 소셜 링크 -->
+        <div class="flex flex-wrap items-center gap-2">
+          <a href="#" class="pop inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gray-50 border border-gray-200 text-xs font-medium text-gray-700 hover:bg-gray-100 transition-colors">
+            <span class="w-4 h-4 rounded bg-gradient-to-tr from-purple-500 via-pink-500 to-orange-400 flex items-center justify-center text-white text-[8px] font-bold">📷</span>
+            @ayoung_diary
+          </a>
+          <a href="#" class="pop inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gray-50 border border-gray-200 text-xs font-medium text-gray-700 hover:bg-gray-100 transition-colors">
+            <span class="w-4 h-4 rounded bg-red-500 flex items-center justify-center text-white text-[8px] font-bold">▶</span>
+            aYoUnG TV
+          </a>
+        </div>
+
+        <!-- 통계 박스 (amber outline 라운드) -->
+        <div class="rounded-2xl border-2 border-amber-200 bg-white p-5">
+          <div class="grid grid-cols-3 gap-4 divide-x divide-amber-100">
+            <div class="flex items-center justify-between gap-3 px-1">
+              <span class="flex items-center gap-1.5 text-sm font-medium text-gray-700">
+                <span class="text-amber-500">❤</span> 받은하트
+              </span>
+              <span class="px-3 py-1 rounded-full bg-amber-50 text-amber-700 text-sm font-bold num">2,978개</span>
+            </div>
+            <div class="flex items-center justify-between gap-3 pl-5 pr-1">
+              <span class="flex items-center gap-1.5 text-sm font-medium text-gray-700">
+                <span class="text-amber-500">👥</span> 구독자
+              </span>
+              <span class="px-3 py-1 rounded-full bg-amber-50 text-amber-700 text-sm font-bold num">1명</span>
+            </div>
+            <div class="flex items-center justify-between gap-3 pl-5 pr-1">
+              <span class="flex items-center gap-1.5 text-sm font-medium text-gray-700">
+                <span class="text-amber-500">🏆</span> 랭킹
+              </span>
+              <span class="px-3 py-1 rounded-full bg-amber-50 text-amber-700 text-sm font-bold num">1위</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- 우측: 구독하기 / 메시지 -->
+      <div class="flex flex-col gap-2 flex-shrink-0 w-32">
+        <button class="pop px-5 py-2.5 rounded-xl border-2 border-amber-400 text-amber-600 font-semibold text-sm hover:bg-amber-50 transition-colors flex items-center justify-center gap-1.5">
+          📣 구독하기
+        </button>
+        <button class="pop px-5 py-2.5 rounded-xl bg-gray-900 text-white font-semibold text-sm hover:bg-gray-800 transition-colors flex items-center justify-center gap-1.5">
+          💬 메시지
+        </button>
+      </div>
+
+    </div>
+  </article>
+
+  <!-- 게시물 (우리 현재 PostCard 형태) -->
+  <div class="mt-10">
+    <h2 class="text-xl font-bold text-gray-900 mb-5">게시물 <span class="num text-amber-600">24</span></h2>
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+
+      <!-- Card 1 -->
+      <a href="#" class="block group">
+        <div class="bg-white border border-gray-200 rounded-2xl overflow-hidden transition-all duration-200 group-hover:shadow-md group-hover:scale-[1.02]">
+          <div class="aspect-square bg-gradient-to-br from-amber-300 to-orange-400"></div>
+          <div class="p-3.5">
+            <p class="font-semibold text-sm text-gray-900 truncate">햇살 가득한 오후</p>
+            <div class="flex items-center justify-between mt-2">
+              <div class="flex items-center gap-2 min-w-0">
+                <span class="w-8 h-8 rounded-full bg-gradient-to-br from-amber-300 to-pink-300 ring-2 ring-white shadow-sm flex-shrink-0"></span>
+                <span class="text-xs text-gray-500 truncate">aYoUnG</span>
+              </div>
+              <span class="flex items-center gap-1 text-xs text-amber-600 font-medium tabular-nums flex-shrink-0">❤ 24</span>
+            </div>
+          </div>
+        </div>
+      </a>
+
+      <!-- Card 2 -->
+      <a href="#" class="block group">
+        <div class="bg-white border border-gray-200 rounded-2xl overflow-hidden transition-all duration-200 group-hover:shadow-md group-hover:scale-[1.02]">
+          <div class="aspect-square bg-gradient-to-br from-pink-300 to-rose-400"></div>
+          <div class="p-3.5">
+            <p class="font-semibold text-sm text-gray-900 truncate">미용 마치고 한 컷</p>
+            <div class="flex items-center justify-between mt-2">
+              <div class="flex items-center gap-2 min-w-0">
+                <span class="w-8 h-8 rounded-full bg-gradient-to-br from-amber-300 to-pink-300 ring-2 ring-white shadow-sm flex-shrink-0"></span>
+                <span class="text-xs text-gray-500 truncate">aYoUnG</span>
+              </div>
+              <span class="flex items-center gap-1 text-xs text-amber-600 font-medium tabular-nums flex-shrink-0">❤ 19</span>
+            </div>
+          </div>
+        </div>
+      </a>
+
+      <!-- Card 3 -->
+      <a href="#" class="block group">
+        <div class="bg-white border border-gray-200 rounded-2xl overflow-hidden transition-all duration-200 group-hover:shadow-md group-hover:scale-[1.02]">
+          <div class="aspect-square bg-gradient-to-br from-blue-300 to-indigo-400"></div>
+          <div class="p-3.5">
+            <p class="font-semibold text-sm text-gray-900 truncate">베란다 명상 중</p>
+            <div class="flex items-center justify-between mt-2">
+              <div class="flex items-center gap-2 min-w-0">
+                <span class="w-8 h-8 rounded-full bg-gradient-to-br from-amber-300 to-pink-300 ring-2 ring-white shadow-sm flex-shrink-0"></span>
+                <span class="text-xs text-gray-500 truncate">aYoUnG</span>
+              </div>
+              <span class="flex items-center gap-1 text-xs text-amber-600 font-medium tabular-nums flex-shrink-0">❤ 17</span>
+            </div>
+          </div>
+        </div>
+      </a>
+
+      <!-- Card 4 -->
+      <a href="#" class="block group">
+        <div class="bg-white border border-gray-200 rounded-2xl overflow-hidden transition-all duration-200 group-hover:shadow-md group-hover:scale-[1.02]">
+          <div class="aspect-square bg-gradient-to-br from-emerald-300 to-teal-400"></div>
+          <div class="p-3.5">
+            <p class="font-semibold text-sm text-gray-900 truncate">새 장난감 들고 자랑</p>
+            <div class="flex items-center justify-between mt-2">
+              <div class="flex items-center gap-2 min-w-0">
+                <span class="w-8 h-8 rounded-full bg-gradient-to-br from-amber-300 to-pink-300 ring-2 ring-white shadow-sm flex-shrink-0"></span>
+                <span class="text-xs text-gray-500 truncate">aYoUnG</span>
+              </div>
+              <span class="flex items-center gap-1 text-xs text-amber-600 font-medium tabular-nums flex-shrink-0">❤ 13</span>
+            </div>
+          </div>
+        </div>
+      </a>
+
+      <!-- Card 5 -->
+      <a href="#" class="block group">
+        <div class="bg-white border border-gray-200 rounded-2xl overflow-hidden transition-all duration-200 group-hover:shadow-md group-hover:scale-[1.02]">
+          <div class="aspect-square bg-gradient-to-br from-violet-300 to-purple-400"></div>
+          <div class="p-3.5">
+            <p class="font-semibold text-sm text-gray-900 truncate">놀이 시간 중 표정</p>
+            <div class="flex items-center justify-between mt-2">
+              <div class="flex items-center gap-2 min-w-0">
+                <span class="w-8 h-8 rounded-full bg-gradient-to-br from-amber-300 to-pink-300 ring-2 ring-white shadow-sm flex-shrink-0"></span>
+                <span class="text-xs text-gray-500 truncate">aYoUnG</span>
+              </div>
+              <span class="flex items-center gap-1 text-xs text-amber-600 font-medium tabular-nums flex-shrink-0">❤ 11</span>
+            </div>
+          </div>
+        </div>
+      </a>
+
+      <!-- Card 6 -->
+      <a href="#" class="block group">
+        <div class="bg-white border border-gray-200 rounded-2xl overflow-hidden transition-all duration-200 group-hover:shadow-md group-hover:scale-[1.02]">
+          <div class="aspect-square bg-gradient-to-br from-yellow-300 to-amber-400"></div>
+          <div class="p-3.5">
+            <p class="font-semibold text-sm text-gray-900 truncate">간식 줄 때 표정 ㅋㅋ</p>
+            <div class="flex items-center justify-between mt-2">
+              <div class="flex items-center gap-2 min-w-0">
+                <span class="w-8 h-8 rounded-full bg-gradient-to-br from-amber-300 to-pink-300 ring-2 ring-white shadow-sm flex-shrink-0"></span>
+                <span class="text-xs text-gray-500 truncate">aYoUnG</span>
+              </div>
+              <span class="flex items-center gap-1 text-xs text-amber-600 font-medium tabular-nums flex-shrink-0">❤ 9</span>
+            </div>
+          </div>
+        </div>
+      </a>
+
+      <!-- Card 7 -->
+      <a href="#" class="block group">
+        <div class="bg-white border border-gray-200 rounded-2xl overflow-hidden transition-all duration-200 group-hover:shadow-md group-hover:scale-[1.02]">
+          <div class="aspect-square bg-gradient-to-br from-orange-300 to-amber-400"></div>
+          <div class="p-3.5">
+            <p class="font-semibold text-sm text-gray-900 truncate">산책길 발견한 친구</p>
+            <div class="flex items-center justify-between mt-2">
+              <div class="flex items-center gap-2 min-w-0">
+                <span class="w-8 h-8 rounded-full bg-gradient-to-br from-amber-300 to-pink-300 ring-2 ring-white shadow-sm flex-shrink-0"></span>
+                <span class="text-xs text-gray-500 truncate">aYoUnG</span>
+              </div>
+              <span class="flex items-center gap-1 text-xs text-amber-600 font-medium tabular-nums flex-shrink-0">❤ 7</span>
+            </div>
+          </div>
+        </div>
+      </a>
+
+      <!-- Card 8 -->
+      <a href="#" class="block group">
+        <div class="bg-white border border-gray-200 rounded-2xl overflow-hidden transition-all duration-200 group-hover:shadow-md group-hover:scale-[1.02]">
+          <div class="aspect-square bg-gradient-to-br from-fuchsia-300 to-rose-400"></div>
+          <div class="p-3.5">
+            <p class="font-semibold text-sm text-gray-900 truncate">잠든 우리 애</p>
+            <div class="flex items-center justify-between mt-2">
+              <div class="flex items-center gap-2 min-w-0">
+                <span class="w-8 h-8 rounded-full bg-gradient-to-br from-amber-300 to-pink-300 ring-2 ring-white shadow-sm flex-shrink-0"></span>
+                <span class="text-xs text-gray-500 truncate">aYoUnG</span>
+              </div>
+              <span class="flex items-center gap-1 text-xs text-amber-600 font-medium tabular-nums flex-shrink-0">❤ 5</span>
+            </div>
+          </div>
+        </div>
+      </a>
+
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>
