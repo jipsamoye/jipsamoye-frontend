@@ -77,10 +77,10 @@ export default function Header({ isLoggedIn = false, onLoginClick, onLogout, onM
           {isLoggedIn ? (
             <>
               <Link
-                href="/posts/new"
+                href={pathname.startsWith('/board') ? '/board/new' : '/posts/new'}
                 className="hidden lg:flex items-center px-6 py-2 bg-amber-500 text-white rounded-xl text-base font-medium hover:bg-amber-600 transition-all duration-200"
               >
-                자랑하기
+                {pathname.startsWith('/board') ? '글쓰기' : '자랑하기'}
               </Link>
               <Link href="/search" className="p-2.5 text-gray-800 hover:text-gray-900">
                 <MagnifyingGlassIcon className="w-6 h-6" />
