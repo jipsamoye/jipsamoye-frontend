@@ -177,6 +177,13 @@ export default function Header({ isLoggedIn = false, onLoginClick, onLogout, onM
                     >
                       좋아요한 게시글
                     </Link>
+                    <Link
+                      href="/feed"
+                      onClick={() => setShowDropdown(false)}
+                      className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100"
+                    >
+                      구독한 유저 게시글
+                    </Link>
                     <hr className="my-1 border-gray-100" />
                     <button
                       onClick={() => { setShowDropdown(false); onLogout?.(); router.push('/'); }}
