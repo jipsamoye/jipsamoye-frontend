@@ -8,11 +8,13 @@ import Button from '@/components/common/Button';
 interface NavigationGuardContextType {
   setBlocked: (blocked: boolean, message?: string) => void;
   guardedPush: (url: string) => void;
+  interceptLink: (e: React.MouseEvent<HTMLAnchorElement>, url: string) => void;
 }
 
 const NavigationGuardContext = createContext<NavigationGuardContextType>({
   setBlocked: () => {},
   guardedPush: () => {},
+  interceptLink: () => {},
 });
 
 export function useNavigationGuard() {
@@ -57,6 +59,16 @@ export default function NavigationGuardProvider({ children }: { children: React.
     }
   }, [router]);
 
+  const interceptLink = useCallback((e: React.MouseEvent<HTMLAnchorElement>, url: string) => {
+    if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey) return;
+    if (blockedRef.current) {
+      e.preventDefault();
+      pendingUrl.current = url;
+      isBackRef.current = false;
+      setShowModal(true);
+    }
+  }, []);
+
   const confirmLeave = () => {
     blockedRef.current = false;
     dummyPushedRef.current = false;
@@ -99,7 +111,7 @@ export default function NavigationGuardProvider({ children }: { children: React.
   }, []);
 
   return (
-    <NavigationGuardContext.Provider value={{ setBlocked, guardedPush }}>
+    <NavigationGuardContext.Provider value={{ setBlocked, guardedPush, interceptLink }}>
       {children}
       <Modal isOpen={showModal} onClose={cancelLeave}>
         <div className="text-center">
