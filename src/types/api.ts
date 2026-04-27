@@ -210,3 +210,12 @@ export interface DmMessage {
   readAt: string | null;
   createdAt: string;
 }
+
+// 랭킹 페이지 API 응답 (GET /api/posts/ranking)
+export interface RankingPageResponse {
+  period: 'WEEKLY' | 'MONTHLY';
+  startDate: string; // "YYYY-MM-DD"
+  endDate: string;   // "YYYY-MM-DD" (UI 표시용 inclusive end)
+  isOngoing: boolean;
+  posts: PageResponse<PetPostListItem>;
+}
