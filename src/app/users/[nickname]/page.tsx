@@ -124,7 +124,7 @@ export default function ProfilePage({ params }: { params: Promise<{ nickname: st
           {/* 가운데: 자기소개 + 소셜 + 통계 */}
           <div className="flex-1 min-w-0 flex flex-col gap-4">
             {/* 자기소개 */}
-            <div className="bg-gray-50 rounded-2xl px-5 py-4 text-sm text-gray-800 leading-relaxed min-h-[80px]">
+            <div className="bg-gray-50 rounded-2xl px-5 py-4 text-sm text-gray-800 leading-relaxed min-h-[80px] max-h-[200px] overflow-y-auto">
               {profile.bio ? (
                 profile.bio.split('\n').map((line, i) => <p key={i}>{line}</p>)
               ) : (

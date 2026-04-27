@@ -10,9 +10,10 @@ import { EllipsisVerticalIcon } from '@/components/layout/icons';
 interface CommentSectionProps {
   postId: string;
   user: User | null;
+  onCountChange?: (delta: number) => void;
 }
 
-export default function CommentSection({ postId, user }: CommentSectionProps) {
+export default function CommentSection({ postId, user, onCountChange }: CommentSectionProps) {
   const [comments, setComments] = useState<Comment[]>([]);
   const [commentText, setCommentText] = useState('');
   const [editingId, setEditingId] = useState<number | null>(null);
@@ -42,6 +43,7 @@ export default function CommentSection({ postId, user }: CommentSectionProps) {
       const res = await api.post<Comment>(`/api/posts/${postId}/comments`, { content: commentText });
       setComments((prev) => [{ ...res.data, replies: [] }, ...prev]);
       setCommentText('');
+      onCountChange?.(1);
     } catch { /* ignore */ }
   };
 
@@ -55,6 +57,7 @@ export default function CommentSection({ postId, user }: CommentSectionProps) {
       setReplyText('');
     } catch {
       const fakeReply: Comment = {
+        // eslint-disable-next-line react-hooks/purity
         id: Date.now(),
         content: replyText,
         nickname: user.nickname,
@@ -79,6 +82,7 @@ export default function CommentSection({ postId, user }: CommentSectionProps) {
       setComments((prev) => prev.map((c) => c.id === parentId ? { ...c, replies: (c.replies ?? []).filter((r) => r.id !== commentId) } : c));
     } else {
       setComments((prev) => prev.filter((c) => c.id !== commentId));
+      onCountChange?.(-1);
     }
   };
 

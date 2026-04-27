@@ -39,7 +39,7 @@ export default function ProfileHoverCardContent({
         </div>
       </div>
       {/* bio */}
-      <div className="bg-gray-50 rounded-xl px-3 py-2.5 text-xs text-gray-800 leading-relaxed mb-3 min-h-[44px]">
+      <div className="bg-gray-50 rounded-xl px-3 py-2.5 text-xs text-gray-800 leading-relaxed mb-3 min-h-[44px] max-h-[80px] overflow-y-auto">
         {profile ? (
           profile.bio ? (
             profile.bio.split('\n').map((line, i) => <p key={i}>{line}</p>)

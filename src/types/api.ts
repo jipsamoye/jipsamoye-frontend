@@ -44,6 +44,7 @@ export interface PetPost {
   content: string;
   imageUrls: string[];
   likeCount: number;
+  commentCount: number;
   nickname: string;
   profileImageUrl: string | null;
   createdAt: string;
