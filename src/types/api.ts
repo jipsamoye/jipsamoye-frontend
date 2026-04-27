@@ -121,7 +121,7 @@ export interface PresignedUrlRequest {
 }
 
 // 자유게시판 카테고리
-export type BoardCategory = 'GENERAL' | 'QUESTION';
+export type BoardCategory = 'GENERAL' | 'QUESTION' | 'NOTICE';
 
 // 자유게시판 검색 타입
 export type BoardSearchType = 'TITLE' | 'TITLE_CONTENT';

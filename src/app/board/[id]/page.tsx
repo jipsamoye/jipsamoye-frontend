@@ -12,8 +12,9 @@ import { timeAgo } from '@/lib/utils';
 import BoardCommentSection from '@/components/domain/BoardCommentSection';
 import { showToast } from '@/components/common/Toast';
 
-const CATEGORY_LABEL = { GENERAL: '일반', QUESTION: '질문' } as const;
+const CATEGORY_LABEL = { NOTICE: '공지', GENERAL: '일반', QUESTION: '질문' } as const;
 const CATEGORY_STYLE = {
+  NOTICE: 'bg-emerald-50 text-emerald-600',
   GENERAL: 'bg-gray-100 text-gray-600',
   QUESTION: 'bg-amber-50 text-amber-600',
 } as const;

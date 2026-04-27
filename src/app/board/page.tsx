@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-import Link from 'next/link';
 import { api } from '@/lib/api';
 import { BoardListItem as BoardListItemType, BoardCategory, BoardSearchType, PageResponse } from '@/types/api';
 import BoardListItem from '@/components/domain/BoardListItem';
@@ -101,16 +100,8 @@ export default function BoardPage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center mb-6">
         <h1 className="text-2xl font-bold text-gray-900">전체 글</h1>
-        <div className="flex items-center gap-2">
-          <Link
-            href="/board/new"
-            className="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-xl text-sm font-medium transition-colors"
-          >
-            글쓰기
-          </Link>
-        </div>
       </div>
 
       <div className="flex items-center justify-between gap-4 mb-6 flex-wrap">
