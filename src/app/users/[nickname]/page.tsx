@@ -6,9 +6,7 @@ import { api } from '@/lib/api';
 import { User, PetPostListItem, PageResponse, PresignedUrlResponse } from '@/types/api';
 import { useAuthContext } from '@/components/providers/AuthProvider';
 import Avatar from '@/components/common/Avatar';
-import Button from '@/components/common/Button';
 import PostCard from '@/components/domain/PostCard';
-import CoverImageEditor from '@/components/domain/CoverImageEditor';
 import ProfileEditModal from '@/components/domain/ProfileEditModal';
 import { ALLOWED_IMAGE_EXTS, POST_CONFIG } from '@/lib/constants';
 import { compressImage, extFromMimeType } from '@/lib/imageCompress';
@@ -24,38 +22,7 @@ export default function ProfilePage({ params }: { params: Promise<{ nickname: st
   const [isFollowing, setIsFollowing] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  // 프로필 편집 모달
   const [showEditModal, setShowEditModal] = useState(false);
-
-  // 커버 이미지 편집 모달
-  const [showCoverEditor, setShowCoverEditor] = useState(false);
-  const [coverSaving, setCoverSaving] = useState(false);
-
-  // 커버 풀너비 계산
-  const wrapperRef = useRef<HTMLDivElement>(null);
-  const [coverStyle, setCoverStyle] = useState<React.CSSProperties>({});
-
-  useEffect(() => {
-    const calcCover = () => {
-      const el = wrapperRef.current;
-      if (!el) return;
-      const rect = el.getBoundingClientRect();
-      const sidebarWidth = window.innerWidth >= 1024 ? 208 : 0;
-      const leftOffset = rect.left - sidebarWidth;
-      const rightOffset = window.innerWidth - rect.right;
-      setCoverStyle({
-        marginLeft: -leftOffset,
-        marginRight: -rightOffset,
-      });
-    };
-    calcCover();
-    window.addEventListener('resize', calcCover);
-    return () => window.removeEventListener('resize', calcCover);
-  }, [loading]);
-
-  // 이미지 업로드
-  const coverFileInputRef = useRef<HTMLInputElement>(null);
-  const [coverFileForEditor, setCoverFileForEditor] = useState<string | null>(null);
   const profileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -76,7 +43,7 @@ export default function ProfilePage({ params }: { params: Promise<{ nickname: st
       setIsFollowing(res.data);
       setProfile((prev) => prev ? {
         ...prev,
-        followerCount: prev.followerCount + (res.data ? 1 : -1)
+        followerCount: prev.followerCount + (res.data ? 1 : -1),
       } : prev);
     } catch { /* ignore */ }
   };
@@ -104,24 +71,6 @@ export default function ProfilePage({ params }: { params: Promise<{ nickname: st
     }
   };
 
-  const handleCoverSave = async (blob: Blob) => {
-    if (!user) return;
-    setCoverSaving(true);
-    const file = new File([blob], 'cover.webp', { type: 'image/webp' });
-    const imageUrl = await uploadImage(file, 'covers', 'cover');
-    if (!imageUrl) {
-      setCoverSaving(false);
-      return;
-    }
-    try {
-      const res = await api.patch<User>(`/api/users/me`, { coverImageUrl: imageUrl });
-      setProfile(res.data);
-      updateUser(res.data);
-      setShowCoverEditor(false);
-    } catch { /* ignore */ }
-    setCoverSaving(false);
-  };
-
   const handleProfileImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !user || !profile) return;
@@ -140,113 +89,117 @@ export default function ProfilePage({ params }: { params: Promise<{ nickname: st
   const isMe = user?.nickname === profile.nickname;
 
   return (
-    <div ref={wrapperRef}>
-      {/* 커버 */}
-      <div
-        className={`relative overflow-hidden -mt-6 ${profile.coverImageUrl ? 'h-80' : 'h-48'}`}
-        style={coverStyle}
-      >
-        {profile.coverImageUrl ? (
-          <img src={profile.coverImageUrl} alt="커버" loading="lazy" decoding="async" className="w-full h-full object-cover" />
-        ) : (
-          <div className="w-full h-full bg-gradient-to-r from-gray-200 to-gray-300" />
-        )}
-        {isMe && (
-          <>
-            <button
-              onClick={() => coverFileInputRef.current?.click()}
-              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center gap-2 px-4 py-2 bg-black/50 text-white rounded-lg text-sm hover:bg-black/70 transition-colors"
-            >
-              <span>+</span> 커버 추가하기
-            </button>
-            <input
-              ref={coverFileInputRef}
-              type="file"
-              accept="image/jpeg,image/png,image/webp"
-              className="hidden"
-              onChange={(e) => {
-                const file = e.target.files?.[0];
-                if (file) {
-                  setCoverFileForEditor(URL.createObjectURL(file));
-                  setShowCoverEditor(true);
-                }
-                e.target.value = '';
-              }}
-            />
-          </>
-        )}
-      </div>
-
-      {/* 프로필 정보 */}
-      <div className="border-b border-gray-100 bg-white px-6 py-6">
-        <div className="flex items-start gap-4">
-          <div className="relative flex-shrink-0">
-            <Avatar src={profile.profileImageUrl} size="xl" />
-            {isMe && (
-              <>
-                <button
-                  onClick={() => profileInputRef.current?.click()}
-                  className="absolute bottom-0 right-0 w-8 h-8 bg-white border border-gray-200 rounded-full flex items-center justify-center shadow-sm hover:bg-gray-50"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4 text-gray-600">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Z" />
-                  </svg>
-                </button>
-                <input
-                  ref={profileInputRef}
-                  type="file"
-                  accept="image/jpeg,image/png,image/webp"
-                  className="hidden"
-                  onChange={handleProfileImageUpload}
-                />
-              </>
-            )}
-          </div>
-          <div className="flex-1">
-            <h1 className="text-xl font-bold">{profile.nickname}</h1>
-            <div className="flex items-center gap-4 text-sm text-gray-500 mt-1">
-              <span>팔로워 <strong className="text-gray-900">{profile.followerCount}</strong></span>
-              <span>팔로잉 <strong className="text-gray-900">{profile.followingCount}</strong></span>
+    <div>
+      {/* 프로필 카드 (시안 mockup-pet-profile.html 적용) */}
+      <article className="bg-white border border-amber-200 rounded-3xl p-7">
+        <div className="flex items-start gap-7">
+          {/* 좌측: 큰 원형 이미지 + 닉네임 */}
+          <div className="flex-shrink-0 flex flex-col items-center w-44">
+            <div className="relative">
+              <Avatar src={profile.profileImageUrl} size="2xl" />
+              {isMe && (
+                <>
+                  <button
+                    onClick={() => profileInputRef.current?.click()}
+                    className="absolute bottom-1 right-1 w-9 h-9 bg-white border border-gray-200 rounded-full flex items-center justify-center shadow-sm hover:bg-gray-50"
+                    aria-label="프로필 이미지 변경"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4 text-gray-600">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Z" />
+                    </svg>
+                  </button>
+                  <input
+                    ref={profileInputRef}
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp"
+                    className="hidden"
+                    onChange={handleProfileImageUpload}
+                  />
+                </>
+              )}
             </div>
+            <h1 className="mt-4 text-2xl font-bold text-gray-900 truncate max-w-full">{profile.nickname}</h1>
+          </div>
+
+          {/* 가운데: 자기소개 + 소셜 + 통계 */}
+          <div className="flex-1 min-w-0 flex flex-col gap-4">
+            {/* 자기소개 */}
+            <div className="bg-gray-50 rounded-2xl px-5 py-4 text-sm text-gray-800 leading-relaxed min-h-[80px]">
+              {profile.bio ? (
+                profile.bio.split('\n').map((line, i) => <p key={i}>{line}</p>)
+              ) : (
+                <p className="text-gray-400">아직 자기소개가 없어요</p>
+              )}
+            </div>
+
             {/* 소셜 링크 */}
             {profile.socialLinks && profile.socialLinks.length > 0 && (
-              <div className="flex items-center gap-3 mt-2">
+              <div className="flex flex-wrap items-center gap-2">
                 {profile.socialLinks.map((link, i) => (
                   <a
                     key={i}
                     href={link.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gray-50 border border-gray-200 text-xs font-medium text-gray-700 hover:bg-gray-100 transition-colors"
                   >
-                    {link.type === 'INSTAGRAM' && (
-                      <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/>
-                      </svg>
+                    {link.type === 'INSTAGRAM' ? (
+                      <span className="w-4 h-4 rounded bg-gradient-to-tr from-purple-500 via-pink-500 to-orange-400 flex items-center justify-center text-white text-[8px] font-bold">📷</span>
+                    ) : (
+                      <span className="w-4 h-4 rounded bg-red-500 flex items-center justify-center text-white text-[8px] font-bold">▶</span>
                     )}
-                    {link.type === 'YOUTUBE' && (
-                      <svg className="w-4 h-4 text-red-500" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
-                      </svg>
-                    )}
-                    <span>{link.type === 'INSTAGRAM' ? '인스타그램' : '유튜브'}</span>
+                    <span className="truncate max-w-[160px]">{link.url.replace(/^https?:\/\/(www\.)?/, '')}</span>
                   </a>
                 ))}
               </div>
             )}
+
+            {/* 통계 박스 */}
+            <div className="rounded-2xl border-2 border-amber-200 bg-white p-5">
+              <div className="grid grid-cols-3 gap-4 divide-x divide-amber-100">
+                <div className="flex items-center justify-between gap-3 px-1">
+                  <span className="flex items-center gap-1.5 text-sm font-medium text-gray-700">
+                    <span className="text-amber-500">❤</span> 받은하트
+                  </span>
+                  <span className="px-3 py-1 rounded-full bg-amber-50 text-amber-700 text-sm font-bold tabular-nums">{profile.totalLikeCount.toLocaleString()}</span>
+                </div>
+                <div className="flex items-center justify-between gap-3 pl-5 pr-1">
+                  <span className="flex items-center gap-1.5 text-sm font-medium text-gray-700">
+                    <span className="text-amber-500">👥</span> 구독자
+                  </span>
+                  <span className="px-3 py-1 rounded-full bg-amber-50 text-amber-700 text-sm font-bold tabular-nums">{profile.followerCount.toLocaleString()}명</span>
+                </div>
+                <div className="flex items-center justify-between gap-3 pl-5 pr-1">
+                  <span className="flex items-center gap-1.5 text-sm font-medium text-gray-700">
+                    <span className="text-amber-500">🏆</span> 랭킹
+                  </span>
+                  <span className="px-3 py-1 rounded-full bg-amber-50 text-amber-700 text-sm font-bold tabular-nums">{profile.ranking !== null ? profile.ranking.toLocaleString() : '-'}</span>
+                </div>
+              </div>
+            </div>
           </div>
-          <div className="flex items-center gap-2">
+
+          {/* 우측: 액션 버튼 */}
+          <div className="flex flex-col gap-2 flex-shrink-0 w-32">
             {isMe ? (
-              <Button variant="outline" size="sm" onClick={() => setShowEditModal(true)}>프로필 편집</Button>
+              <button
+                onClick={() => setShowEditModal(true)}
+                className="px-5 py-2.5 rounded-xl border-2 border-amber-400 text-amber-600 font-semibold text-sm hover:bg-amber-50 transition-colors"
+              >
+                프로필 편집
+              </button>
             ) : (
               <>
-                <Button
-                  variant={isFollowing ? 'outline' : 'primary'}
-                  size="sm"
+                <button
                   onClick={handleFollow}
+                  className={`px-5 py-2.5 rounded-xl font-semibold text-sm transition-colors flex items-center justify-center gap-1.5 ${
+                    isFollowing
+                      ? 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      : 'border-2 border-amber-400 text-amber-600 hover:bg-amber-50'
+                  }`}
                 >
-                  {isFollowing ? '팔로잉' : '팔로우'}
-                </Button>
+                  {isFollowing ? '구독 중' : '📣 구독하기'}
+                </button>
                 <button
                   onClick={async () => {
                     if (!user || !profile) return;
@@ -255,28 +208,21 @@ export default function ProfilePage({ params }: { params: Promise<{ nickname: st
                     } catch { /* ignore */ }
                     router.push('/dm');
                   }}
-                  className="p-2 rounded-xl border border-gray-100 text-gray-500 hover:text-gray-700 hover:bg-gray-50 transition-all duration-200"
-                  title="메시지"
+                  className="px-5 py-2.5 rounded-xl bg-gray-900 text-white font-semibold text-sm hover:bg-gray-800 transition-colors flex items-center justify-center gap-1.5"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75" />
-                  </svg>
+                  💬 메시지
                 </button>
               </>
             )}
           </div>
         </div>
-        {profile.bio && (
-          <p className="text-sm text-gray-600 mt-3 ml-28">{profile.bio}</p>
-        )}
-      </div>
+      </article>
 
-      {/* 게시글 목록 */}
-      <div className="px-6 pt-6">
-        <div className="flex items-center gap-2 mb-4">
-          <span className="text-sm font-medium">게시글</span>
-          <span className="text-sm text-gray-400">{profile.postCount}</span>
-        </div>
+      {/* 게시물 (PostCard 그대로) */}
+      <div className="mt-10">
+        <h2 className="text-xl font-bold text-gray-900 mb-5">
+          게시물 <span className="tabular-nums text-amber-600">{profile.postCount.toLocaleString()}</span>
+        </h2>
         {posts.length > 0 ? (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {posts.map((post) => (
@@ -290,15 +236,6 @@ export default function ProfilePage({ params }: { params: Promise<{ nickname: st
           </div>
         )}
       </div>
-
-      {/* 커버 이미지 편집 모달 */}
-      <CoverImageEditor
-        isOpen={showCoverEditor}
-        onClose={() => { setShowCoverEditor(false); setCoverFileForEditor(null); }}
-        onSave={handleCoverSave}
-        saving={coverSaving}
-        initialImage={coverFileForEditor}
-      />
 
       {/* 프로필 편집 모달 */}
       {profile && user && (
