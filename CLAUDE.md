@@ -12,6 +12,13 @@
   - 새 기능: 정상 동작 + 엣지 케이스
   - 버그 수정: 재현 테스트 (실패 → 수정 → 통과)
   - 리팩터링: 기존 동작 보존 확인
+- IMPORTANT: push 전에 반드시 `npx next build`로 production 빌드가 통과하는지 확인한다.
+  로컬 dev에선 통과해도 Vercel prerender 단계에서 실패하는 경우(예: `useSearchParams` Suspense 누락,
+  use client 경계 문제 등) 가 있으니 `next build`로 "Generating static pages" 단계까지 통과해야 안전.
+- IMPORTANT: 메인 push 후에는 반드시 Vercel 배포 성공 여부를 확인한다.
+  - 사용자에게 "푸쉬 완료"라고만 알리고 끝내면 배포 실패가 늦게 발견됨.
+  - 확인 방법: Vercel CLI(`vercel ls --prod`)나 사용자에게 Vercel 대시보드 결과를 물어본다.
+  - 배포 실패 시 즉시 원인 분석 + 후속 fix commit + 재배포 확인까지 책임진다.
 
 ## 기술 스택
 
