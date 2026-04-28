@@ -157,19 +157,19 @@ export default function ProfilePage({ params }: { params: Promise<{ nickname: st
             {/* 통계 박스 */}
             <div className="rounded-2xl border-2 border-amber-200 bg-white p-5">
               <div className="grid grid-cols-1 md:grid-cols-3 md:gap-4 divide-y md:divide-y-0 md:divide-x divide-amber-100">
-                <div className="flex items-center justify-between gap-3 px-1 py-2 md:py-0">
+                <div className="flex items-center justify-between gap-3 py-2 md:py-0">
                   <span className="flex items-center gap-1.5 text-sm font-medium text-gray-700">
                     <span className="text-amber-500">❤</span> 받은하트
                   </span>
                   <span className="px-3 py-1 rounded-full bg-amber-50 text-amber-700 text-sm font-bold tabular-nums">{profile.totalLikeCount.toLocaleString()}개</span>
                 </div>
-                <div className="flex items-center justify-between gap-3 md:pl-5 pr-1 py-2 md:py-0">
+                <div className="flex items-center justify-between gap-3 py-2 md:py-0">
                   <span className="flex items-center gap-1.5 text-sm font-medium text-gray-700">
                     <span className="text-amber-500">👥</span> 구독자
                   </span>
                   <span className="px-3 py-1 rounded-full bg-amber-50 text-amber-700 text-sm font-bold tabular-nums">{profile.followerCount.toLocaleString()}명</span>
                 </div>
-                <div className="flex items-center justify-between gap-3 md:pl-5 pr-1 py-2 md:py-0">
+                <div className="flex items-center justify-between gap-3 py-2 md:py-0">
                   <span className="flex items-center gap-1.5 text-sm font-medium text-gray-700">
                     <span className="text-amber-500">🏆</span> 랭킹
                   </span>
