@@ -41,10 +41,10 @@ export default function FloatingWriteButton() {
           <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
         </svg>
       </span>
-      <span
-        className={`flex items-center h-14 overflow-hidden whitespace-nowrap font-semibold text-base transition-all duration-300 ${isExpanded ? 'max-w-[120px] opacity-100 pr-5' : 'max-w-0 opacity-0 pr-0'}`}
-      >
-        {config.label}
+      <span className={`overflow-hidden transition-all duration-300 ${isExpanded ? 'max-w-[120px] opacity-100' : 'max-w-0 opacity-0'}`}>
+        <span className="flex items-center h-14 pr-5 whitespace-nowrap font-semibold text-base">
+          {config.label}
+        </span>
       </span>
     </Link>
   );

@@ -65,22 +65,22 @@ describe('FloatingWriteButton', () => {
   });
 
   describe('스크롤 기반 확장/축소', () => {
-    it('scrollY=0 마운트 시 라벨 span이 확장 상태(opacity-100)다', () => {
+    it('scrollY=0 마운트 시 래퍼 span이 확장 상태(opacity-100)다', () => {
       mockPathname('/');
       const { getByText } = render(<FloatingWriteButton />);
-      const span = getByText('자랑하기');
-      expect(span.className).toContain('opacity-100');
+      const wrapper = getByText('자랑하기').parentElement!;
+      expect(wrapper.className).toContain('opacity-100');
     });
 
-    it('scrollY=200 후 scroll 이벤트 발생 시 라벨 span이 축소 상태(opacity-0)가 된다', () => {
+    it('scrollY=200 후 scroll 이벤트 발생 시 래퍼 span이 축소 상태(opacity-0)가 된다', () => {
       mockPathname('/');
       const { getByText } = render(<FloatingWriteButton />);
       act(() => {
         Object.defineProperty(window, 'scrollY', { writable: true, configurable: true, value: 200 });
         fireEvent.scroll(window);
       });
-      const span = getByText('자랑하기');
-      expect(span.className).toContain('opacity-0');
+      const wrapper = getByText('자랑하기').parentElement!;
+      expect(wrapper.className).toContain('opacity-0');
     });
 
     it('scrollY=200 후 scrollY=0으로 돌아오면 다시 확장 상태(opacity-100)가 된다', () => {
@@ -94,8 +94,8 @@ describe('FloatingWriteButton', () => {
         Object.defineProperty(window, 'scrollY', { writable: true, configurable: true, value: 0 });
         fireEvent.scroll(window);
       });
-      const span = getByText('자랑하기');
-      expect(span.className).toContain('opacity-100');
+      const wrapper = getByText('자랑하기').parentElement!;
+      expect(wrapper.className).toContain('opacity-100');
     });
   });
 });
