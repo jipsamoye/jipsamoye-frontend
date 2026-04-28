@@ -42,7 +42,7 @@ export default function FloatingWriteButton() {
         </svg>
       </span>
       <span
-        className={`overflow-hidden whitespace-nowrap font-semibold text-base transition-all duration-300 ${isExpanded ? 'max-w-[120px] opacity-100 pr-5' : 'max-w-0 opacity-0 pr-0'}`}
+        className={`flex items-center h-14 overflow-hidden whitespace-nowrap font-semibold text-base transition-all duration-300 ${isExpanded ? 'max-w-[120px] opacity-100 pr-5' : 'max-w-0 opacity-0 pr-0'}`}
       >
         {config.label}
       </span>
