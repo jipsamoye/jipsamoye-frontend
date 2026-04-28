@@ -161,7 +161,7 @@ export default function ProfilePage({ params }: { params: Promise<{ nickname: st
                   <span className="flex items-center gap-1.5 text-sm font-medium text-gray-700">
                     <span className="text-amber-500">❤</span> 받은하트
                   </span>
-                  <span className="px-3 py-1 rounded-full bg-amber-50 text-amber-700 text-sm font-bold tabular-nums">{profile.totalLikeCount.toLocaleString()}</span>
+                  <span className="px-3 py-1 rounded-full bg-amber-50 text-amber-700 text-sm font-bold tabular-nums">{profile.totalLikeCount.toLocaleString()}개</span>
                 </div>
                 <div className="flex items-center justify-between gap-3 md:pl-5 pr-1 py-2 md:py-0">
                   <span className="flex items-center gap-1.5 text-sm font-medium text-gray-700">
@@ -173,7 +173,7 @@ export default function ProfilePage({ params }: { params: Promise<{ nickname: st
                   <span className="flex items-center gap-1.5 text-sm font-medium text-gray-700">
                     <span className="text-amber-500">🏆</span> 랭킹
                   </span>
-                  <span className="px-3 py-1 rounded-full bg-amber-50 text-amber-700 text-sm font-bold tabular-nums">{profile.ranking !== null ? profile.ranking.toLocaleString() : '-'}</span>
+                  <span className="px-3 py-1 rounded-full bg-amber-50 text-amber-700 text-sm font-bold tabular-nums">{profile.ranking !== null ? `${profile.ranking.toLocaleString()}위` : '-'}</span>
                 </div>
               </div>
             </div>
