@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>통계 박스 배치 개선 시안</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css');
+    body { font-family: 'Pretendard', -apple-system, sans-serif; background: #f3f4f6; }
+    .section-title { font-size: 13px; font-weight: 700; color: #6b7280; letter-spacing: .05em; text-transform: uppercase; margin-bottom: 12px; }
+    .badge-label { display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 11px; font-weight: 700; color: white; margin-bottom: 10px; }
+    .before { background: #ef4444; }
+    .after  { background: #10b981; }
+    /* 모바일 프레임 */
+    .phone { width: 375px; border-radius: 40px; border: 10px solid #111827; background: #f9fafb; overflow: hidden; box-shadow: 0 20px 50px -10px rgba(0,0,0,.25); }
+    .phone::before { content:''; display:block; width:100px; height:22px; background:#111827; border-radius:0 0 14px 14px; margin:0 auto; }
+  </style>
+</head>
+<body class="p-10">
+<div class="max-w-5xl mx-auto space-y-16">
+
+  <div>
+    <h1 class="text-2xl font-bold text-gray-900 mb-1">📊 프로필 통계 박스 — 배치 개선 시안</h1>
+    <p class="text-sm text-gray-500">이미지 1 참고 → 라벨+숫자를 붙여서 셀 중앙 정렬로 변경</p>
+  </div>
+
+  <!-- ══════════════════════════════════════════ -->
+  <!-- 데스크톱 Before / After -->
+  <!-- ══════════════════════════════════════════ -->
+  <section>
+    <p class="section-title">🖥 데스크톱 (768px+)</p>
+    <div class="flex flex-col gap-6">
+
+      <!-- Before -->
+      <div>
+        <span class="badge-label before">Before — 현재</span>
+        <p class="text-xs text-gray-500 mb-3">justify-between으로 라벨↔숫자가 양끝으로 분리됨</p>
+        <div class="bg-white border border-gray-200 rounded-2xl p-6 max-w-2xl">
+          <div class="rounded-2xl border-2 border-amber-200 bg-white p-5">
+            <div class="grid grid-cols-3 divide-x divide-amber-100">
+              <div class="flex items-center justify-between gap-3 py-2">
+                <span class="flex items-center gap-1.5 text-sm font-medium text-gray-700">
+                  <span class="text-amber-500">❤</span> 받은하트
+                </span>
+                <span class="px-3 py-1 rounded-full bg-amber-50 text-amber-700 text-sm font-bold">1,234개</span>
+              </div>
+              <div class="flex items-center justify-between gap-3 py-2 px-4">
+                <span class="flex items-center gap-1.5 text-sm font-medium text-gray-700">
+                  <span class="text-amber-500">👥</span> 구독자
+                </span>
+                <span class="px-3 py-1 rounded-full bg-amber-50 text-amber-700 text-sm font-bold">456명</span>
+              </div>
+              <div class="flex items-center justify-between gap-3 py-2 px-4">
+                <span class="flex items-center gap-1.5 text-sm font-medium text-gray-700">
+                  <span class="text-amber-500">🏆</span> 랭킹
+                </span>
+                <span class="px-3 py-1 rounded-full bg-amber-50 text-amber-700 text-sm font-bold">12위</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- After -->
+      <div>
+        <span class="badge-label after">After — 개선안 (추천)</span>
+        <p class="text-xs text-gray-500 mb-3">라벨+숫자가 붙어서 셀 중앙 정렬 → 이미지 1과 동일한 패턴</p>
+        <div class="bg-white border border-gray-200 rounded-2xl p-6 max-w-2xl">
+          <div class="rounded-2xl border-2 border-amber-200 bg-white">
+            <div class="flex divide-x divide-amber-100">
+              <div class="flex-1 flex items-center justify-center gap-2.5 py-4 px-3">
+                <span class="flex items-center gap-1.5 text-sm font-medium text-gray-700 whitespace-nowrap">
+                  <span class="text-amber-500">❤</span> 받은하트
+                </span>
+                <span class="px-3 py-1 rounded-full bg-amber-50 text-amber-700 text-sm font-bold tabular-nums whitespace-nowrap">1,234개</span>
+              </div>
+              <div class="flex-1 flex items-center justify-center gap-2.5 py-4 px-3">
+                <span class="flex items-center gap-1.5 text-sm font-medium text-gray-700 whitespace-nowrap">
+                  <span class="text-amber-500">👥</span> 구독자
+                </span>
+                <span class="px-3 py-1 rounded-full bg-amber-50 text-amber-700 text-sm font-bold tabular-nums whitespace-nowrap">456명</span>
+              </div>
+              <div class="flex-1 flex items-center justify-center gap-2.5 py-4 px-3">
+                <span class="flex items-center gap-1.5 text-sm font-medium text-gray-700 whitespace-nowrap">
+                  <span class="text-amber-500">🏆</span> 랭킹
+                </span>
+                <span class="px-3 py-1 rounded-full bg-amber-50 text-amber-700 text-sm font-bold tabular-nums whitespace-nowrap">12위</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- After (실제 프로필 카드 컨텍스트에서) -->
+      <div>
+        <span class="badge-label after">After — 프로필 카드 전체 맥락</span>
+        <p class="text-xs text-gray-500 mb-3">통계 박스가 프로필 카드 안에서 어떻게 보이는지</p>
+        <div class="bg-white border border-amber-200 rounded-3xl p-7 max-w-3xl">
+          <div class="flex items-start gap-7">
+            <!-- 아바타+닉네임 -->
+            <div class="flex-shrink-0 flex flex-col items-center w-44">
+              <div class="w-40 h-40 rounded-full bg-gradient-to-br from-amber-200 to-amber-400 flex items-center justify-center text-6xl">🐱</div>
+              <h1 class="mt-4 text-2xl font-bold text-gray-900">냥냥펀치</h1>
+            </div>
+            <!-- 가운데 -->
+            <div class="flex-1 min-w-0 flex flex-col gap-4">
+              <div class="bg-gray-50 rounded-2xl px-5 py-4 text-sm text-gray-800 leading-relaxed min-h-[80px]">
+                <p>2살 페르시안 냥냥펀치입니다 🐾</p>
+                <p>입맛이 까다로워서 사료 추천 받고 있어요!</p>
+              </div>
+              <!-- 개선된 통계 박스 -->
+              <div class="rounded-2xl border-2 border-amber-200 bg-white">
+                <div class="flex divide-x divide-amber-100">
+                  <div class="flex-1 flex items-center justify-center gap-2.5 py-4 px-2">
+                    <span class="flex items-center gap-1.5 text-sm font-medium text-gray-700 whitespace-nowrap">
+                      <span class="text-amber-500">❤</span> 받은하트
+                    </span>
+                    <span class="px-3 py-1 rounded-full bg-amber-50 text-amber-700 text-sm font-bold tabular-nums">1,234개</span>
+                  </div>
+                  <div class="flex-1 flex items-center justify-center gap-2.5 py-4 px-2">
+                    <span class="flex items-center gap-1.5 text-sm font-medium text-gray-700 whitespace-nowrap">
+                      <span class="text-amber-500">👥</span> 구독자
+                    </span>
+                    <span class="px-3 py-1 rounded-full bg-amber-50 text-amber-700 text-sm font-bold tabular-nums">456명</span>
+                  </div>
+                  <div class="flex-1 flex items-center justify-center gap-2.5 py-4 px-2">
+                    <span class="flex items-center gap-1.5 text-sm font-medium text-gray-700 whitespace-nowrap">
+                      <span class="text-amber-500">🏆</span> 랭킹
+                    </span>
+                    <span class="px-3 py-1 rounded-full bg-amber-50 text-amber-700 text-sm font-bold tabular-nums">12위</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- 버튼 -->
+            <div class="flex flex-col gap-2 flex-shrink-0 w-32">
+              <button class="px-5 py-2.5 rounded-xl border-2 border-amber-400 text-amber-600 font-semibold text-sm">📣 구독하기</button>
+              <button class="px-5 py-2.5 rounded-xl bg-gray-900 text-white font-semibold text-sm">💬 메시지</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════ -->
+  <!-- 모바일 Before / After -->
+  <!-- ══════════════════════════════════════════ -->
+  <section>
+    <p class="section-title">📱 모바일 (375px)</p>
+    <div class="flex gap-10 flex-wrap">
+
+      <!-- 모바일 Before -->
+      <div>
+        <span class="badge-label before">Before — 현재</span>
+        <p class="text-xs text-gray-500 mb-3 max-w-[200px]">세로 1열이지만 justify-between으로 라벨↔숫자 분리</p>
+        <div class="phone">
+          <div class="p-4">
+            <div class="rounded-2xl border-2 border-amber-200 bg-white p-5">
+              <div class="grid grid-cols-1 divide-y divide-amber-100">
+                <div class="flex items-center justify-between gap-3 py-3">
+                  <span class="flex items-center gap-1.5 text-sm font-medium text-gray-700">
+                    <span class="text-amber-500">❤</span> 받은하트
+                  </span>
+                  <span class="px-3 py-1 rounded-full bg-amber-50 text-amber-700 text-sm font-bold">1,234개</span>
+                </div>
+                <div class="flex items-center justify-between gap-3 py-3">
+                  <span class="flex items-center gap-1.5 text-sm font-medium text-gray-700">
+                    <span class="text-amber-500">👥</span> 구독자
+                  </span>
+                  <span class="px-3 py-1 rounded-full bg-amber-50 text-amber-700 text-sm font-bold">456명</span>
+                </div>
+                <div class="flex items-center justify-between gap-3 py-3">
+                  <span class="flex items-center gap-1.5 text-sm font-medium text-gray-700">
+                    <span class="text-amber-500">🏆</span> 랭킹
+                  </span>
+                  <span class="px-3 py-1 rounded-full bg-amber-50 text-amber-700 text-sm font-bold">12위</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 모바일 After A: 가로 3열 (이미지 1 동일) -->
+      <div>
+        <span class="badge-label after">After A — 모바일도 가로 3열</span>
+        <p class="text-xs text-gray-500 mb-3 max-w-[200px]">데스크톱과 동일하게 가로 유지. 항목 짧아서 375px에도 들어감</p>
+        <div class="phone">
+          <div class="p-4">
+            <div class="rounded-2xl border-2 border-amber-200 bg-white">
+              <div class="flex divide-x divide-amber-100">
+                <div class="flex-1 flex flex-col items-center justify-center gap-1 py-4 px-1">
+                  <span class="flex items-center gap-1 text-xs font-medium text-gray-700 whitespace-nowrap">
+                    <span class="text-amber-500">❤</span> 받은하트
+                  </span>
+                  <span class="px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 text-xs font-bold tabular-nums">1,234개</span>
+                </div>
+                <div class="flex-1 flex flex-col items-center justify-center gap-1 py-4 px-1">
+                  <span class="flex items-center gap-1 text-xs font-medium text-gray-700 whitespace-nowrap">
+                    <span class="text-amber-500">👥</span> 구독자
+                  </span>
+                  <span class="px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 text-xs font-bold tabular-nums">456명</span>
+                </div>
+                <div class="flex-1 flex flex-col items-center justify-center gap-1 py-4 px-1">
+                  <span class="flex items-center gap-1 text-xs font-medium text-gray-700 whitespace-nowrap">
+                    <span class="text-amber-500">🏆</span> 랭킹
+                  </span>
+                  <span class="px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 text-xs font-bold tabular-nums">12위</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 모바일 After B: 세로 1열이지만 중앙 정렬 -->
+      <div>
+        <span class="badge-label after">After B — 세로 1열 + 중앙 정렬</span>
+        <p class="text-xs text-gray-500 mb-3 max-w-[200px]">세로 유지하되 라벨+숫자를 붙여서 가운데 정렬</p>
+        <div class="phone">
+          <div class="p-4">
+            <div class="rounded-2xl border-2 border-amber-200 bg-white">
+              <div class="flex flex-col divide-y divide-amber-100">
+                <div class="flex items-center justify-center gap-3 py-3 px-5">
+                  <span class="flex items-center gap-1.5 text-sm font-medium text-gray-700 whitespace-nowrap">
+                    <span class="text-amber-500">❤</span> 받은하트
+                  </span>
+                  <span class="px-3 py-1 rounded-full bg-amber-50 text-amber-700 text-sm font-bold tabular-nums">1,234개</span>
+                </div>
+                <div class="flex items-center justify-center gap-3 py-3 px-5">
+                  <span class="flex items-center gap-1.5 text-sm font-medium text-gray-700 whitespace-nowrap">
+                    <span class="text-amber-500">👥</span> 구독자
+                  </span>
+                  <span class="px-3 py-1 rounded-full bg-amber-50 text-amber-700 text-sm font-bold tabular-nums">456명</span>
+                </div>
+                <div class="flex items-center justify-center gap-3 py-3 px-5">
+                  <span class="flex items-center gap-1.5 text-sm font-medium text-gray-700 whitespace-nowrap">
+                    <span class="text-amber-500">🏆</span> 랭킹
+                  </span>
+                  <span class="px-3 py-1 rounded-full bg-amber-50 text-amber-700 text-sm font-bold tabular-nums">12위</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════ -->
+  <!-- 정리 -->
+  <!-- ══════════════════════════════════════════ -->
+  <section class="bg-white border border-gray-200 rounded-2xl p-6 max-w-2xl">
+    <h2 class="text-base font-bold text-gray-900 mb-4">📌 핵심 변경 내용</h2>
+    <div class="space-y-2 text-sm text-gray-700">
+      <p>• <code class="bg-gray-100 px-1.5 rounded">grid grid-cols-3</code> → <code class="bg-gray-100 px-1.5 rounded">flex</code> 로 변경</p>
+      <p>• 각 셀: <code class="bg-gray-100 px-1.5 rounded">justify-between</code> → <code class="bg-gray-100 px-1.5 rounded">justify-center gap-2.5</code></p>
+      <p>• <code class="bg-gray-100 px-1.5 rounded">whitespace-nowrap</code> 추가로 텍스트 줄바꿈 방지</p>
+      <p>• 모바일: <b>A안(가로 3열)</b>은 데스크톱과 동일한 구조 유지, 폰트/패딩만 축소</p>
+      <p>• 모바일: <b>B안(세로 1열+중앙)</b>은 현재 세로 스택을 유지하면서 가운데 정렬만 변경</p>
+    </div>
+    <p class="text-xs text-gray-400 mt-4">어떤 모바일 방식(A/B)을 선택할지 알려주시면 바로 적용합니다.</p>
+  </section>
+
+</div>
+</body>
+</html>
