@@ -272,7 +272,7 @@ export default function ChatPage() {
               onBlur={() => { if (!input) setInputFocused(false); }}
               placeholder={`${user.nickname}(으)로 메시지 입력`}
               rows={1}
-              className="flex-1 text-sm bg-transparent text-gray-900 outline-none resize-none max-h-24 overflow-y-auto placeholder-gray-400"
+              className="flex-1 text-base bg-transparent text-gray-900 outline-none resize-none max-h-24 overflow-y-auto placeholder-gray-400"
               style={{ minHeight: '20px' }}
             />
             <button
