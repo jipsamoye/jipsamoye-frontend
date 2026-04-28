@@ -91,10 +91,10 @@ export default function ProfilePage({ params }: { params: Promise<{ nickname: st
   return (
     <div>
       {/* 프로필 카드 (시안 mockup-pet-profile.html 적용) */}
-      <article className="bg-white border border-amber-200 rounded-3xl p-7">
-        <div className="flex items-start gap-7">
+      <article className="bg-white border border-amber-200 rounded-3xl p-5 md:p-7">
+        <div className="flex flex-col md:flex-row md:items-start gap-5 md:gap-7">
           {/* 좌측: 큰 원형 이미지 + 닉네임 */}
-          <div className="flex-shrink-0 flex flex-col items-center w-44">
+          <div className="flex flex-col items-center order-1 md:flex-shrink-0 md:w-44">
             <div className="relative">
               <Avatar src={profile.profileImageUrl} size="2xl" />
               {isMe && (
@@ -122,7 +122,7 @@ export default function ProfilePage({ params }: { params: Promise<{ nickname: st
           </div>
 
           {/* 가운데: 자기소개 + 소셜 + 통계 */}
-          <div className="flex-1 min-w-0 flex flex-col gap-4">
+          <div className="flex-1 min-w-0 flex flex-col gap-4 order-3 md:order-2">
             {/* 자기소개 */}
             <div className="bg-gray-50 rounded-2xl px-5 py-4 text-sm text-gray-800 leading-relaxed min-h-[80px] max-h-[200px] overflow-y-auto">
               {profile.bio ? (
@@ -156,20 +156,20 @@ export default function ProfilePage({ params }: { params: Promise<{ nickname: st
 
             {/* 통계 박스 */}
             <div className="rounded-2xl border-2 border-amber-200 bg-white p-5">
-              <div className="grid grid-cols-3 gap-4 divide-x divide-amber-100">
-                <div className="flex items-center justify-between gap-3 px-1">
+              <div className="grid grid-cols-1 md:grid-cols-3 md:gap-4 divide-y md:divide-y-0 md:divide-x divide-amber-100">
+                <div className="flex items-center justify-between gap-3 px-1 py-2 md:py-0">
                   <span className="flex items-center gap-1.5 text-sm font-medium text-gray-700">
                     <span className="text-amber-500">❤</span> 받은하트
                   </span>
                   <span className="px-3 py-1 rounded-full bg-amber-50 text-amber-700 text-sm font-bold tabular-nums">{profile.totalLikeCount.toLocaleString()}</span>
                 </div>
-                <div className="flex items-center justify-between gap-3 pl-5 pr-1">
+                <div className="flex items-center justify-between gap-3 md:pl-5 pr-1 py-2 md:py-0">
                   <span className="flex items-center gap-1.5 text-sm font-medium text-gray-700">
                     <span className="text-amber-500">👥</span> 구독자
                   </span>
                   <span className="px-3 py-1 rounded-full bg-amber-50 text-amber-700 text-sm font-bold tabular-nums">{profile.followerCount.toLocaleString()}명</span>
                 </div>
-                <div className="flex items-center justify-between gap-3 pl-5 pr-1">
+                <div className="flex items-center justify-between gap-3 md:pl-5 pr-1 py-2 md:py-0">
                   <span className="flex items-center gap-1.5 text-sm font-medium text-gray-700">
                     <span className="text-amber-500">🏆</span> 랭킹
                   </span>
@@ -180,11 +180,11 @@ export default function ProfilePage({ params }: { params: Promise<{ nickname: st
           </div>
 
           {/* 우측: 액션 버튼 */}
-          <div className="flex flex-col gap-2 flex-shrink-0 w-32">
+          <div className="flex flex-row md:flex-col gap-2 order-2 md:order-3 md:flex-shrink-0 md:w-32">
             {isMe ? (
               <button
                 onClick={() => setShowEditModal(true)}
-                className="px-5 py-2.5 rounded-xl border-2 border-amber-400 text-amber-600 font-semibold text-sm hover:bg-amber-50 transition-colors"
+                className="flex-1 md:flex-none px-5 py-2.5 rounded-xl border-2 border-amber-400 text-amber-600 font-semibold text-sm hover:bg-amber-50 transition-colors"
               >
                 프로필 편집
               </button>
@@ -192,7 +192,7 @@ export default function ProfilePage({ params }: { params: Promise<{ nickname: st
               <>
                 <button
                   onClick={handleFollow}
-                  className={`px-5 py-2.5 rounded-xl font-semibold text-sm transition-colors flex items-center justify-center gap-1.5 ${
+                  className={`flex-1 md:flex-none px-5 py-2.5 rounded-xl font-semibold text-sm transition-colors flex items-center justify-center gap-1.5 ${
                     isFollowing
                       ? 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                       : 'border-2 border-amber-400 text-amber-600 hover:bg-amber-50'
@@ -208,7 +208,7 @@ export default function ProfilePage({ params }: { params: Promise<{ nickname: st
                     } catch { /* ignore */ }
                     router.push('/dm');
                   }}
-                  className="px-5 py-2.5 rounded-xl bg-gray-900 text-white font-semibold text-sm hover:bg-gray-800 transition-colors flex items-center justify-center gap-1.5"
+                  className="flex-1 md:flex-none px-5 py-2.5 rounded-xl bg-gray-900 text-white font-semibold text-sm hover:bg-gray-800 transition-colors flex items-center justify-center gap-1.5"
                 >
                   💬 메시지
                 </button>
