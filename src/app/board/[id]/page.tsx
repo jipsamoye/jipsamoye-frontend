@@ -11,7 +11,6 @@ import { HeartIcon, EyeIcon, EllipsisHorizontalIcon } from '@/components/layout/
 import { timeAgo } from '@/lib/utils';
 import BoardCommentSection from '@/components/domain/BoardCommentSection';
 import { showToast } from '@/components/common/Toast';
-import BackButton from '@/components/common/BackButton';
 
 const CATEGORY_LABEL = { NOTICE: '공지', GENERAL: '일반', QUESTION: '질문' } as const;
 const CATEGORY_STYLE = {
@@ -75,9 +74,6 @@ export default function BoardDetailPage({ params }: { params: Promise<{ id: stri
 
   return (
     <article className="max-w-4xl mx-auto">
-      {/* 뒤로가기 — 이전에 보던 위치로 복원 */}
-      <BackButton className="mb-3" />
-
       <div className="flex items-center gap-2 mb-3">
         <span className={`inline-flex items-center justify-center w-14 h-7 rounded-full text-xs font-semibold ${CATEGORY_STYLE[post.category]}`}>
           {CATEGORY_LABEL[post.category]}

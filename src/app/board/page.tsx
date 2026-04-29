@@ -7,7 +7,6 @@ import BoardListItem from '@/components/domain/BoardListItem';
 import Skeleton from '@/components/common/Skeleton';
 import Pagination from '@/components/common/Pagination';
 import { MagnifyingGlassIcon } from '@/components/layout/icons';
-import { useScrollMemory } from '@/hooks/useScrollMemory';
 
 type Tab = 'ALL' | BoardCategory;
 
@@ -85,9 +84,6 @@ export default function BoardPage() {
     setCurrentPage(page);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
-
-  // 스크롤 위치 기억 — 게시글 상세에서 뒤로가기 시 복원
-  useScrollMemory('board', !loading);
 
   return (
     <div className="max-w-4xl mx-auto">

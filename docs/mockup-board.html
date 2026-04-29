@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>댓글 수 표시 스타일 비교</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css');
+    body { font-family: 'Pretendard', -apple-system, sans-serif; }
+    .option-card { border: 1px solid #e5e7eb; border-radius: 16px; padding: 24px; margin-bottom: 24px; background: white; }
+    .option-label { display: inline-block; padding: 4px 10px; border-radius: 999px; background: #f59e0b; color: white; font-size: 11px; font-weight: 700; margin-bottom: 12px; }
+    .recommended { background: #10b981 !important; }
+  </style>
+</head>
+<body class="bg-gray-50 p-8">
+  <div class="max-w-4xl mx-auto">
+
+    <h1 class="text-2xl font-bold text-gray-900 mb-2">💬 댓글 수 표시 — 5가지 스타일 비교</h1>
+    <p class="text-sm text-gray-500 mb-8">제목 옆 숫자 표시 방법. 같은 게시글로 비교해보세요.</p>
+
+    <!-- ============================ -->
+    <!-- 옵션 A: 현재 (그리미티 카피) -->
+    <!-- ============================ -->
+    <div class="option-card">
+      <span class="option-label">A — 현재 (그리미티 카피)</span>
+      <p class="text-xs text-gray-500 mb-4">제목 끝에 amber 숫자만. 미니멀.</p>
+      <div class="flex flex-col">
+        <a class="flex items-start gap-4 py-4 border-b border-gray-100 hover:bg-gray-50/60 px-2 -mx-2 rounded-lg cursor-pointer">
+          <span class="flex-shrink-0 inline-flex items-center justify-center w-14 h-7 rounded-full text-xs font-semibold bg-amber-50 text-amber-600">질문</span>
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-1.5 mb-1">
+              <h3 class="text-sm font-semibold text-gray-900 truncate">고양이 사료 어떤거 추천하시나요?</h3>
+              <span class="flex-shrink-0 text-xs text-amber-500 font-medium">12</span>
+            </div>
+            <p class="text-xs text-gray-500 truncate">2살 페르시안인데 입맛이 까다로워서 고민이에요.</p>
+          </div>
+          <div class="flex-shrink-0 flex flex-col items-end gap-1 text-xs">
+            <div class="flex items-center gap-1.5">
+              <div class="w-5 h-5 rounded-full bg-pink-100 flex items-center justify-center text-[10px]">🐱</div>
+              <span class="text-gray-600 font-medium">냥냥펀치</span>
+            </div>
+            <span class="text-gray-400">5일 전</span>
+          </div>
+        </a>
+      </div>
+    </div>
+
+    <!-- ============================ -->
+    <!-- 옵션 B: 발바닥 🐾 + 숫자 (브랜드 정체성) -->
+    <!-- ============================ -->
+    <div class="option-card">
+      <span class="option-label recommended">B — 🐾 발바닥 + 숫자 (집사모여 정체성)</span>
+      <p class="text-xs text-gray-500 mb-4">반려동물 커뮤니티 정체성. "댓글 수 = 발자국"이라는 위트.</p>
+      <div class="flex flex-col">
+        <a class="flex items-start gap-4 py-4 border-b border-gray-100 hover:bg-gray-50/60 px-2 -mx-2 rounded-lg cursor-pointer">
+          <span class="flex-shrink-0 inline-flex items-center justify-center w-14 h-7 rounded-full text-xs font-semibold bg-amber-50 text-amber-600">질문</span>
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-1.5 mb-1">
+              <h3 class="text-sm font-semibold text-gray-900 truncate">고양이 사료 어떤거 추천하시나요?</h3>
+              <span class="flex-shrink-0 inline-flex items-center gap-0.5 text-xs text-amber-500 font-medium">
+                <span>🐾</span>
+                <span>12</span>
+              </span>
+            </div>
+            <p class="text-xs text-gray-500 truncate">2살 페르시안인데 입맛이 까다로워서 고민이에요.</p>
+          </div>
+          <div class="flex-shrink-0 flex flex-col items-end gap-1 text-xs">
+            <div class="flex items-center gap-1.5">
+              <div class="w-5 h-5 rounded-full bg-pink-100 flex items-center justify-center text-[10px]">🐱</div>
+              <span class="text-gray-600 font-medium">냥냥펀치</span>
+            </div>
+            <span class="text-gray-400">5일 전</span>
+          </div>
+        </a>
+      </div>
+    </div>
+
+    <!-- ============================ -->
+    <!-- 옵션 C: 말풍선 + 숫자 (표준 SNS) -->
+    <!-- ============================ -->
+    <div class="option-card">
+      <span class="option-label">C — 말풍선 아이콘 + 숫자 (표준)</span>
+      <p class="text-xs text-gray-500 mb-4">SNS·커뮤니티 표준 패턴. 의미 명확.</p>
+      <div class="flex flex-col">
+        <a class="flex items-start gap-4 py-4 border-b border-gray-100 hover:bg-gray-50/60 px-2 -mx-2 rounded-lg cursor-pointer">
+          <span class="flex-shrink-0 inline-flex items-center justify-center w-14 h-7 rounded-full text-xs font-semibold bg-amber-50 text-amber-600">질문</span>
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-1.5 mb-1">
+              <h3 class="text-sm font-semibold text-gray-900 truncate">고양이 사료 어떤거 추천하시나요?</h3>
+              <span class="flex-shrink-0 inline-flex items-center gap-1 text-xs text-amber-500 font-medium">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-3.5 h-3.5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.76c0 1.6 1.123 2.994 2.707 3.227 1.068.157 2.148.279 3.238.364.466.037.893.281 1.153.671L12 21l2.652-3.978c.26-.39.687-.634 1.153-.67 1.09-.086 2.17-.208 3.238-.365 1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z" />
+                </svg>
+                <span>12</span>
+              </span>
+            </div>
+            <p class="text-xs text-gray-500 truncate">2살 페르시안인데 입맛이 까다로워서 고민이에요.</p>
+          </div>
+          <div class="flex-shrink-0 flex flex-col items-end gap-1 text-xs">
+            <div class="flex items-center gap-1.5">
+              <div class="w-5 h-5 rounded-full bg-pink-100 flex items-center justify-center text-[10px]">🐱</div>
+              <span class="text-gray-600 font-medium">냥냥펀치</span>
+            </div>
+            <span class="text-gray-400">5일 전</span>
+          </div>
+        </a>
+      </div>
+    </div>
+
+    <!-- ============================ -->
+    <!-- 옵션 D: amber pill 배지 (알림 스타일) -->
+    <!-- ============================ -->
+    <div class="option-card">
+      <span class="option-label">D — amber 알약 배지 (강조)</span>
+      <p class="text-xs text-gray-500 mb-4">댓글 수가 시선을 끔. 활발한 글이 한눈에.</p>
+      <div class="flex flex-col">
+        <a class="flex items-start gap-4 py-4 border-b border-gray-100 hover:bg-gray-50/60 px-2 -mx-2 rounded-lg cursor-pointer">
+          <span class="flex-shrink-0 inline-flex items-center justify-center w-14 h-7 rounded-full text-xs font-semibold bg-amber-50 text-amber-600">질문</span>
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-1.5 mb-1">
+              <h3 class="text-sm font-semibold text-gray-900 truncate">고양이 사료 어떤거 추천하시나요?</h3>
+              <span class="flex-shrink-0 inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full bg-amber-500 text-white text-[10px] font-bold">12</span>
+            </div>
+            <p class="text-xs text-gray-500 truncate">2살 페르시안인데 입맛이 까다로워서 고민이에요.</p>
+          </div>
+          <div class="flex-shrink-0 flex flex-col items-end gap-1 text-xs">
+            <div class="flex items-center gap-1.5">
+              <div class="w-5 h-5 rounded-full bg-pink-100 flex items-center justify-center text-[10px]">🐱</div>
+              <span class="text-gray-600 font-medium">냥냥펀치</span>
+            </div>
+            <span class="text-gray-400">5일 전</span>
+          </div>
+        </a>
+      </div>
+    </div>
+
+    <!-- ============================ -->
+    <!-- 옵션 E: 핫함 임계치 (HOT 표시) -->
+    <!-- ============================ -->
+    <div class="option-card">
+      <span class="option-label">E — 핫함 임계치 (1~9 일반 / 10+ HOT)</span>
+      <p class="text-xs text-gray-500 mb-4">댓글이 많은 글에는 🔥 HOT 라벨 추가. 인기 게시글 강조.</p>
+      <div class="flex flex-col">
+        <!-- 1-9개: 기본 발바닥 -->
+        <a class="flex items-start gap-4 py-4 border-b border-gray-100 hover:bg-gray-50/60 px-2 -mx-2 rounded-lg cursor-pointer">
+          <span class="flex-shrink-0 inline-flex items-center justify-center w-14 h-7 rounded-full text-xs font-semibold bg-amber-50 text-amber-600">질문</span>
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-1.5 mb-1">
+              <h3 class="text-sm font-semibold text-gray-900 truncate">중성화 시기 언제가 좋나요?</h3>
+              <span class="flex-shrink-0 inline-flex items-center gap-0.5 text-xs text-amber-500 font-medium">
+                <span>🐾</span><span>5</span>
+              </span>
+            </div>
+            <p class="text-xs text-gray-500 truncate">6개월 된 수컷 강아지인데 중성화 고민중입니다.</p>
+          </div>
+          <div class="flex-shrink-0 flex flex-col items-end gap-1 text-xs">
+            <div class="flex items-center gap-1.5">
+              <div class="w-5 h-5 rounded-full bg-purple-100 flex items-center justify-center text-[10px]">🐕</div>
+              <span class="text-gray-600 font-medium">초보집사</span>
+            </div>
+            <span class="text-gray-400">3시간 전</span>
+          </div>
+        </a>
+        <!-- 10+개: HOT -->
+        <a class="flex items-start gap-4 py-4 border-b border-gray-100 hover:bg-gray-50/60 px-2 -mx-2 rounded-lg cursor-pointer">
+          <span class="flex-shrink-0 inline-flex items-center justify-center w-14 h-7 rounded-full text-xs font-semibold bg-amber-50 text-amber-600">질문</span>
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-1.5 mb-1">
+              <h3 class="text-sm font-semibold text-gray-900 truncate">고양이 사료 어떤거 추천하시나요?</h3>
+              <span class="flex-shrink-0 inline-flex items-center gap-0.5 text-xs font-bold text-red-500">
+                <span>🔥</span><span>12</span>
+              </span>
+            </div>
+            <p class="text-xs text-gray-500 truncate">2살 페르시안인데 입맛이 까다로워서 고민이에요.</p>
+          </div>
+          <div class="flex-shrink-0 flex flex-col items-end gap-1 text-xs">
+            <div class="flex items-center gap-1.5">
+              <div class="w-5 h-5 rounded-full bg-pink-100 flex items-center justify-center text-[10px]">🐱</div>
+              <span class="text-gray-600 font-medium">냥냥펀치</span>
+            </div>
+            <span class="text-gray-400">5일 전</span>
+          </div>
+        </a>
+      </div>
+    </div>
+
+    <!-- 비교 테이블 -->
+    <div class="mt-8 p-6 bg-amber-50/40 rounded-2xl border border-amber-100">
+      <h2 class="text-base font-bold text-gray-900 mb-4">🤔 어떤 걸 추천?</h2>
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="border-b border-amber-200">
+            <th class="text-left py-2 font-semibold">스타일</th>
+            <th class="text-left py-2 font-semibold">장점</th>
+            <th class="text-left py-2 font-semibold">단점</th>
+          </tr>
+        </thead>
+        <tbody class="text-gray-700">
+          <tr class="border-b border-amber-100">
+            <td class="py-2 font-medium">A — 숫자만</td>
+            <td class="py-2">미니멀</td>
+            <td class="py-2">의미 모호 (왜 amber 숫자?)</td>
+          </tr>
+          <tr class="border-b border-amber-100 bg-emerald-50/40">
+            <td class="py-2 font-medium">B — 🐾 발바닥</td>
+            <td class="py-2"><strong>브랜드 정체성</strong>, 위트 있음, 의미 직관적</td>
+            <td class="py-2">이모지가 안 일관될 수 있음 (브라우저별)</td>
+          </tr>
+          <tr class="border-b border-amber-100">
+            <td class="py-2 font-medium">C — 💬 말풍선</td>
+            <td class="py-2">표준, 의미 명확</td>
+            <td class="py-2">평범함, 다른 사이트와 차별 안 됨</td>
+          </tr>
+          <tr class="border-b border-amber-100">
+            <td class="py-2 font-medium">D — 알약 배지</td>
+            <td class="py-2">시선 끌림</td>
+            <td class="py-2">너무 강해서 제목보다 눈에 띌 수 있음</td>
+          </tr>
+          <tr>
+            <td class="py-2 font-medium">E — HOT 임계치</td>
+            <td class="py-2">인기 글 자연스럽게 강조</td>
+            <td class="py-2">로직 추가 (10+ 조건분기), 빨간색 시각 부담</td>
+          </tr>
+        </tbody>
+      </table>
+      <p class="mt-4 text-sm text-gray-700"><strong>제 추천: B (🐾 발바닥)</strong> — 집사모여만의 정체성을 가장 잘 살림. 발자국 = 댓글이라는 비유도 귀엽고 자연스러움.</p>
+    </div>
+
+  </div>
+</body>
+</html>

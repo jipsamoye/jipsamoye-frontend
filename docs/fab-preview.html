@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FAB Preview</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { background: #f3f4f6; display: flex; flex-direction: column; align-items: center; gap: 32px; padding: 40px; }
+    .label { font-size: 12px; color: #6b7280; margin-bottom: 8px; text-align: center; }
+    .phone-bg { background: white; border-radius: 16px; padding: 24px; box-shadow: 0 4px 24px rgba(0,0,0,0.08); }
+  </style>
+</head>
+<body>
+  <div class="label">현재 코드 — expanded (최상단)</div>
+  <div class="phone-bg">
+    <!-- 현재 구현 -->
+    <a href="#" class="h-14 rounded-full bg-amber-500 text-white shadow-lg flex items-center overflow-hidden">
+      <!-- 아이콘 래퍼 (현재) -->
+      <span class="w-14 h-14 flex items-center justify-center shrink-0">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-6 h-6">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+        </svg>
+      </span>
+      <!-- 텍스트 래퍼 (현재) -->
+      <span class="overflow-hidden max-w-[120px] opacity-100">
+        <span class="flex items-center h-14 pr-5 whitespace-nowrap font-semibold text-base">
+          자랑하기
+        </span>
+      </span>
+    </a>
+  </div>
+
+  <div class="label">collapsed (+만)</div>
+  <div class="phone-bg">
+    <a href="#" class="h-14 rounded-full bg-amber-500 text-white shadow-lg flex items-center overflow-hidden">
+      <span class="w-14 h-14 flex items-center justify-center shrink-0">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-6 h-6">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+        </svg>
+      </span>
+      <span class="overflow-hidden max-w-0 opacity-0">
+        <span class="flex items-center h-14 pr-5 whitespace-nowrap font-semibold text-base">
+          자랑하기
+        </span>
+      </span>
+    </a>
+  </div>
+
+  <hr class="w-full border-gray-300 my-4">
+  <div class="label font-bold text-gray-700">대안 A — 중첩 span 없이, inline-flex로 단순화</div>
+  <div class="phone-bg">
+    <a href="#" class="h-14 rounded-full bg-amber-500 text-white shadow-lg inline-flex items-center overflow-hidden">
+      <span class="w-14 h-14 flex items-center justify-center shrink-0">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-6 h-6">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+        </svg>
+      </span>
+      <span class="overflow-hidden max-w-[120px] opacity-100 pr-5 whitespace-nowrap font-semibold text-base leading-[3.5rem]">
+        자랑하기
+      </span>
+    </a>
+  </div>
+
+  <div class="label">대안 A — collapsed</div>
+  <div class="phone-bg">
+    <a href="#" class="h-14 rounded-full bg-amber-500 text-white shadow-lg inline-flex items-center overflow-hidden">
+      <span class="w-14 h-14 flex items-center justify-center shrink-0">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-6 h-6">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+        </svg>
+      </span>
+      <span class="overflow-hidden max-w-0 opacity-0 pr-0 whitespace-nowrap font-semibold text-base leading-[3.5rem]">
+        자랑하기
+      </span>
+    </a>
+  </div>
+
+  <hr class="w-full border-gray-300 my-4">
+  <div class="label font-bold text-gray-700">대안 B — 아이콘 왼쪽 pl-4 고정 + 텍스트 오른쪽 확장</div>
+  <div class="phone-bg">
+    <a href="#" class="h-14 rounded-full bg-amber-500 text-white shadow-lg flex items-center overflow-hidden pl-4">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-6 h-6 shrink-0">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+      </svg>
+      <span class="overflow-hidden max-w-[120px] opacity-100 ml-2 pr-5 whitespace-nowrap font-semibold text-base">
+        자랑하기
+      </span>
+    </a>
+  </div>
+
+  <div class="label">대안 B — collapsed</div>
+  <div class="phone-bg">
+    <a href="#" class="h-14 w-14 rounded-full bg-amber-500 text-white shadow-lg flex items-center justify-center overflow-hidden">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-6 h-6 shrink-0">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+      </svg>
+      <span class="overflow-hidden max-w-0 opacity-0 whitespace-nowrap font-semibold text-base">
+        자랑하기
+      </span>
+    </a>
+  </div>
+</body>
+</html>

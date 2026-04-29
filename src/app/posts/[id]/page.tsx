@@ -13,7 +13,6 @@ import CommentSection from '@/components/domain/CommentSection';
 import { HeartIcon, ShareIcon, LinkIcon } from '@/components/layout/icons';
 import { showToast } from '@/components/common/Toast';
 import { formatDateTime } from '@/lib/utils';
-import BackButton from '@/components/common/BackButton';
 
 export default function PostDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -94,9 +93,6 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
 
   return (
     <div className="max-w-3xl mx-auto">
-
-      {/* 뒤로가기 — 이전에 보던 위치로 복원 */}
-      <BackButton className="mb-3" />
 
       {/* 제목 */}
       <h1 className="text-2xl font-bold text-gray-900 leading-snug mb-4">{post.title}</h1>

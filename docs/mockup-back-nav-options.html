@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>뒤로가기 스크롤 복원 — 옵션 비교</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css');
+    body { font-family: 'Pretendard', -apple-system, sans-serif; background: #f3f4f6; }
+    .label { display: inline-block; padding: 4px 12px; border-radius: 999px; background: #f59e0b; color: white; font-size: 11px; font-weight: 700; }
+    .recommended { background: #10b981 !important; }
+    .danger { background: #ef4444 !important; }
+    .neutral { background: #6b7280 !important; }
+    /* 모바일 프레임 */
+    .phone { width: 280px; border-radius: 32px; border: 7px solid #111827; background: #fff; overflow: hidden; box-shadow: 0 18px 36px -10px rgba(0,0,0,.22); position: relative; }
+    .phone::before { content:''; display:block; width:80px; height:18px; background:#111827; border-radius:0 0 12px 12px; margin:0 auto; }
+    /* 데스크톱 브라우저 프레임 */
+    .desktop { width: 760px; border-radius: 12px; border: 1px solid #d1d5db; background: #fff; overflow: hidden; box-shadow: 0 18px 40px -10px rgba(0,0,0,.18); }
+    .browser-bar { background: #f3f4f6; padding: 8px 12px; border-bottom: 1px solid #e5e7eb; display: flex; align-items: center; gap: 8px; }
+    .browser-dot { width: 10px; height: 10px; border-radius: 999px; }
+    .url { flex: 1; background: #fff; padding: 4px 12px; border-radius: 999px; font-size: 11px; color: #6b7280; }
+    /* 카드 그리드 */
+    .feed-card { aspect-ratio: 1; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 22px; }
+    /* arrow flow 표시 */
+    .flow-arrow { font-size: 24px; color: #9ca3af; }
+  </style>
+</head>
+<body class="p-8">
+<div class="max-w-[1700px] mx-auto space-y-12">
+
+  <header>
+    <h1 class="text-2xl font-bold text-gray-900 mb-1">🔄 뒤로가기 스크롤 복원 — 옵션 비교</h1>
+    <p class="text-sm text-gray-500">메인에서 게시글 클릭 → 뒤로가기 시 "이전에 보던 정확한 스크롤 위치"로 복원되는 기능. 4가지 방향이 시각적으로 어떻게 다른지 비교</p>
+  </header>
+
+  <!-- ════════════════════════════════════════════════════ -->
+  <!-- BEFORE — 현재 동작 (문제 상황) -->
+  <!-- ════════════════════════════════════════════════════ -->
+  <section>
+    <div class="flex items-center gap-3 mb-3">
+      <span class="label danger">BEFORE — 현재 (문제 있음)</span>
+      <p class="text-xs text-gray-500">메인 → 게시글 클릭 시 페이지 풀 전환. 뒤로가면 메인이 처음부터 다시 로드 → 3번째 줄 카드 위치까지 콘텐츠가 아직 없어서 정확한 위치 못 찾음</p>
+    </div>
+
+    <div class="flex gap-6 items-start">
+
+      <!-- 데스크톱 시각화 -->
+      <div>
+        <p class="text-xs font-bold text-gray-700 mb-2">🖥 데스크톱 흐름</p>
+        <div class="flex items-center gap-3">
+          <!-- ① 메인 (스크롤 내려간 상태) -->
+          <div class="desktop" style="height: 360px;">
+            <div class="browser-bar"><div class="browser-dot bg-red-400"></div><div class="browser-dot bg-yellow-400"></div><div class="browser-dot bg-green-400"></div><div class="url">jipsamoye.com/</div></div>
+            <div class="flex h-full">
+              <aside class="w-32 border-r border-gray-100 p-3 text-[10px] text-gray-400 space-y-2"><p class="font-bold text-gray-700">집사모여</p><p>🏠 홈</p><p>📋 게시판</p></aside>
+              <main class="flex-1 p-3 overflow-hidden">
+                <p class="text-[10px] text-gray-400 mb-1">↑ 위쪽 카드들은 화면 밖</p>
+                <div class="grid grid-cols-4 gap-1.5 mb-1"><div class="feed-card bg-amber-100">🐶</div><div class="feed-card bg-pink-100">🐱</div><div class="feed-card bg-blue-100">🐾</div><div class="feed-card bg-purple-100">🐱</div></div>
+                <div class="grid grid-cols-4 gap-1.5 mb-1 ring-2 ring-amber-400 rounded-lg p-0.5"><div class="feed-card bg-amber-100">🐶</div><div class="feed-card bg-pink-100">🐱</div><div class="feed-card bg-blue-100">🐾</div><div class="feed-card bg-purple-100">🐱</div></div>
+                <p class="text-[10px] text-amber-600 font-medium mb-1">↑ 사용자가 보던 3번째 줄 (50번째 카드 클릭)</p>
+                <div class="grid grid-cols-4 gap-1.5"><div class="feed-card bg-amber-100">🐶</div><div class="feed-card bg-pink-100">🐱</div><div class="feed-card bg-blue-100">🐾</div><div class="feed-card bg-purple-100">🐱</div></div>
+              </main>
+            </div>
+          </div>
+
+          <span class="flow-arrow">→</span>
+
+          <!-- ② 게시글 상세 풀 페이지 -->
+          <div class="desktop" style="height: 360px;">
+            <div class="browser-bar"><div class="browser-dot bg-red-400"></div><div class="browser-dot bg-yellow-400"></div><div class="browser-dot bg-green-400"></div><div class="url">jipsamoye.com/posts/50</div></div>
+            <div class="flex h-full">
+              <aside class="w-32 border-r border-gray-100 p-3 text-[10px] text-gray-400 space-y-2"><p class="font-bold text-gray-700">집사모여</p><p>🏠 홈</p><p>📋 게시판</p></aside>
+              <main class="flex-1 p-3">
+                <button class="text-xs text-gray-500">‹ 뒤로</button>
+                <h2 class="text-base font-bold mt-2 mb-1">우리집 강아지 자랑</h2>
+                <div class="aspect-square bg-amber-200 rounded-lg flex items-center justify-center text-3xl mb-2">🐶</div>
+                <p class="text-xs text-gray-500">메인이 unmount되며 데이터·스크롤 사라짐</p>
+              </main>
+            </div>
+          </div>
+
+          <span class="flow-arrow">→</span>
+
+          <!-- ③ 뒤로가기 후 — 잘못된 위치 -->
+          <div class="desktop" style="height: 360px;">
+            <div class="browser-bar"><div class="browser-dot bg-red-400"></div><div class="browser-dot bg-yellow-400"></div><div class="browser-dot bg-green-400"></div><div class="url">jipsamoye.com/</div></div>
+            <div class="flex h-full">
+              <aside class="w-32 border-r border-gray-100 p-3 text-[10px] text-gray-400 space-y-2"><p class="font-bold text-gray-700">집사모여</p><p>🏠 홈</p><p>📋 게시판</p></aside>
+              <main class="flex-1 p-3">
+                <p class="text-[10px] text-red-500 mb-1">⚠️ 첫 페이지 20개만 로드 → scrollTo(0,1500) 무효</p>
+                <div class="grid grid-cols-4 gap-1.5 mb-1"><div class="feed-card bg-amber-100">🐶</div><div class="feed-card bg-pink-100">🐱</div><div class="feed-card bg-blue-100">🐾</div><div class="feed-card bg-purple-100">🐱</div></div>
+                <div class="grid grid-cols-4 gap-1.5 mb-1"><div class="feed-card bg-amber-100">🐶</div><div class="feed-card bg-pink-100">🐱</div><div class="feed-card bg-blue-100">🐾</div><div class="feed-card bg-purple-100">🐱</div></div>
+                <div class="grid grid-cols-4 gap-1.5 ring-2 ring-red-400 rounded-lg p-0.5"><div class="feed-card bg-amber-100">🐶</div><div class="feed-card bg-pink-100">🐱</div><div class="feed-card bg-blue-100">🐾</div><div class="feed-card bg-purple-100">🐱</div></div>
+                <p class="text-[10px] text-red-600 font-medium mt-1">↑ 페이지 끝에서 멈춤 (사용자가 보던 위치 ❌)</p>
+              </main>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ════════════════════════════════════════════════════ -->
+  <!-- A안 — Intercepting Routes 모달 (UI 변화 있음) -->
+  <!-- ════════════════════════════════════════════════════ -->
+  <section>
+    <div class="flex items-center gap-3 mb-3">
+      <span class="label recommended">A — Intercepting Routes 모달 (추천)</span>
+      <p class="text-xs text-gray-500"><b>UI도 변함.</b> 게시글이 풀 페이지가 아닌 모달로 표시. 메인은 unmount 안 되어 100% 보존</p>
+    </div>
+
+    <div class="space-y-6">
+
+      <!-- 데스크톱 -->
+      <div>
+        <p class="text-xs font-bold text-gray-700 mb-2">🖥 데스크톱 — 중앙 모달 (Reddit/Pinterest 패턴)</p>
+        <div class="flex items-center gap-3">
+          <!-- ① 메인 -->
+          <div class="desktop" style="height: 360px;">
+            <div class="browser-bar"><div class="browser-dot bg-red-400"></div><div class="browser-dot bg-yellow-400"></div><div class="browser-dot bg-green-400"></div><div class="url">jipsamoye.com/</div></div>
+            <div class="flex h-full">
+              <aside class="w-32 border-r border-gray-100 p-3 text-[10px] text-gray-400 space-y-2"><p class="font-bold text-gray-700">집사모여</p><p>🏠 홈</p><p>📋 게시판</p></aside>
+              <main class="flex-1 p-3">
+                <p class="text-[10px] text-gray-400 mb-1">↑ 위쪽 카드들은 화면 밖</p>
+                <div class="grid grid-cols-4 gap-1.5 mb-1"><div class="feed-card bg-amber-100">🐶</div><div class="feed-card bg-pink-100">🐱</div><div class="feed-card bg-blue-100">🐾</div><div class="feed-card bg-purple-100">🐱</div></div>
+                <div class="grid grid-cols-4 gap-1.5 mb-1 ring-2 ring-amber-400 rounded-lg p-0.5"><div class="feed-card bg-amber-100">🐶</div><div class="feed-card bg-pink-100">🐱</div><div class="feed-card bg-blue-100">🐾</div><div class="feed-card bg-purple-100">🐱</div></div>
+                <p class="text-[10px] text-amber-600 font-medium mb-1">↑ 3번째 줄 클릭</p>
+              </main>
+            </div>
+          </div>
+
+          <span class="flow-arrow">→</span>
+
+          <!-- ② 메인 + 모달 (메인이 dim 상태로 뒤에 있음) -->
+          <div class="desktop relative" style="height: 360px;">
+            <div class="browser-bar"><div class="browser-dot bg-red-400"></div><div class="browser-dot bg-yellow-400"></div><div class="browser-dot bg-green-400"></div><div class="url">jipsamoye.com/posts/50</div></div>
+            <div class="flex h-full relative">
+              <aside class="w-32 border-r border-gray-100 p-3 text-[10px] text-gray-400 space-y-2"><p class="font-bold text-gray-700">집사모여</p><p>🏠 홈</p><p>📋 게시판</p></aside>
+              <main class="flex-1 p-3 relative">
+                <!-- dim된 메인 -->
+                <div class="opacity-30">
+                  <p class="text-[10px] text-gray-400 mb-1">↑ 메인이 살짝 보임 (살아있음)</p>
+                  <div class="grid grid-cols-4 gap-1.5 mb-1"><div class="feed-card bg-amber-100">🐶</div><div class="feed-card bg-pink-100">🐱</div><div class="feed-card bg-blue-100">🐾</div><div class="feed-card bg-purple-100">🐱</div></div>
+                  <div class="grid grid-cols-4 gap-1.5"><div class="feed-card bg-amber-100">🐶</div><div class="feed-card bg-pink-100">🐱</div><div class="feed-card bg-blue-100">🐾</div><div class="feed-card bg-purple-100">🐱</div></div>
+                </div>
+                <!-- 모달 -->
+                <div class="absolute inset-0 bg-black/40 flex items-center justify-center p-3 z-10 rounded-br-lg">
+                  <div class="bg-white rounded-xl shadow-2xl w-full max-w-[300px] p-3">
+                    <div class="flex justify-between items-center mb-2">
+                      <p class="text-[10px] font-bold">우리집 강아지 자랑</p>
+                      <button class="w-5 h-5 rounded-full bg-gray-100 flex items-center justify-center text-[10px]">×</button>
+                    </div>
+                    <div class="aspect-video bg-amber-200 rounded flex items-center justify-center text-2xl mb-2">🐶</div>
+                    <p class="text-[9px] text-gray-500">본문...</p>
+                  </div>
+                </div>
+              </main>
+            </div>
+          </div>
+
+          <span class="flow-arrow">→</span>
+
+          <!-- ③ 모달 닫음 — 메인 그대로 -->
+          <div class="desktop" style="height: 360px;">
+            <div class="browser-bar"><div class="browser-dot bg-red-400"></div><div class="browser-dot bg-yellow-400"></div><div class="browser-dot bg-green-400"></div><div class="url">jipsamoye.com/</div></div>
+            <div class="flex h-full">
+              <aside class="w-32 border-r border-gray-100 p-3 text-[10px] text-gray-400 space-y-2"><p class="font-bold text-gray-700">집사모여</p><p>🏠 홈</p><p>📋 게시판</p></aside>
+              <main class="flex-1 p-3">
+                <p class="text-[10px] text-emerald-600 mb-1">✨ 메인이 그대로 — 데이터/스크롤 100% 보존</p>
+                <div class="grid grid-cols-4 gap-1.5 mb-1"><div class="feed-card bg-amber-100">🐶</div><div class="feed-card bg-pink-100">🐱</div><div class="feed-card bg-blue-100">🐾</div><div class="feed-card bg-purple-100">🐱</div></div>
+                <div class="grid grid-cols-4 gap-1.5 mb-1 ring-2 ring-emerald-500 rounded-lg p-0.5"><div class="feed-card bg-amber-100">🐶</div><div class="feed-card bg-pink-100">🐱</div><div class="feed-card bg-blue-100">🐾</div><div class="feed-card bg-purple-100">🐱</div></div>
+                <p class="text-[10px] text-emerald-600 font-medium mb-1">↑ 정확히 보던 위치 ✓</p>
+              </main>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 모바일 -->
+      <div>
+        <p class="text-xs font-bold text-gray-700 mb-2">📱 모바일 — 풀스크린 sheet (Instagram/Pinterest 패턴)</p>
+        <div class="flex items-center gap-3">
+          <!-- ① 메인 -->
+          <div class="phone" style="height: 480px;">
+            <div class="px-3 py-2 border-b border-gray-100 flex items-center justify-between"><p class="text-xs font-bold">집사모여</p><div class="flex gap-1.5 text-gray-400 text-[10px]">🔍 🔔 ☰</div></div>
+            <div class="p-2">
+              <p class="text-[9px] text-gray-400 mb-1">↑ 위쪽 카드 화면 밖</p>
+              <div class="grid grid-cols-2 gap-1 mb-1"><div class="feed-card bg-amber-100">🐶</div><div class="feed-card bg-pink-100">🐱</div></div>
+              <div class="grid grid-cols-2 gap-1 mb-1 ring-2 ring-amber-400 rounded-lg p-0.5"><div class="feed-card bg-blue-100">🐾</div><div class="feed-card bg-purple-100">🐱</div></div>
+              <p class="text-[9px] text-amber-600">↑ 3번째 줄 클릭</p>
+            </div>
+          </div>
+
+          <span class="flow-arrow">→</span>
+
+          <!-- ② 모바일 sheet (풀스크린이지만 위에 X handle, 아래에 약간 배경) -->
+          <div class="phone relative" style="height: 480px;">
+            <div class="px-3 py-2 border-b border-gray-100 flex items-center justify-between opacity-30"><p class="text-xs font-bold">집사모여</p><div class="flex gap-1.5 text-gray-400 text-[10px]">🔍 🔔 ☰</div></div>
+            <div class="absolute inset-0 top-[20px] bg-white rounded-t-2xl shadow-2xl">
+              <div class="w-10 h-1 bg-gray-300 rounded-full mx-auto mt-1.5"></div>
+              <div class="px-3 pt-2 pb-2 flex justify-between items-center"><p class="text-[10px] font-bold">우리집 강아지 자랑</p><button class="w-5 h-5 rounded-full bg-gray-100 flex items-center justify-center text-[10px]">×</button></div>
+              <div class="px-3"><div class="aspect-square bg-amber-200 rounded-lg flex items-center justify-center text-3xl mb-2">🐶</div><p class="text-[9px] text-gray-500">2살 페르시안 멍멍이입니다 🐾</p></div>
+            </div>
+          </div>
+
+          <span class="flow-arrow">→</span>
+
+          <!-- ③ sheet 닫음 — 메인 그대로 -->
+          <div class="phone" style="height: 480px;">
+            <div class="px-3 py-2 border-b border-gray-100 flex items-center justify-between"><p class="text-xs font-bold">집사모여</p><div class="flex gap-1.5 text-gray-400 text-[10px]">🔍 🔔 ☰</div></div>
+            <div class="p-2">
+              <p class="text-[9px] text-emerald-600">✨ 그대로 보존</p>
+              <div class="grid grid-cols-2 gap-1 mb-1 mt-1"><div class="feed-card bg-amber-100">🐶</div><div class="feed-card bg-pink-100">🐱</div></div>
+              <div class="grid grid-cols-2 gap-1 mb-1 ring-2 ring-emerald-500 rounded-lg p-0.5"><div class="feed-card bg-blue-100">🐾</div><div class="feed-card bg-purple-100">🐱</div></div>
+              <p class="text-[9px] text-emerald-600 font-medium">↑ 정확히 그 위치 ✓</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-4 bg-emerald-50 border border-emerald-200 rounded-xl p-4 max-w-3xl">
+      <p class="text-xs"><b>UI 변화:</b> 데스크톱 모달 + 모바일 풀스크린 sheet. 작업량 6~8h. 정확도 100%. 카카오톡 공유 링크는 풀 페이지 fallback (자연스러움). Reddit·Instagram·Pinterest 표준 패턴</p>
+    </div>
+  </section>
+
+  <!-- ════════════════════════════════════════════════════ -->
+  <!-- B안 — TanStack Query (UI 변화 0) -->
+  <!-- ════════════════════════════════════════════════════ -->
+  <section>
+    <div class="flex items-center gap-3 mb-3">
+      <span class="label">B — TanStack Query</span>
+      <p class="text-xs text-gray-500"><b>UI 변화 0.</b> 게시글은 그대로 풀 페이지 전환. 다만 메인 데이터가 query cache에 보존되어 뒤로가기 시 무한 스크롤 누적 데이터 그대로 복원</p>
+    </div>
+
+    <div class="flex items-center gap-3">
+      <div class="desktop" style="height: 280px;">
+        <div class="browser-bar"><div class="browser-dot bg-red-400"></div><div class="browser-dot bg-yellow-400"></div><div class="browser-dot bg-green-400"></div><div class="url">jipsamoye.com/</div></div>
+        <div class="flex h-full">
+          <aside class="w-32 border-r border-gray-100 p-3 text-[10px] text-gray-400"><p class="font-bold text-gray-700">집사모여</p></aside>
+          <main class="flex-1 p-3"><p class="text-[10px] text-gray-400">↑ Before와 동일</p><div class="grid grid-cols-4 gap-1.5 mt-1 mb-1"><div class="feed-card bg-amber-100">🐶</div><div class="feed-card bg-pink-100">🐱</div><div class="feed-card bg-blue-100">🐾</div><div class="feed-card bg-purple-100">🐱</div></div><div class="grid grid-cols-4 gap-1.5 ring-2 ring-amber-400 rounded-lg p-0.5"><div class="feed-card bg-amber-100">🐶</div><div class="feed-card bg-pink-100">🐱</div><div class="feed-card bg-blue-100">🐾</div><div class="feed-card bg-purple-100">🐱</div></div></main>
+        </div>
+      </div>
+
+      <span class="flow-arrow">→</span>
+
+      <div class="desktop" style="height: 280px;">
+        <div class="browser-bar"><div class="browser-dot bg-red-400"></div><div class="browser-dot bg-yellow-400"></div><div class="browser-dot bg-green-400"></div><div class="url">jipsamoye.com/posts/50</div></div>
+        <div class="flex h-full"><aside class="w-32 border-r border-gray-100 p-3 text-[10px] text-gray-400"><p class="font-bold text-gray-700">집사모여</p></aside><main class="flex-1 p-3"><p class="text-[10px] text-gray-500">기존 풀 페이지 그대로</p><div class="aspect-square bg-amber-200 rounded mt-2 flex items-center justify-center text-3xl">🐶</div></main></div>
+      </div>
+
+      <span class="flow-arrow">→</span>
+
+      <div class="desktop" style="height: 280px;">
+        <div class="browser-bar"><div class="browser-dot bg-red-400"></div><div class="browser-dot bg-yellow-400"></div><div class="browser-dot bg-green-400"></div><div class="url">jipsamoye.com/</div></div>
+        <div class="flex h-full"><aside class="w-32 border-r border-gray-100 p-3 text-[10px] text-gray-400"><p class="font-bold text-gray-700">집사모여</p></aside><main class="flex-1 p-3"><p class="text-[10px] text-emerald-600">✨ Query cache가 누적 데이터 복원</p><div class="grid grid-cols-4 gap-1.5 mt-1 mb-1"><div class="feed-card bg-amber-100">🐶</div><div class="feed-card bg-pink-100">🐱</div><div class="feed-card bg-blue-100">🐾</div><div class="feed-card bg-purple-100">🐱</div></div><div class="grid grid-cols-4 gap-1.5 ring-2 ring-emerald-500 rounded-lg p-0.5"><div class="feed-card bg-amber-100">🐶</div><div class="feed-card bg-pink-100">🐱</div><div class="feed-card bg-blue-100">🐾</div><div class="feed-card bg-purple-100">🐱</div></div></main></div>
+      </div>
+    </div>
+
+    <div class="mt-4 bg-amber-50 border border-amber-200 rounded-xl p-4 max-w-3xl">
+      <p class="text-xs"><b>UI 변화:</b> 0. 게시글은 그대로 풀 페이지. <b>차이는 데이터:</b> useInfiniteQuery가 페이지별 데이터를 cache 보존. 작업량 4~5h. <b>부가 효과:</b> 다른 페이지(좋아요/팔로우 등)도 캐싱 가능</p>
+    </div>
+  </section>
+
+  <!-- ════════════════════════════════════════════════════ -->
+  <!-- D안 — 페이지 번호 함께 저장 -->
+  <!-- ════════════════════════════════════════════════════ -->
+  <section>
+    <div class="flex items-center gap-3 mb-3">
+      <span class="label neutral">D — 페이지 번호 함께 저장</span>
+      <p class="text-xs text-gray-500"><b>UI 변화 0.</b> sessionStorage에 {y, page} 저장. 복원 시 page까지 미리 fetch한 후 scrollTo</p>
+    </div>
+
+    <div class="bg-gray-50 border border-gray-200 rounded-xl p-4 max-w-3xl text-xs space-y-2">
+      <p>1️⃣ 사용자가 50번째 카드 클릭 직전 sessionStorage 저장: <code class="bg-white px-1.5 rounded">{y: 1500, page: 3}</code></p>
+      <p>2️⃣ 게시글 페이지 풀 전환 (UI는 Before와 동일)</p>
+      <p>3️⃣ 뒤로가기 → 메인 마운트 시 sessionStorage 읽음 → page 3까지 sequential하게 fetch (3번 API 호출)</p>
+      <p>4️⃣ 콘텐츠 다 로드된 후 scrollTo(0, 1500) → 정확한 위치 ✓</p>
+      <p class="text-amber-700 mt-2">⚠️ 단점: 페이지 3번 fetch라 약간 느림 (300~600ms 로딩). UI는 그대로지만 "복귀가 느려진다"는 단점</p>
+    </div>
+
+    <div class="mt-4 bg-amber-50 border border-amber-200 rounded-xl p-4 max-w-3xl">
+      <p class="text-xs"><b>UI 변화:</b> 0. <b>차이는 fetch 횟수:</b> 무한 스크롤 page만큼 다시 fetch. 작업량 3~4h. 라이브러리 추가 X. 다만 fetch가 늘어나 백엔드 부담</p>
+    </div>
+  </section>
+
+  <!-- ════════════════════════════════════════════════════ -->
+  <!-- 결정 가이드 -->
+  <!-- ════════════════════════════════════════════════════ -->
+  <section class="bg-white border-2 border-amber-300 rounded-2xl p-6 max-w-4xl">
+    <h2 class="text-base font-bold text-gray-900 mb-4">📌 결정 가이드</h2>
+
+    <div class="space-y-3 text-sm">
+      <div class="flex gap-3">
+        <span class="flex-shrink-0 w-6 h-6 rounded-full bg-emerald-500 text-white flex items-center justify-center text-xs font-bold">A</span>
+        <p>최대한 우아한 UX. 게시글이 모달로 떠도 괜찮고, 6~8h 작업이 OK라면 → <b>A안</b>. Reddit/Instagram의 "그 부드러움" 그대로 재현</p>
+      </div>
+      <div class="flex gap-3">
+        <span class="flex-shrink-0 w-6 h-6 rounded-full bg-amber-500 text-white flex items-center justify-center text-xs font-bold">B</span>
+        <p>UI는 그대로 두고 싶고, TanStack Query 같은 캐싱 라이브러리를 도입할 의향 있다면 → <b>B안</b>. 다른 영역에도 캐싱 효과 + 4~5h 작업</p>
+      </div>
+      <div class="flex gap-3">
+        <span class="flex-shrink-0 w-6 h-6 rounded-full bg-gray-500 text-white flex items-center justify-center text-xs font-bold">D</span>
+        <p>UI 그대로 + 라이브러리 추가도 싫다면 → <b>D안</b>. 다만 복귀가 살짝 느려짐(여러 페이지 sequential fetch)</p>
+      </div>
+    </div>
+
+    <hr class="my-4 border-gray-200">
+
+    <p class="text-xs text-gray-600">
+      💡 <b>제 우선순위 추천:</b> A(가장 우아) > B(데이터 캐싱) > D(작은 변경) > C(현재 미세 개선, 점프 보일 수 있음)
+    </p>
+    <p class="text-xs text-gray-500 mt-2">UI 변화 허용 여부가 가장 큰 결정 기준입니다. A안의 모달 UI가 마음에 들지 않으면 B/D, A안을 받아들일 수 있다면 가장 부드러운 UX가 나옴.</p>
+  </section>
+
+</div>
+</body>
+</html>
