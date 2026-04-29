@@ -126,7 +126,7 @@ export default function CommentSection({ postId, user, onCountChange }: CommentS
               placeholder="댓글 달기"
               className="flex-1 px-4 py-2 rounded-xl border border-gray-100 bg-transparent text-sm focus:outline-none focus:ring-2 focus:ring-amber-300 transition-all duration-200"
             />
-            <Button size="sm" onClick={handleAddParent}>댓글</Button>
+            <Button size="sm" className="flex-shrink-0" onClick={handleAddParent}>댓글</Button>
           </div>
         </div>
       )}
@@ -298,7 +298,7 @@ export default function CommentSection({ postId, user, onCountChange }: CommentS
                         autoFocus
                       />
                     </div>
-                    <Button size="sm" onClick={handleAddReply}>등록</Button>
+                    <Button size="sm" className="flex-shrink-0" onClick={handleAddReply}>등록</Button>
                     <Button variant="ghost" size="sm" onClick={() => setReplyingTo(null)}>취소</Button>
                   </div>
                 </div>

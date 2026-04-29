@@ -34,7 +34,7 @@ export default function ProfilePage({ params }: { params: Promise<{ nickname: st
     api.get<PageResponse<PetPostListItem>>(`/api/users/${decodedNickname}/posts?page=0&size=20`)
       .then((res) => setPosts(res.data.content))
       .catch(() => {});
-  }, [decodedNickname, router]);
+  }, [decodedNickname, router, user]);
 
   const handleFollow = async () => {
     if (!user) return;

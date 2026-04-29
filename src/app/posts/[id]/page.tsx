@@ -37,7 +37,7 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
       })
       .catch(() => router.push('/'))
       .finally(() => setLoading(false));
-  }, [id, router]);
+  }, [id, router, user]);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {

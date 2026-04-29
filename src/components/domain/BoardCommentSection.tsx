@@ -83,7 +83,7 @@ export default function BoardCommentSection({ boardId, user }: Props) {
               maxLength={500}
               className="flex-1 px-4 py-2 rounded-xl border border-gray-100 bg-transparent text-sm focus:outline-none focus:ring-2 focus:ring-amber-300"
             />
-            <Button size="sm" onClick={handleSubmit}>등록</Button>
+            <Button size="sm" className="flex-shrink-0" onClick={handleSubmit}>등록</Button>
           </div>
         </div>
       )}

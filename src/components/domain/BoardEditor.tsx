@@ -11,6 +11,7 @@ import { api } from '@/lib/api';
 import { PresignedUrlResponse } from '@/types/api';
 import { compressImage, extFromMimeType } from '@/lib/imageCompress';
 import { showToast } from '@/components/common/Toast';
+import { POST_CONFIG, ALLOWED_IMAGE_EXTS } from '@/lib/constants';
 
 interface BoardEditorProps {
   value: string;
@@ -174,6 +175,29 @@ export default function BoardEditor({ value, onChange, placeholder = '내용을 
   }, [value, editor]);
 
   const handleImageUpload = async (file: File) => {
+    if (!editor) return;
+
+    let imageCount = 0;
+    editor.state.doc.descendants((node) => {
+      if (node.type.name === 'image') imageCount++;
+    });
+    if (imageCount >= POST_CONFIG.MAX_IMAGES) {
+      showToast(`이미지는 최대 ${POST_CONFIG.MAX_IMAGES}장까지 올릴 수 있어요`);
+      return;
+    }
+
+    const ext = file.name.split('.').pop()?.toLowerCase() || 'jpg';
+    if (!ALLOWED_IMAGE_EXTS.includes(ext)) {
+      showToast('지원하지 않는 이미지 형식이에요 (JPG · PNG · WEBP만 가능)');
+      return;
+    }
+
+    if (file.size > POST_CONFIG.MAX_IMAGE_SIZE) {
+      const maxMB = POST_CONFIG.MAX_IMAGE_SIZE / (1024 * 1024);
+      showToast(`이미지는 1장 당 ${maxMB}MB 이내로 올려주세요`);
+      return;
+    }
+
     try {
       // fast path에서 원본이 그대로 반환될 수 있어 직렬 처리 필요 (S3 메타/바이트 정합성).
       const compressed = await compressImage(file, 'post');

@@ -114,6 +114,7 @@ export default function BoardForm({
         className="w-full h-12 px-4 mb-3 rounded-xl border border-gray-200 bg-gray-50 text-base focus:outline-none focus:ring-2 focus:ring-amber-300"
       />
 
+      <p className="text-xs text-gray-400 mb-2 px-1">📎 이미지: 1장 당 10MB 이내 · 최대 5장 (JPG · PNG · WEBP)</p>
       <BoardEditor value={content} onChange={setContent} />
 
       <div className="fixed bottom-0 left-0 right-0 lg:left-52 bg-white border-t border-gray-100 px-4 py-3 z-40">
