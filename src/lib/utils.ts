@@ -1,7 +1,15 @@
+// 백엔드는 timezone 없는 KST naive ISO 8601을 보냄 (예: "2026-04-28T01:14:39.580808")
+// 이미 timezone 정보가 있으면 그대로, 없으면 +09:00을 명시해 파싱
+function parseServerTime(dateString: string): Date {
+  if (dateString.endsWith('Z') || /[+\-]\d{2}:?\d{2}$/.test(dateString)) {
+    return new Date(dateString);
+  }
+  return new Date(dateString + '+09:00');
+}
+
 export function timeAgo(dateString: string): string {
   const now = Date.now();
-  const utcStr = dateString.endsWith('Z') ? dateString : dateString + 'Z';
-  const date = new Date(utcStr).getTime();
+  const date = parseServerTime(dateString).getTime();
   const diffMs = now - date;
   const diffSec = Math.floor(diffMs / 1000);
   const diffMin = Math.floor(diffSec / 60);
@@ -19,15 +27,13 @@ export function timeAgo(dateString: string): string {
 // 7일 이내: 상대 시간 ("방금 전", "N분 전", "N일 전" 등), 7일 이후: "YYYY.MM.DD"
 export function timeAgoOrDate(dateString: string): string {
   const now = Date.now();
-  const utcStr = dateString.endsWith('Z') ? dateString : dateString + 'Z';
-  const diffDay = Math.floor((now - new Date(utcStr).getTime()) / (1000 * 60 * 60 * 24));
+  const diffDay = Math.floor((now - parseServerTime(dateString).getTime()) / (1000 * 60 * 60 * 24));
   return diffDay < 7 ? timeAgo(dateString) : formatDate(dateString);
 }
 
 // "YYYY.MM.DD" — trailing dot 없음
 export function formatDate(dateString: string): string {
-  const utcStr = dateString.endsWith('Z') ? dateString : dateString + 'Z';
-  const d = new Date(utcStr);
+  const d = parseServerTime(dateString);
   const y = d.getFullYear();
   const m = String(d.getMonth() + 1).padStart(2, '0');
   const day = String(d.getDate()).padStart(2, '0');
@@ -36,8 +42,7 @@ export function formatDate(dateString: string): string {
 
 // "YYYY.MM.DD HH:MM" — trailing dot 없음
 export function formatDateTime(dateString: string): string {
-  const utcStr = dateString.endsWith('Z') ? dateString : dateString + 'Z';
-  const d = new Date(utcStr);
+  const d = parseServerTime(dateString);
   const y = d.getFullYear();
   const m = String(d.getMonth() + 1).padStart(2, '0');
   const day = String(d.getDate()).padStart(2, '0');

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
-import { timeAgoOrDate, formatDate, formatDateTime } from '@/lib/utils';
+import { timeAgo, timeAgoOrDate, formatDate, formatDateTime } from '@/lib/utils';
 
 afterEach(() => vi.useRealTimers());
 
@@ -64,5 +64,41 @@ describe('timeAgoOrDate', () => {
   it('반환값에 trailing dot이 없다', () => {
     const result = timeAgoOrDate(isoAgo(30));
     expect(result.endsWith('.')).toBe(false);
+  });
+});
+
+describe('timezone naive 처리 — 백엔드 KST naive 대응 (회귀 방지)', () => {
+  it('timezone 없는 ISO 문자열을 KST(+09:00)로 해석한다', () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-04-29T08:00:00+09:00'));
+    // 백엔드가 timezone 정보 없이 보내는 KST naive 형식
+    expect(timeAgo('2026-04-29T07:59:00')).toBe('1분 전');
+    expect(timeAgo('2026-04-29T07:00:00')).toBe('1시간 전');
+  });
+
+  it('KST naive를 UTC로 잘못 해석하지 않는다 (9시간 어긋남 방지)', () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-04-29T17:00:00+09:00'));
+    // 동일 시각이지만 timezone 누락 → KST로 해석되어 '방금 전'
+    expect(timeAgo('2026-04-29T17:00:00')).toBe('방금 전');
+  });
+
+  it('마이크로초 정밀도가 포함된 KST naive (Spring LocalDateTime 형식) 처리', () => {
+    vi.useFakeTimers();
+    // 2시간 차이 — floor 시 마이크로초 손실 영향 없도록 충분한 마진
+    vi.setSystemTime(new Date('2026-04-29T10:00:00+09:00'));
+    expect(timeAgo('2026-04-29T08:00:00.580808')).toBe('1시간 전');
+  });
+
+  it('Z로 끝나는 UTC 문자열은 그대로 UTC로 처리한다', () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-04-29T08:00:00Z'));
+    expect(timeAgo('2026-04-29T07:00:00Z')).toBe('1시간 전');
+  });
+
+  it('+09:00 명시된 KST 문자열은 그대로 KST로 처리한다', () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-04-29T17:00:00+09:00'));
+    expect(timeAgo('2026-04-29T16:30:00+09:00')).toBe('30분 전');
   });
 });
