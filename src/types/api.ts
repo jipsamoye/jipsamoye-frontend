@@ -177,17 +177,36 @@ export interface BoardRequest {
 // 자유게시판 댓글
 export interface BoardComment {
   id: number;
+  content: string | null;          // isMasked=true이면 null
   nickname: string;
   profileImageUrl: string | null;
-  content: string;
+  mentionedNickname: string | null;
+  isMasked: boolean;
+  replyCount: number;
+  replies?: BoardComment[];        // 부모면 ASC 처음 3개
   createdAt: string;
+  updatedAt: string;
+}
+
+// 자유게시판 댓글 작성 요청
+export interface BoardCommentCreateRequest {
+  boardId: number;
+  parentId: number | null;
+  mentionedUserId: number | null;  // 항상 null (서버 자동 처리)
+  content: string;
+}
+
+// 자유게시판 댓글 수정 요청
+export interface BoardCommentUpdateRequest {
+  content: string;
 }
 
 // 알림 타입 (백엔드 PR #53 기준 known set + 미래 타입 string fallback)
 export type KnownNotificationType =
   | 'LIKE'
   | 'FOLLOW'
-  | 'PET_POST_COMMENT_REPLY';
+  | 'PET_POST_COMMENT_REPLY'
+  | 'BOARD_COMMENT_REPLY';
 export type NotificationType = KnownNotificationType | (string & {});
 
 // 알림

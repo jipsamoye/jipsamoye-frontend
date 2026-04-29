@@ -44,6 +44,28 @@ describe('getNotificationLink', () => {
     expect(getNotificationLink({ ...base, type: 'LIKE', targetId: 7 })).toBe('/posts/7');
   });
 
+  it('BOARD_COMMENT_REPLY + relatedPostId + targetId → /board/{id}#comment-{id}', () => {
+    expect(
+      getNotificationLink({
+        ...base,
+        type: 'BOARD_COMMENT_REPLY',
+        relatedPostId: 7,
+        targetId: 55,
+      }),
+    ).toBe('/board/7#comment-55');
+  });
+
+  it('BOARD_COMMENT_REPLY 인데 relatedPostId 가 null 이면 fallback', () => {
+    expect(
+      getNotificationLink({
+        ...base,
+        type: 'BOARD_COMMENT_REPLY',
+        relatedPostId: null,
+        targetId: 55,
+      }),
+    ).toBe('/posts/55');
+  });
+
   it('PET_POST_COMMENT_REPLY 인데 relatedPostId 가 null 이면 fallback (안전망)', () => {
     expect(
       getNotificationLink({

@@ -149,7 +149,11 @@ export default function BoardDetailPage({ params }: { params: Promise<{ id: stri
         </span>
       </div>
 
-      <BoardCommentSection boardId={post.id} user={user} />
+      <BoardCommentSection
+        boardId={post.id}
+        user={user}
+        onCountChange={(delta) => setPost((prev) => prev ? { ...prev, commentCount: prev.commentCount + delta } : prev)}
+      />
     </article>
   );
 }
