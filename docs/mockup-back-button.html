@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>뒤로가기 버튼 + 스크롤 복원 — 시안 비교</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css');
+    body { font-family: 'Pretendard', -apple-system, sans-serif; background: #f3f4f6; }
+    .label { display: inline-block; padding: 4px 12px; border-radius: 999px; background: #f59e0b; color: white; font-size: 11px; font-weight: 700; }
+    .recommended { background: #10b981 !important; }
+    .phone { width: 375px; border-radius: 36px; border: 8px solid #111827; background: #fff; overflow: hidden; box-shadow: 0 18px 40px -10px rgba(0,0,0,.22); position: relative; }
+    .phone::before { content:''; display:block; width:100px; height:22px; background:#111827; border-radius:0 0 14px 14px; margin:0 auto; }
+    .desktop { width: 920px; border-radius: 12px; border: 1px solid #d1d5db; background: #fff; overflow: hidden; box-shadow: 0 20px 40px -10px rgba(0,0,0,.15); }
+    .browser-bar { background: #f3f4f6; padding: 8px 12px; border-bottom: 1px solid #e5e7eb; display: flex; align-items: center; gap: 8px; }
+    .browser-dot { width: 11px; height: 11px; border-radius: 999px; }
+    .url { flex: 1; background: #fff; padding: 4px 12px; border-radius: 999px; font-size: 11px; color: #6b7280; }
+    .arrow { display: inline-flex; align-items: center; justify-content: center; }
+  </style>
+</head>
+<body class="p-10">
+<div class="max-w-[1500px] mx-auto space-y-12">
+
+  <header>
+    <h1 class="text-2xl font-bold text-gray-900 mb-1">⬅️ 뒤로가기 버튼 + 스크롤 복원 — 시안 비교</h1>
+    <p class="text-sm text-gray-500 mb-2">게시글 상세에 뒤로가기 버튼을 어디에 배치할지 + 목록 페이지로 돌아갈 때 보던 위치까지 복원</p>
+    <p class="text-xs text-gray-500">스크롤 복원은 <code class="bg-gray-200 px-1 rounded">sessionStorage</code> 기반으로 모든 시안에 공통 적용. 차이는 <b>버튼 위치</b>만.</p>
+  </header>
+
+  <!-- ════════════════════════════════════════════════════ -->
+  <!-- A안 — 페이지 콘텐츠 영역 좌상단 (모바일/데스크톱 동일) -->
+  <!-- ════════════════════════════════════════════════════ -->
+  <section>
+    <div class="flex items-center gap-3 mb-3">
+      <span class="label recommended">A — 콘텐츠 영역 좌상단 (추천)</span>
+      <p class="text-xs text-gray-500">제목 위 한 줄. 모바일/데스크톱 동일 위치. 콘텐츠와 함께 스크롤됨</p>
+    </div>
+
+    <div class="flex gap-8 flex-wrap items-start">
+      <!-- A 데스크톱 -->
+      <div class="desktop">
+        <div class="browser-bar">
+          <div class="browser-dot bg-red-400"></div>
+          <div class="browser-dot bg-yellow-400"></div>
+          <div class="browser-dot bg-green-400"></div>
+          <div class="url">jipsamoye.com/posts/16</div>
+        </div>
+        <div class="flex">
+          <!-- 사이드바 -->
+          <aside class="w-48 border-r border-gray-100 p-4 text-xs text-gray-500 space-y-2">
+            <p class="font-bold text-gray-900 mb-3">집사모여</p>
+            <p>🏠 홈</p>
+            <p>🏆 랭킹</p>
+            <p>📋 자유게시판</p>
+          </aside>
+          <!-- 본문 -->
+          <main class="flex-1 p-8">
+            <button class="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-amber-600 mb-4">
+              <span class="text-lg">‹</span> 뒤로
+            </button>
+            <h2 class="text-2xl font-bold text-gray-900 mb-4">우리집 강아지 자랑해요</h2>
+            <div class="flex items-center gap-2 pb-4 mb-5 border-b border-gray-200">
+              <div class="w-8 h-8 rounded-full bg-amber-200 flex items-center justify-center text-sm">🐶</div>
+              <div>
+                <p class="text-xs font-semibold">멍멍이</p>
+                <p class="text-[10px] text-gray-400">2026.04.28 17:39</p>
+              </div>
+            </div>
+            <div class="aspect-video bg-gradient-to-br from-amber-100 to-amber-300 rounded-xl flex items-center justify-center text-5xl mb-3">🐶</div>
+            <p class="text-xs text-gray-700">우리집 강아지가 너무 귀여워서 자랑하러 왔어요!</p>
+          </main>
+        </div>
+      </div>
+
+      <!-- A 모바일 -->
+      <div class="phone">
+        <div class="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
+          <p class="font-bold">집사모여</p>
+          <div class="flex gap-2 text-gray-400">🔍 🔔 ☰</div>
+        </div>
+        <div class="px-4 pt-4 pb-4">
+          <button class="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-amber-600 mb-3">
+            <span class="text-lg leading-none">‹</span> 뒤로
+          </button>
+          <h2 class="text-lg font-bold text-gray-900 mb-3">우리집 강아지 자랑해요</h2>
+          <div class="flex items-center gap-2 pb-3 mb-4 border-b border-gray-200">
+            <div class="w-7 h-7 rounded-full bg-amber-200 flex items-center justify-center text-sm">🐶</div>
+            <div>
+              <p class="text-xs font-semibold">멍멍이</p>
+              <p class="text-[10px] text-gray-400">2026.04.28 17:39</p>
+            </div>
+          </div>
+          <div class="aspect-square bg-gradient-to-br from-amber-100 to-amber-300 rounded-xl flex items-center justify-center text-5xl mb-3">🐶</div>
+          <p class="text-xs text-gray-700">우리집 강아지가 너무 귀여워서 자랑하러 왔어요!</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-4 bg-emerald-50 border border-emerald-200 rounded-xl p-4 max-w-3xl">
+      <p class="text-sm font-bold text-emerald-800 mb-1">✨ 추천 이유</p>
+      <ul class="text-xs text-emerald-700 space-y-1 list-disc pl-5">
+        <li>모바일/데스크톱 동일 위치 — 학습 비용 0</li>
+        <li>글로벌 헤더 변경 없음 — 다른 페이지 영향 0</li>
+        <li>콘텐츠와 함께 스크롤되므로 자연스럽고 평면적</li>
+        <li>구현 단순: 1개 컴포넌트(<code>BackButton</code>)를 두 페이지(<code>posts/[id]</code>, <code>board/[id]</code>) 상단에 추가만</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ════════════════════════════════════════════════════ -->
+  <!-- B안 — 글로벌 헤더 좌측 (모바일에만) -->
+  <!-- ════════════════════════════════════════════════════ -->
+  <section>
+    <div class="flex items-center gap-3 mb-3">
+      <span class="label">B — 글로벌 헤더 좌측 (모바일만)</span>
+      <p class="text-xs text-gray-500">모바일에서 헤더에 화살표가 로고 자리 대신 표시. 데스크톱은 A와 동일</p>
+    </div>
+
+    <div class="flex gap-8 flex-wrap items-start">
+      <div class="desktop">
+        <div class="browser-bar">
+          <div class="browser-dot bg-red-400"></div>
+          <div class="browser-dot bg-yellow-400"></div>
+          <div class="browser-dot bg-green-400"></div>
+          <div class="url">jipsamoye.com/posts/16</div>
+        </div>
+        <div class="flex">
+          <aside class="w-48 border-r border-gray-100 p-4 text-xs text-gray-500 space-y-2">
+            <p class="font-bold text-gray-900 mb-3">집사모여</p>
+            <p>🏠 홈</p>
+            <p>🏆 랭킹</p>
+            <p>📋 자유게시판</p>
+          </aside>
+          <main class="flex-1 p-8">
+            <button class="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-amber-600 mb-4">
+              <span class="text-lg">‹</span> 뒤로
+            </button>
+            <h2 class="text-2xl font-bold text-gray-900 mb-2">우리집 강아지 자랑해요</h2>
+            <p class="text-xs text-gray-400">데스크톱은 A안과 동일</p>
+          </main>
+        </div>
+      </div>
+
+      <div class="phone">
+        <!-- 모바일 헤더에 ← 화살표 -->
+        <div class="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
+          <button class="text-2xl leading-none text-gray-700">‹</button>
+          <p class="font-bold text-sm">게시글</p>
+          <div class="flex gap-2 text-gray-400 text-sm">🔔 ☰</div>
+        </div>
+        <div class="px-4 pt-4 pb-4">
+          <h2 class="text-lg font-bold text-gray-900 mb-3">우리집 강아지 자랑해요</h2>
+          <div class="flex items-center gap-2 pb-3 mb-4 border-b border-gray-200">
+            <div class="w-7 h-7 rounded-full bg-amber-200 flex items-center justify-center text-sm">🐶</div>
+            <div>
+              <p class="text-xs font-semibold">멍멍이</p>
+              <p class="text-[10px] text-gray-400">2026.04.28 17:39</p>
+            </div>
+          </div>
+          <div class="aspect-square bg-gradient-to-br from-amber-100 to-amber-300 rounded-xl flex items-center justify-center text-5xl mb-3">🐶</div>
+          <p class="text-xs text-gray-700">우리집 강아지가 너무 귀여워서 자랑하러 왔어요!</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-4 bg-amber-50 border border-amber-200 rounded-xl p-4 max-w-3xl">
+      <p class="text-sm font-bold text-amber-800 mb-1">⚠️ 주의점</p>
+      <ul class="text-xs text-amber-700 space-y-1 list-disc pl-5">
+        <li>iOS 네이티브 앱 패턴(상단 좌측 ← 화살표)으로 익숙함</li>
+        <li>그러나 글로벌 Header를 페이지별로 변형해야 함 → 페이지 컨텍스트 props 추가, 라우트 분기 등 복잡도 증가</li>
+        <li>로고가 사라져 브랜드 노출이 줄어듦 (모바일 한정)</li>
+        <li>"게시글" 같은 페이지 타이틀을 헤더에 넣을지 결정해야 하는 추가 디자인 이슈</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ════════════════════════════════════════════════════ -->
+  <!-- C안 — Floating 좌상단 (콘텐츠 위 absolute) -->
+  <!-- ════════════════════════════════════════════════════ -->
+  <section>
+    <div class="flex items-center gap-3 mb-3">
+      <span class="label">C — Floating 좌상단</span>
+      <p class="text-xs text-gray-500">동그란 버튼이 첫 이미지 위 좌상단에 떠 있음. 인스타그램 스토리 스타일</p>
+    </div>
+
+    <div class="flex gap-8 flex-wrap items-start">
+      <div class="desktop">
+        <div class="browser-bar">
+          <div class="browser-dot bg-red-400"></div>
+          <div class="browser-dot bg-yellow-400"></div>
+          <div class="browser-dot bg-green-400"></div>
+          <div class="url">jipsamoye.com/posts/16</div>
+        </div>
+        <div class="flex">
+          <aside class="w-48 border-r border-gray-100 p-4 text-xs text-gray-500 space-y-2">
+            <p class="font-bold text-gray-900 mb-3">집사모여</p>
+            <p>🏠 홈</p>
+            <p>🏆 랭킹</p>
+            <p>📋 자유게시판</p>
+          </aside>
+          <main class="flex-1 p-8 relative">
+            <button class="absolute top-8 left-8 w-10 h-10 rounded-full bg-white border border-gray-200 shadow flex items-center justify-center text-lg z-10 hover:bg-gray-50">‹</button>
+            <h2 class="text-2xl font-bold text-gray-900 mb-2 ml-12">우리집 강아지 자랑해요</h2>
+            <p class="text-xs text-gray-400 ml-12">제목이 버튼과 겹치지 않게 좌측 패딩 필요</p>
+          </main>
+        </div>
+      </div>
+
+      <div class="phone">
+        <div class="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
+          <p class="font-bold">집사모여</p>
+          <div class="flex gap-2 text-gray-400">🔍 🔔 ☰</div>
+        </div>
+        <div class="relative px-4 pt-4 pb-4">
+          <button class="absolute top-4 left-4 w-10 h-10 rounded-full bg-white border border-gray-200 shadow flex items-center justify-center text-lg z-10">‹</button>
+          <h2 class="text-lg font-bold text-gray-900 mb-3 pl-12">우리집 강아지 자랑해요</h2>
+          <div class="flex items-center gap-2 pb-3 mb-4 border-b border-gray-200 pl-12">
+            <div class="w-7 h-7 rounded-full bg-amber-200 flex items-center justify-center text-sm">🐶</div>
+            <div>
+              <p class="text-xs font-semibold">멍멍이</p>
+              <p class="text-[10px] text-gray-400">2026.04.28 17:39</p>
+            </div>
+          </div>
+          <div class="aspect-square bg-gradient-to-br from-amber-100 to-amber-300 rounded-xl flex items-center justify-center text-5xl mb-3">🐶</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-4 bg-amber-50 border border-amber-200 rounded-xl p-4 max-w-3xl">
+      <p class="text-sm font-bold text-amber-800 mb-1">⚠️ 주의점</p>
+      <ul class="text-xs text-amber-700 space-y-1 list-disc pl-5">
+        <li>스크롤 시 따라 올라가서 안 보임 (sticky 처리 시 콘텐츠 가림)</li>
+        <li>제목과 충돌 — 좌측 패딩 추가 필요</li>
+        <li>인스타 스토리 같은 풀스크린 레이아웃에선 어울리나, 일반 게시글에는 과함</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ════════════════════════════════════════════════════ -->
+  <!-- 스크롤 복원 동작 설명 -->
+  <!-- ════════════════════════════════════════════════════ -->
+  <section class="bg-white border border-gray-200 rounded-2xl p-6 max-w-4xl">
+    <h2 class="text-base font-bold text-gray-900 mb-4">🎬 스크롤 복원 동작 (3안 공통)</h2>
+    <ol class="text-sm text-gray-700 space-y-2 list-decimal pl-5">
+      <li>메인 / 자유게시판 목록에서 사용자가 스크롤하다가 5번째 카드 클릭</li>
+      <li>onClick 핸들러가 <code class="bg-gray-100 px-1.5 rounded">sessionStorage.setItem('home-feed-scroll', window.scrollY)</code></li>
+      <li>게시글 상세 페이지로 이동</li>
+      <li>"뒤로" 버튼 클릭 → <code class="bg-gray-100 px-1.5 rounded">router.back()</code></li>
+      <li>목록 페이지가 다시 마운트되면서 useEffect에서 <code class="bg-gray-100 px-1.5 rounded">window.scrollTo(0, sessionStorage.getItem('home-feed-scroll'))</code></li>
+      <li>5번째 카드 위치로 정확히 복원 ✨</li>
+    </ol>
+    <p class="text-xs text-gray-500 mt-4">⚠️ 새 탭/새 윈도우는 sessionStorage 분리되어 복원 안 됨 — 의도된 동작 (새 탭은 새 컨텍스트).</p>
+  </section>
+
+  <!-- ════════════════════════════════════════════════════ -->
+  <!-- 정리 -->
+  <!-- ════════════════════════════════════════════════════ -->
+  <section class="bg-emerald-50 border-2 border-emerald-200 rounded-2xl p-6 max-w-4xl">
+    <h2 class="text-base font-bold text-emerald-900 mb-3">📌 최종 추천: A안</h2>
+    <p class="text-sm text-emerald-800 mb-3">콘텐츠 영역 좌상단에 텍스트 버튼 (모바일/데스크톱 동일).</p>
+    <p class="text-sm text-emerald-700">
+      <b>구현 단순도</b>가 높고 (BackButton 컴포넌트 1개 + sessionStorage 훅 1개),
+      <b>다른 페이지 영향 없음</b>, <b>학습 비용 0</b>이며,
+      게시글 같은 콘텐츠 페이지에 가장 어울리는 패턴입니다.
+      적용 위치: <code class="bg-white px-1.5 rounded">/posts/[id]</code>, <code class="bg-white px-1.5 rounded">/board/[id]</code>.
+    </p>
+  </section>
+
+</div>
+</body>
+</html>

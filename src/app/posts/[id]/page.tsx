@@ -13,6 +13,7 @@ import CommentSection from '@/components/domain/CommentSection';
 import { HeartIcon, ShareIcon, LinkIcon } from '@/components/layout/icons';
 import { showToast } from '@/components/common/Toast';
 import { formatDateTime } from '@/lib/utils';
+import BackButton from '@/components/common/BackButton';
 
 export default function PostDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -94,17 +95,8 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
   return (
     <div className="max-w-3xl mx-auto">
 
-      {/* 브레드크럼 — 클릭 시 홈 최신 자랑 섹션으로 이동 */}
-      <button
-        type="button"
-        onClick={() => router.push('/?section=latest')}
-        className="flex items-center gap-1 text-sm text-amber-500 hover:text-amber-600 font-medium transition-colors mb-3"
-      >
-        최신 자랑
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-3.5 h-3.5">
-          <path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
-        </svg>
-      </button>
+      {/* 뒤로가기 — 이전에 보던 위치로 복원 */}
+      <BackButton className="mb-3" />
 
       {/* 제목 */}
       <h1 className="text-2xl font-bold text-gray-900 leading-snug mb-4">{post.title}</h1>

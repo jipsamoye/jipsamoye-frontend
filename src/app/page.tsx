@@ -10,6 +10,7 @@ import { timeAgoOrDate } from '@/lib/utils';
 import PopularSlider from '@/components/domain/PopularSlider';
 import PostCard from '@/components/domain/PostCard';
 import { PostCardSkeleton, PopularSliderSkeleton } from '@/components/common/Skeleton';
+import { useScrollMemory } from '@/hooks/useScrollMemory';
 
 function HomeContent() {
   const router = useRouter();
@@ -82,6 +83,10 @@ function HomeContent() {
       latestSectionRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   }, [sectionParam, initialLatestLoading]);
+
+  // 스크롤 위치 기억 — 게시글 상세에서 뒤로가기 시 복원
+  // ?section=latest 진입 시에는 latest 섹션으로 강제 스크롤이 우선이므로 비활성
+  useScrollMemory('home', !initialLatestLoading && sectionParam !== 'latest');
 
   const popularSliderItems = popularPosts.map((p) => ({
     id: p.id,
