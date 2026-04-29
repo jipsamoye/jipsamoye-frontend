@@ -30,6 +30,7 @@ interface PopularItem {
   label: string;
   thumbnailUrl?: string | null;
   likeCount?: number;
+  commentCount?: number;
   nickname?: string;
   profileImageUrl?: string | null;
 }
@@ -125,11 +126,18 @@ export default function PopularSlider({ items }: PopularSliderProps) {
                 ) : (
                   <span />
                 )}
-                {item.likeCount !== undefined && (
-                  <span className="flex items-center gap-1 text-xs text-amber-600 font-medium tabular-nums flex-shrink-0">
-                    ❤ {item.likeCount}
-                  </span>
-                )}
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  {item.likeCount !== undefined && (
+                    <span className="flex items-center gap-1 text-xs text-amber-600 font-medium tabular-nums">
+                      ❤ {item.likeCount}
+                    </span>
+                  )}
+                  {item.commentCount !== undefined && (
+                    <span className="flex items-center gap-1 text-xs text-gray-500 font-medium tabular-nums">
+                      💬 {item.commentCount}
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
           </Link>

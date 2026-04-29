@@ -61,7 +61,7 @@ export default function NotificationProvider({ children }: NotificationProviderP
   const markAsRead = useCallback(async (id: number) => {
     if (!user) return;
     setNotifications((prev) =>
-      prev.map((n) => (n.id === id ? { ...n, read: true } : n))
+      prev.map((n) => (n.id === id ? { ...n, isRead: true } : n))
     );
     setUnreadCount((prev) => Math.max(0, prev - 1));
     try {
@@ -73,7 +73,7 @@ export default function NotificationProvider({ children }: NotificationProviderP
 
   const markAllAsRead = useCallback(async () => {
     if (!user) return;
-    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+    setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
     setUnreadCount(0);
     try {
       await api.patch(`/api/notifications/read-all`);
@@ -98,7 +98,7 @@ export default function NotificationProvider({ children }: NotificationProviderP
     const unsubscribe = wsService.on('notification', (data) => {
       const notification = data as Notification;
       setNotifications((prev) => [notification, ...prev]);
-      if (!notification.read) {
+      if (!notification.isRead) {
         setUnreadCount((prev) => prev + 1);
       }
     });

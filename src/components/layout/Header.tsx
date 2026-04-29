@@ -9,6 +9,7 @@ import { useNavigationGuard } from '@/components/providers/NavigationGuard';
 import { useNotification } from '@/components/providers/NotificationProvider';
 import { useHomeRefresh } from '@/components/providers/HomeRefreshProvider';
 import { timeAgo } from '@/lib/utils';
+import { getNotificationLink } from '@/lib/notification';
 import type { Notification } from '@/types/api';
 
 interface HeaderProps {
@@ -46,11 +47,8 @@ export default function Header({ isLoggedIn = false, onLoginClick, onLogout, onM
   const handleNotificationClick = (notification: Notification) => {
     notificationContext.markAsRead(notification.id);
     setShowNotification(false);
-    if (notification.type === 'FOLLOW') {
-      router.push(`/users/${notification.senderNickname}`);
-    } else if (notification.targetId) {
-      router.push(`/posts/${notification.targetId}`);
-    }
+    const link = getNotificationLink(notification);
+    if (link) router.push(link);
   };
 
   useEffect(() => {
@@ -127,7 +125,7 @@ export default function Header({ isLoggedIn = false, onLoginClick, onLogout, onM
                             key={notification.id}
                             onClick={() => handleNotificationClick(notification)}
                             className={`flex items-start gap-3 w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors ${
-                              !notification.read ? 'bg-amber-50' : ''
+                              !notification.isRead ? 'bg-amber-50' : ''
                             }`}
                           >
                             <Avatar src={notification.senderProfileImageUrl} size="sm" />
@@ -139,7 +137,7 @@ export default function Header({ isLoggedIn = false, onLoginClick, onLogout, onM
                                 {timeAgo(notification.createdAt)}
                               </p>
                             </div>
-                            {!notification.read && (
+                            {!notification.isRead && (
                               <span className="mt-1.5 w-2 h-2 rounded-full bg-amber-500 flex-shrink-0" />
                             )}
                           </button>

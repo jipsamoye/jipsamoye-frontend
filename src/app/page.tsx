@@ -88,6 +88,7 @@ function HomeContent() {
     label: p.title,
     thumbnailUrl: p.thumbnailUrl,
     likeCount: p.likeCount,
+    commentCount: p.commentCount,
     nickname: p.nickname,
     profileImageUrl: p.profileImageUrl,
   }));

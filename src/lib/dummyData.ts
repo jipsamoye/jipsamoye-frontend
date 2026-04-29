@@ -41,6 +41,7 @@ export const dummyPopularPosts: PetPostListItem[] = Array.from({ length: 10 }, (
   title: titles[i % titles.length],
   thumbnailUrl: allImages[i % allImages.length],
   likeCount: Math.floor(Math.random() * 200) + 50,
+  commentCount: Math.floor(Math.random() * 50),
   nickname: nicknames[i % nicknames.length],
   createdAt: new Date(Date.now() - i * 3600000).toISOString(),
 }));
@@ -50,6 +51,7 @@ export const dummyLatestPosts: PetPostListItem[] = Array.from({ length: 20 }, (_
   title: titles[i % titles.length],
   thumbnailUrl: allImages[i % allImages.length],
   likeCount: Math.floor(Math.random() * 100),
+  commentCount: Math.floor(Math.random() * 30),
   nickname: nicknames[i % nicknames.length],
   createdAt: new Date(Date.now() - i * 1800000).toISOString(),
 }));
