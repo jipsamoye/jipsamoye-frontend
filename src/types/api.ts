@@ -57,6 +57,7 @@ export interface PetPostListItem {
   title: string;
   thumbnailUrl: string | null;
   likeCount: number;
+  commentCount: number;
   nickname: string;
   profileImageUrl?: string | null;
   createdAt: string;
@@ -65,11 +66,13 @@ export interface PetPostListItem {
 // 댓글
 export interface Comment {
   id: number;
-  content: string;
+  content: string | null;          // isMasked=true이면 null
   nickname: string;
   profileImageUrl: string | null;
-  parentId?: number | null;
-  replies?: Comment[];
+  mentionedNickname: string | null;
+  isMasked: boolean;
+  replyCount: number;
+  replies?: Comment[];             // 부모면 ASC 처음 3개, 답글 응답이면 비어있거나 없음
   createdAt: string;
   updatedAt: string;
 }
@@ -100,8 +103,16 @@ export interface PetPostUpdateRequest {
   imageUrls?: string[];
 }
 
-// 댓글 작성/수정 요청
-export interface CommentRequest {
+// 댓글 작성 요청
+export interface CommentCreateRequest {
+  petPostId: number;
+  parentId: number | null;
+  mentionedUserId: number | null;  // 항상 null (서버 자동 처리)
+  content: string;
+}
+
+// 댓글 수정 요청
+export interface CommentUpdateRequest {
   content: string;
 }
 
@@ -172,15 +183,23 @@ export interface BoardComment {
   createdAt: string;
 }
 
+// 알림 타입 (백엔드 PR #53 기준 known set + 미래 타입 string fallback)
+export type KnownNotificationType =
+  | 'LIKE'
+  | 'FOLLOW'
+  | 'PET_POST_COMMENT_REPLY';
+export type NotificationType = KnownNotificationType | (string & {});
+
 // 알림
 export interface Notification {
   id: number;
-  type: string;
-  targetId?: number;
+  type: NotificationType;
+  targetId: number | null;        // FOLLOW=userId, PET_POST_COMMENT_REPLY=commentId
+  relatedPostId: number | null;   // 게시글 딥링크용 postId
   message: string;
   senderNickname: string;
   senderProfileImageUrl: string | null;
-  read: boolean;
+  isRead: boolean;
   createdAt: string;
 }
 

@@ -60,9 +60,14 @@ export default function PostCard({ post, index = 99 }: PostCardProps) {
                 <span className="text-xs text-gray-500 truncate hover:text-gray-700">{post.nickname}</span>
               </button>
             </ProfileHoverCard>
-            <span className="flex items-center gap-1 text-xs text-amber-600 font-medium tabular-nums flex-shrink-0">
-              ❤ {post.likeCount}
-            </span>
+            <div className="flex items-center gap-2 flex-shrink-0">
+              <span className="flex items-center gap-1 text-xs text-amber-600 font-medium tabular-nums">
+                ❤ {post.likeCount}
+              </span>
+              <span className="flex items-center gap-1 text-xs text-gray-500 font-medium tabular-nums">
+                💬 {post.commentCount}
+              </span>
+            </div>
           </div>
         </div>
       </div>

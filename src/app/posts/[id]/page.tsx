@@ -47,6 +47,18 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  // 알림 클릭으로 진입 시 #comment-{id} 해시로 자동 스크롤
+  useEffect(() => {
+    if (!post) return;
+    const hash = typeof window !== 'undefined' ? window.location.hash : '';
+    if (!hash.startsWith('#comment-')) return;
+    const targetId = hash.slice(1);
+    const t = setTimeout(() => {
+      document.getElementById(targetId)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 600);
+    return () => clearTimeout(t);
+  }, [post]);
+
   const handleLike = async () => {
     if (!user) return;
     try {
