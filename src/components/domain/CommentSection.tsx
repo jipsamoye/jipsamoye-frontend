@@ -122,7 +122,7 @@ export default function CommentSection({ postId, user, onCountChange }: CommentS
             <input
               value={commentText}
               onChange={(e) => setCommentText(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleAddParent()}
+              onKeyDown={(e) => e.key === 'Enter' && !e.nativeEvent.isComposing && handleAddParent()}
               placeholder="댓글 달기"
               className="flex-1 px-4 py-2 rounded-xl border border-gray-100 bg-transparent text-sm focus:outline-none focus:ring-2 focus:ring-amber-300 transition-all duration-200"
             />
@@ -291,7 +291,7 @@ export default function CommentSection({ postId, user, onCountChange }: CommentS
                       <input
                         value={replyText}
                         onChange={(e) => setReplyText(e.target.value)}
-                        onKeyDown={(e) => e.key === 'Enter' && handleAddReply()}
+                        onKeyDown={(e) => e.key === 'Enter' && !e.nativeEvent.isComposing && handleAddReply()}
                         placeholder="답글을 입력하세요"
                         className="w-full px-4 py-2 rounded-xl border border-gray-100 bg-transparent text-sm focus:outline-none focus:ring-2 focus:ring-amber-300 transition-all duration-200"
                         style={{ paddingLeft: `${12 + (replyingTo!.targetNickname.length + 1) * 7 + 8}px` }}

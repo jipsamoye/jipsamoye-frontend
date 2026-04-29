@@ -145,11 +145,14 @@ export default function BoardDetailPage({ params }: { params: Promise<{ id: stri
         </span>
       </div>
 
-      <BoardCommentSection
-        boardId={post.id}
-        user={user}
-        onCountChange={(delta) => setPost((prev) => prev ? { ...prev, commentCount: prev.commentCount + delta } : prev)}
-      />
+      <div className="mt-10">
+        <h3 className="text-lg font-bold text-gray-900 mb-4">댓글 {post.commentCount}</h3>
+        <BoardCommentSection
+          boardId={post.id}
+          user={user}
+          onCountChange={(delta) => setPost((prev) => prev ? { ...prev, commentCount: prev.commentCount + delta } : prev)}
+        />
+      </div>
     </article>
   );
 }
