@@ -10,8 +10,9 @@ import DetailImage from '@/components/common/DetailImage';
 import Modal from '@/components/common/Modal';
 import PostCard from '@/components/domain/PostCard';
 import CommentSection from '@/components/domain/CommentSection';
-import { HeartIcon, ShareIcon, LinkIcon } from '@/components/layout/icons';
-import { showToast } from '@/components/common/Toast';
+import { LinkIcon } from '@/components/layout/icons';
+import PostActions from '@/components/domain/PostActions';
+import { showToast, showLoginRequiredToast } from '@/components/common/Toast';
 import { formatDateTime } from '@/lib/utils';
 
 export default function PostDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -60,7 +61,10 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
   }, [post]);
 
   const handleLike = async () => {
-    if (!user) return;
+    if (!user) {
+      showLoginRequiredToast('like');
+      return;
+    }
     try {
       const res = await api.post<boolean>(`/api/posts/${id}/like`);
       setLiked(res.data);
@@ -199,27 +203,12 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
       {/* 본문 */}
       <p className="text-gray-700 whitespace-pre-wrap mb-8">{post.content}</p>
 
-      {/* 하단 큰 버튼: 공유하기 + 좋아요 */}
-      <div className="flex gap-3 mb-10">
-        <button
-          onClick={() => setShowShareModal(true)}
-          className="flex-1 flex items-center justify-center gap-2 py-3.5 rounded-2xl border-2 border-gray-300 text-gray-700 font-semibold text-base hover:bg-gray-50 hover:border-gray-400 transition-all duration-200"
-        >
-          <ShareIcon />
-          공유하기
-        </button>
-        <button
-          onClick={handleLike}
-          className={`flex-1 flex items-center justify-center gap-2 py-3.5 rounded-2xl font-semibold text-base transition-all duration-200 ${
-            liked
-              ? 'bg-amber-600 text-white'
-              : 'bg-amber-500 hover:bg-amber-600 text-white'
-          }`}
-        >
-          <HeartIcon filled={liked} />
-          좋아요 <span className="tabular-nums">{post.likeCount}</span>
-        </button>
-      </div>
+      <PostActions
+        likeCount={post.likeCount}
+        liked={liked}
+        onLike={handleLike}
+        onShare={() => setShowShareModal(true)}
+      />
 
       {/* 댓글 섹션 */}
       <CommentSection
