@@ -69,6 +69,7 @@ export interface Comment {
   content: string | null;          // isMasked=true이면 null
   nickname: string;
   profileImageUrl: string | null;
+  authorTotalLikeCount: number;
   mentionedNickname: string | null;
   isMasked: boolean;
   replyCount: number;
@@ -180,6 +181,7 @@ export interface BoardComment {
   content: string | null;          // isMasked=true이면 null
   nickname: string;
   profileImageUrl: string | null;
+  authorTotalLikeCount: number;
   mentionedNickname: string | null;
   isMasked: boolean;
   replyCount: number;

@@ -2,12 +2,17 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, fireEvent, act } from '@testing-library/react';
 import type { Comment, User } from '@/types/api';
 
-const { useCommentsMock } = vi.hoisted(() => ({
+const { useCommentsMock, showLoginRequiredToastMock } = vi.hoisted(() => ({
   useCommentsMock: vi.fn(),
+  showLoginRequiredToastMock: vi.fn(),
 }));
 
 vi.mock('@/hooks/useComments', () => ({
   useComments: useCommentsMock,
+}));
+
+vi.mock('@/components/common/Toast', () => ({
+  showLoginRequiredToast: showLoginRequiredToastMock,
 }));
 
 import CommentSection from '@/components/domain/CommentSection';
@@ -17,6 +22,7 @@ const makeComment = (over: Partial<Comment> = {}): Comment => ({
   content: '귀엽네요',
   nickname: '집사A',
   profileImageUrl: null,
+  authorTotalLikeCount: 0,
   mentionedNickname: null,
   isMasked: false,
   replyCount: 0,
@@ -68,6 +74,32 @@ const setupHook = (over: {
 describe('CommentSection', () => {
   beforeEach(() => {
     useCommentsMock.mockReset();
+    showLoginRequiredToastMock.mockReset();
+  });
+
+  it('비로그인 시 "회원만 댓글 달 수 있어요!" 영역 클릭하면 showLoginRequiredToast("comment") 호출', () => {
+    setupHook();
+    const { getByText } = render(<CommentSection postId="42" user={null} />);
+    fireEvent.click(getByText('회원만 댓글 달 수 있어요!').closest('div[class*="cursor-pointer"]')!);
+    expect(showLoginRequiredToastMock).toHaveBeenCalledWith('comment');
+  });
+
+  it('비로그인 시에는 input 입력창이 렌더되지 않는다', () => {
+    setupHook();
+    const { queryByPlaceholderText } = render(<CommentSection postId="42" user={null} />);
+    expect(queryByPlaceholderText('댓글 달기')).toBeNull();
+  });
+
+  it('댓글이 없고 로딩 중이 아닐 때 빈 상태 문구가 표시된다', () => {
+    setupHook({ comments: [] });
+    const { getByText } = render(<CommentSection postId="42" user={null} />);
+    expect(getByText(/아직 댓글이 없어요/)).toBeInTheDocument();
+  });
+
+  it('댓글이 있을 때 빈 상태 문구가 표시되지 않는다', () => {
+    setupHook({ comments: [makeComment({ id: 1 })] });
+    const { queryByText } = render(<CommentSection postId="42" user={null} />);
+    expect(queryByText(/아직 댓글이 없어요/)).toBeNull();
   });
 
   it('마스킹된 댓글은 "삭제된 댓글입니다"로 표시되고 답글 버튼이 노출되지 않는다', () => {
@@ -198,6 +230,29 @@ describe('CommentSection', () => {
     expect(container.querySelector('#comment-1')).toBeTruthy();
     expect(container.querySelector('#comment-2')).toBeTruthy();
     expect(container.querySelector('#comment-10')).toBeTruthy();
+  });
+
+  it('댓글에 작성자 누적 좋아요 뱃지가 표시된다', () => {
+    setupHook({ comments: [makeComment({ id: 1, authorTotalLikeCount: 301 })] });
+    const { getByText } = render(<CommentSection postId="42" user={null} />);
+    expect(getByText('301')).toBeInTheDocument();
+  });
+
+  it('마스킹된 댓글에는 좋아요 뱃지가 표시되지 않는다', () => {
+    setupHook({ comments: [makeComment({ id: 1, isMasked: true, content: null, authorTotalLikeCount: 100 })] });
+    const { queryByText } = render(<CommentSection postId="42" user={null} />);
+    expect(queryByText('100')).toBeNull();
+  });
+
+  it('답글에도 작성자 누적 좋아요 뱃지가 표시된다', () => {
+    setupHook({
+      comments: [makeComment({
+        id: 1, replyCount: 1,
+        replies: [makeComment({ id: 10, authorTotalLikeCount: 45 })],
+      })],
+    });
+    const { getByText } = render(<CommentSection postId="42" user={null} />);
+    expect(getByText('45')).toBeInTheDocument();
   });
 
   it('좋아요 하트 아이콘 + 숫자 0 카운트 블록은 더 이상 렌더되지 않는다', () => {
