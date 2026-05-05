@@ -8,6 +8,7 @@ import { useAuthContext } from '@/components/providers/AuthProvider';
 import Avatar from '@/components/common/Avatar';
 import PostCard from '@/components/domain/PostCard';
 import ProfileEditModal from '@/components/domain/ProfileEditModal';
+import { showLoginRequiredToast } from '@/components/common/Toast';
 import { ALLOWED_IMAGE_EXTS, POST_CONFIG } from '@/lib/constants';
 import { compressImage, extFromMimeType } from '@/lib/imageCompress';
 
@@ -37,7 +38,10 @@ export default function ProfilePage({ params }: { params: Promise<{ nickname: st
   }, [decodedNickname, router, user]);
 
   const handleFollow = async () => {
-    if (!user) return;
+    if (!user) {
+      showLoginRequiredToast('follow');
+      return;
+    }
     try {
       const res = await api.post<boolean>(`/api/users/${decodedNickname}/follow`);
       setIsFollowing(res.data);

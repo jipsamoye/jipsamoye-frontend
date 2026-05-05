@@ -99,46 +99,40 @@ export default function PopularSlider({ items }: PopularSliderProps) {
           <Link
             key={item.id}
             href={`/posts/${item.id}`}
-            className="flex-shrink-0 w-[calc(25%-12px)] min-w-[200px] bg-white border border-gray-200 rounded-2xl overflow-hidden cursor-pointer transition-all duration-200 hover:shadow-md hover:scale-[1.02]"
+            className="flex-shrink-0 w-[calc(25%-12px)] min-w-[200px] bg-white rounded-2xl cursor-pointer"
           >
-            <div className="aspect-square bg-gray-200 overflow-hidden relative">
+            <div className="aspect-square bg-gray-200 overflow-hidden rounded-2xl relative">
               {item.thumbnailUrl ? (
                 <FadeImage src={item.thumbnailUrl} alt={item.label} eager={i < 4} />
               ) : (
                 <div className="w-full h-full flex items-center justify-center text-gray-400 text-4xl">🐾</div>
               )}
             </div>
-            <div className="p-3">
-              <p className="font-semibold text-sm text-gray-900 truncate">{item.label}</p>
-              <div className="flex items-center justify-between mt-2">
-                {item.nickname ? (
-                  <ProfileHoverCard nickname={item.nickname}>
-                    <button
-                      type="button"
-                      onClick={goToProfile(item.nickname)}
-                      className="flex items-center gap-2 min-w-0 hover:opacity-70 transition-opacity"
-                      aria-label={`${item.nickname} 프로필 보기`}
-                    >
-                      <Avatar src={item.profileImageUrl ?? null} size="sm" />
-                      <span className="text-xs text-gray-500 truncate hover:text-gray-700">{item.nickname}</span>
-                    </button>
-                  </ProfileHoverCard>
-                ) : (
-                  <span />
-                )}
-                <div className="flex items-center gap-2 flex-shrink-0">
+            <div className="pt-3 pb-1">
+              <div className="flex items-center gap-2 mb-2 min-w-0">
+                <p className="font-semibold text-sm text-gray-900 truncate min-w-0">{item.label}</p>
+                <div className="flex items-center gap-1.5 flex-shrink-0">
                   {item.likeCount !== undefined && (
-                    <span className="flex items-center gap-1 text-xs text-amber-600 font-medium tabular-nums">
-                      ❤ {item.likeCount}
-                    </span>
+                    <span className="text-xs text-amber-600 font-medium tabular-nums">❤ {item.likeCount}</span>
                   )}
                   {item.commentCount !== undefined && (
-                    <span className="flex items-center gap-1 text-xs text-gray-500 font-medium tabular-nums">
-                      💬 {item.commentCount}
-                    </span>
+                    <span className="text-xs text-gray-500 font-medium tabular-nums">💬 {item.commentCount}</span>
                   )}
                 </div>
               </div>
+              {item.nickname ? (
+                <ProfileHoverCard nickname={item.nickname}>
+                  <button
+                    type="button"
+                    onClick={goToProfile(item.nickname)}
+                    className="flex items-center gap-2 min-w-0 hover:opacity-70 transition-opacity"
+                    aria-label={`${item.nickname} 프로필 보기`}
+                  >
+                    <Avatar src={item.profileImageUrl ?? null} size="sm" />
+                    <span className="text-xs text-gray-500 truncate hover:text-gray-700">{item.nickname}</span>
+                  </button>
+                </ProfileHoverCard>
+              ) : null}
             </div>
           </Link>
         ))}

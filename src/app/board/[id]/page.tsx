@@ -10,7 +10,7 @@ import Avatar from '@/components/common/Avatar';
 import { HeartIcon, EyeIcon, EllipsisHorizontalIcon } from '@/components/layout/icons';
 import { timeAgo } from '@/lib/utils';
 import BoardCommentSection from '@/components/domain/BoardCommentSection';
-import { showToast } from '@/components/common/Toast';
+import { showToast, showLoginRequiredToast } from '@/components/common/Toast';
 
 const CATEGORY_LABEL = { NOTICE: '공지', GENERAL: '일반', QUESTION: '질문' } as const;
 const CATEGORY_STYLE = {
@@ -45,7 +45,11 @@ export default function BoardDetailPage({ params }: { params: Promise<{ id: stri
   }, []);
 
   const handleLike = async () => {
-    if (!user || !post) return;
+    if (!user) {
+      showLoginRequiredToast('like');
+      return;
+    }
+    if (!post) return;
     try {
       const res = await api.post<boolean>(`/api/boards/${post.id}/like`);
       setLiked(res.data);
@@ -128,13 +132,11 @@ export default function BoardDetailPage({ params }: { params: Promise<{ id: stri
       <div className="flex items-center justify-center pb-8 border-b border-gray-100">
         <button
           onClick={handleLike}
-          disabled={!user}
           className={`flex items-center gap-2 px-6 py-2.5 rounded-xl border transition-colors
             ${liked
               ? 'border-amber-300 bg-amber-50 text-amber-600'
               : 'border-gray-200 text-gray-600 hover:border-amber-300 hover:text-amber-500'
-            }
-            disabled:opacity-50 disabled:cursor-not-allowed`}
+            }`}
         >
           <HeartIcon filled={liked} />
           <span className="text-sm font-medium">{post.likeCount}</span>

@@ -36,11 +36,11 @@ export default function Sidebar() {
               className={`flex items-center gap-4 px-3 py-3 rounded-xl text-lg font-medium transition-all duration-200
                 ${isActive
                   ? 'bg-gray-50 text-amber-500 font-semibold'
-                  : 'text-gray-900 hover:bg-gray-50/70'
+                  : 'text-gray-500 hover:bg-gray-50/70'
                 }`}
             >
-              <span className="inline-flex items-center justify-center w-6 h-6 text-amber-500">
-                {item.icon(true)}
+              <span className={`inline-flex items-center justify-center w-6 h-6 ${isActive ? 'text-amber-500' : 'text-gray-500'}`}>
+                {item.icon(isActive)}
               </span>
               <span className="leading-none">{item.label}</span>
             </Link>

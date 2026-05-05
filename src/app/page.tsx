@@ -137,25 +137,32 @@ function HomeContent() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 
           {/* 자유게시판 최신 글 */}
-          <div className="bg-white rounded-2xl border border-gray-100 p-5">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-xl font-bold text-gray-900">자유게시판 최신 글</h3>
+          <div>
+            <div className="flex items-center justify-between mb-5">
+              <h2 className="text-2xl font-bold text-gray-900">자유게시판 최신 글</h2>
               <Link href="/board" className="text-sm text-gray-400 hover:text-gray-600 transition-colors">
                 더보기
               </Link>
             </div>
-            <div className="space-y-3">
+            <div className="space-y-0">
               {boardPosts.length > 0 ? boardPosts.map((post) => (
                 <button
                   key={post.id}
                   type="button"
                   onClick={() => router.push(`/board/${post.id}`)}
-                  className="w-full flex items-center justify-between gap-3 text-left hover:opacity-70 transition-opacity"
+                  className="w-full flex items-center gap-2 text-left py-2.5 border-b border-gray-100 last:border-b-0 hover:opacity-70 transition-opacity"
                 >
-                  <span className="text-sm text-gray-700 truncate">{post.title}</span>
-                  <span className="text-xs text-gray-400 flex-shrink-0">
-                    {timeAgoOrDate(post.createdAt)}
+                  <span className="flex-shrink-0 text-[11px] font-semibold px-2 py-0.5 rounded-full bg-gray-100 text-gray-500">
+                    {post.category === 'QUESTION' ? '질문' : '일반'}
                   </span>
+                  <div className="flex items-center gap-1.5 min-w-0 flex-1">
+                    <span className="text-sm font-semibold text-gray-900 truncate">{post.title}</span>
+                    <span className="flex-shrink-0 flex items-center gap-1">
+                      <span className="text-xs text-amber-600 tabular-nums">❤ {post.likeCount}</span>
+                      <span className="text-xs text-gray-400 tabular-nums">💬 {post.commentCount}</span>
+                    </span>
+                  </div>
+                  <span className="text-xs text-gray-400 flex-shrink-0">{timeAgoOrDate(post.createdAt)}</span>
                 </button>
               )) : (
                 <p className="text-sm text-gray-400">아직 게시글이 없어요</p>
@@ -164,17 +171,17 @@ function HomeContent() {
           </div>
 
           {/* 공지사항 */}
-          <div className="bg-white rounded-2xl border border-gray-100 p-5">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-xl font-bold text-gray-900">공지사항</h3>
+          <div>
+            <div className="flex items-center justify-between mb-5">
+              <h2 className="text-2xl font-bold text-gray-900">공지사항</h2>
             </div>
-            <div className="space-y-3">
-              <div className="flex items-center justify-between gap-3">
-                <span className="text-sm text-gray-700 truncate">집사모여 서비스 오픈 안내</span>
+            <div className="space-y-0">
+              <div className="flex items-center justify-between gap-3 py-2.5 border-b border-gray-100">
+                <span className="text-sm font-semibold text-gray-900 truncate">집사모여 서비스 오픈 안내</span>
                 <span className="text-xs text-gray-400 flex-shrink-0">04. 14.</span>
               </div>
-              <div className="flex items-center justify-between gap-3">
-                <span className="text-sm text-gray-700 truncate">커뮤니티 이용 규칙 안내</span>
+              <div className="flex items-center justify-between gap-3 py-2.5">
+                <span className="text-sm font-semibold text-gray-900 truncate">커뮤니티 이용 규칙 안내</span>
                 <span className="text-xs text-gray-400 flex-shrink-0">04. 14.</span>
               </div>
             </div>
