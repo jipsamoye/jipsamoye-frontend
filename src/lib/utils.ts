@@ -1,6 +1,6 @@
 // 백엔드는 timezone 없는 KST naive ISO 8601을 보냄 (예: "2026-04-28T01:14:39.580808")
 // 이미 timezone 정보가 있으면 그대로, 없으면 +09:00을 명시해 파싱
-function parseServerTime(dateString: string): Date {
+export function parseServerTime(dateString: string): Date {
   if (dateString.endsWith('Z') || /[+\-]\d{2}:?\d{2}$/.test(dateString)) {
     return new Date(dateString);
   }
@@ -49,4 +49,21 @@ export function formatDateTime(dateString: string): string {
   const h = String(d.getHours()).padStart(2, '0');
   const min = String(d.getMinutes()).padStart(2, '0');
   return `${y}.${m}.${day} ${h}:${min}`;
+}
+
+// "오전/오후 HH:MM" 형식 (DM 메시지 시간 표시용)
+// status==='sending' 인 낙관적 메시지는 호출부에서 현재 시각을 직접 생성해 전달한다.
+export function formatTime(dateString: string): string {
+  const d = parseServerTime(dateString);
+  return d.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
+}
+
+// 현재 로컬 KST-naive ISO 문자열 반환 (낙관적 메시지 createdAt 생성용)
+// new Date().toISOString()은 UTC(Z)라 parseServerTime 파이프라인과 불일치하므로 이 함수를 사용.
+export function nowKstString(): string {
+  const now = new Date();
+  // +09:00 offset을 반영한 naive 형식 생성
+  const kst = new Date(now.getTime() + 9 * 60 * 60 * 1000);
+  // ISO 형식에서 "Z" 제거해 naive KST 형식으로
+  return kst.toISOString().replace('Z', '');
 }

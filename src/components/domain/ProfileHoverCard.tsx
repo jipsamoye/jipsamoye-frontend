@@ -84,6 +84,7 @@ export default function ProfileHoverCard({ nickname, children }: ProfileHoverCar
       .then((res) => {
         if (cancelled) return;
         setProfile(res.data);
+        setFollowing(res.data.isFollowing ?? false);
       })
       .catch(() => { /* 무시: 비로그인이거나 네트워크 일시 오류 */ });
     return () => { cancelled = true; };
@@ -109,9 +110,13 @@ export default function ProfileHoverCard({ nickname, children }: ProfileHoverCar
     e.stopPropagation();
     if (!currentUser) return;
     try {
-      await api.post(`/api/dm/rooms?targetNickname=${encodeURIComponent(nickname)}`);
-    } catch { /* ignore */ }
-    router.push('/dm');
+      const res = await api.post<{ roomId: number }>(
+        `/api/dm/rooms?targetNickname=${encodeURIComponent(nickname)}`
+      );
+      router.push(`/dm?room=${res.data.roomId}`);
+    } catch {
+      router.push('/dm');
+    }
   };
 
   const handleEditProfile = (e: React.MouseEvent) => {

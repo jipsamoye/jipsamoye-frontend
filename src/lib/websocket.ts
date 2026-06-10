@@ -1,8 +1,10 @@
 import SockJS from 'sockjs-client';
 import { Client, IMessage } from '@stomp/stompjs';
 import { showToast } from '@/components/common/Toast';
+import type { DmMessage, DmRoomEvent } from '@/types/api';
 
 type MessageHandler = (data: unknown) => void;
+type DmRoomEventHandler = (event: DmRoomEvent) => void;
 
 type Channel = 'notification' | 'chat';
 
@@ -10,6 +12,8 @@ class WebSocketService {
   private client: Client | null = null;
   private channelHandlers: Map<Channel, Set<MessageHandler>> = new Map();
   private subscriptions: Map<string, { unsubscribe: () => void }> = new Map();
+  /** 연결 전 또는 재연결 시 재구독을 위해 DM 방 핸들러 기억 */
+  private pendingDmRooms: Map<number, DmRoomEventHandler> = new Map();
   private userNickname: string | null = null;
   private connected = false;
   private authRejected = false;
@@ -36,9 +40,15 @@ class WebSocketService {
         this.connected = true;
         this.subscribeChannel('notification', '/user/sub/notifications');
         this.subscribeChannel('chat', '/sub/chat/room');
+        // 이미 등록된 DM 방 구독 전부 복구 (연결 전 등록 + 재연결 시)
+        this.pendingDmRooms.forEach((handler, roomId) => {
+          this.subscribeDmRoomNow(roomId, handler);
+        });
       },
       onDisconnect: () => {
         this.connected = false;
+        // 구독 참조 초기화 (재연결 시 onConnect에서 재구독)
+        this.subscriptions.clear();
       },
       onStompError: (frame) => {
         const message = frame.headers['message'] ?? '';
@@ -75,10 +85,44 @@ class WebSocketService {
     this.subscriptions.set(destination, sub);
   }
 
+  /** 실제 STOMP subscribe 수행 (connected 상태에서만 호출) */
+  private subscribeDmRoomNow(roomId: number, handler: DmRoomEventHandler): void {
+    if (!this.client || !this.connected) return;
+    const destination = `/sub/dm/room/${roomId}`;
+    // 이미 구독 중이면 해제 후 재구독 (재연결 시 중복 방지)
+    const existing = this.subscriptions.get(destination);
+    if (existing) {
+      try { existing.unsubscribe(); } catch { /* ignore */ }
+    }
+    const sub = this.client.subscribe(destination, (message: IMessage) => {
+      try {
+        const raw = JSON.parse(message.body) as Record<string, unknown>;
+        let event: DmRoomEvent;
+        if (raw.type === 'READ') {
+          event = {
+            type: 'READ',
+            readerNickname: raw.readerNickname as string,
+            readAt: raw.readAt as string,
+          };
+        } else if (raw.type === 'MESSAGE') {
+          event = { type: 'MESSAGE', message: raw.message as DmMessage };
+        } else {
+          // type 필드 없음 → raw가 DmMessage 자체 (레거시 폴백)
+          event = { type: 'MESSAGE', message: raw as unknown as DmMessage };
+        }
+        handler(event);
+      } catch {
+        // parse error
+      }
+    });
+    this.subscriptions.set(destination, sub);
+  }
+
   disconnect(): void {
     this.userNickname = null;
     this.connected = false;
     this.subscriptions.clear();
+    this.pendingDmRooms.clear();
     if (this.client) {
       try {
         this.client.deactivate();
@@ -106,34 +150,35 @@ class WebSocketService {
     };
   }
 
-  send(destination: string, data: unknown): void {
+  send(destination: string, data: unknown): boolean {
     if (this.client && this.connected) {
       this.client.publish({
         destination,
         body: JSON.stringify(data),
       });
+      return true;
     }
+    return false;
   }
 
-  onDmRoom(roomId: number, handler: MessageHandler): () => void {
-    const destination = `/sub/dm/room/${roomId}`;
-
+  /**
+   * DM 방 채널 구독.
+   * - 연결 중이면 즉시 subscribe.
+   * - 미연결이면 pendingDmRooms에 등록 → onConnect 시 자동 구독.
+   * - 반환값: unsubscribe 함수
+   */
+  onDmRoom(roomId: number, handler: DmRoomEventHandler): () => void {
+    this.pendingDmRooms.set(roomId, handler);
     if (this.client && this.connected) {
-      const sub = this.client.subscribe(destination, (message: IMessage) => {
-        try {
-          const data = JSON.parse(message.body);
-          handler(data);
-        } catch {
-          // parse error
-        }
-      });
-      this.subscriptions.set(destination, sub);
+      this.subscribeDmRoomNow(roomId, handler);
     }
 
     return () => {
+      this.pendingDmRooms.delete(roomId);
+      const destination = `/sub/dm/room/${roomId}`;
       const sub = this.subscriptions.get(destination);
       if (sub) {
-        sub.unsubscribe();
+        try { sub.unsubscribe(); } catch { /* ignore */ }
         this.subscriptions.delete(destination);
       }
     };
@@ -141,6 +186,10 @@ class WebSocketService {
 
   isAuthRejected(): boolean {
     return this.authRejected;
+  }
+
+  isConnected(): boolean {
+    return this.connected;
   }
 }
 

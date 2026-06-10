@@ -262,4 +262,43 @@ describe('CommentSection', () => {
     const heartPath = container.querySelector('path[d^="M21 8.25c0-2.485"]');
     expect(heartPath).toBeNull();
   });
+
+  // ── 모바일 레이아웃 픽스 검증 ──────────────────────────────────────────────
+
+  it('[모바일 픽스] 로그인 상태: input에 flex-1·min-w-0 클래스가 있고 아바타 래퍼가 hidden md:block이다', () => {
+    setupHook();
+    const { getByPlaceholderText, container } = render(
+      <CommentSection postId="42" user={makeUser('나')} />,
+    );
+    const input = getByPlaceholderText('댓글 달기');
+    expect(input.className).toContain('flex-1');
+    expect(input.className).toContain('min-w-0');
+
+    // 제출 버튼 flex-shrink-0
+    const submitBtn = Array.from(container.querySelectorAll('button')).find(
+      (b) => b.textContent === '댓글',
+    );
+    expect(submitBtn).toBeTruthy();
+    expect(submitBtn!.className).toContain('flex-shrink-0');
+
+    // 아바타 래퍼 hidden md:block
+    const avatarWrapper = input.closest('.flex.items-center')?.querySelector('div.hidden.md\\:block');
+    expect(avatarWrapper).toBeTruthy();
+  });
+
+  it('[모바일 픽스] 비로그인 상태: "회원만 댓글 달 수 있어요!" 렌더되고 아바타 래퍼가 hidden md:block이다', () => {
+    setupHook();
+    const { getByText, container } = render(<CommentSection postId="42" user={null} />);
+    expect(getByText('회원만 댓글 달 수 있어요!')).toBeInTheDocument();
+
+    // 아바타 래퍼 hidden md:block
+    const avatarWrapper = container.querySelector('div.hidden.md\\:block');
+    expect(avatarWrapper).toBeTruthy();
+
+    // 비로그인 버튼 flex-shrink-0
+    const disabledBtn = Array.from(container.querySelectorAll('div')).find(
+      (d) => d.textContent === '댓글' && d.className.includes('flex-shrink-0'),
+    );
+    expect(disabledBtn).toBeTruthy();
+  });
 });
