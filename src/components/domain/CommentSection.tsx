@@ -235,7 +235,7 @@ export default function CommentSection({ postId, user, onCountChange }: CommentS
                     <>
                       {renderContent(comment, false)}
                       <div className="text-xs text-gray-400 mt-1">{formatDateTime(comment.createdAt)}</div>
-                      {!comment.isMasked && user && (
+                      {!comment.isMasked && user && user.nickname !== comment.nickname && (
                         <div className="flex items-center gap-3 mt-2">
                           <button
                             onClick={() => startReply(comment.id, comment.id, comment.nickname)}
@@ -285,7 +285,7 @@ export default function CommentSection({ postId, user, onCountChange }: CommentS
                           )}
                           {!reply.isMasked && (
                             <div className="flex items-center gap-3 mt-1">
-                              {user && editingId !== reply.id && (
+                              {user && editingId !== reply.id && user.nickname !== reply.nickname && (
                                 <button
                                   onClick={() => startReply(comment.id, reply.id, reply.nickname)}
                                   className="text-xs text-gray-400 hover:text-amber-500 transition-all duration-200"
@@ -333,10 +333,12 @@ export default function CommentSection({ postId, user, onCountChange }: CommentS
               {/* 답글 입력창 */}
               {showReplyInputForThisRoot && user && (
                 <div className="ml-12 mt-3 flex gap-3">
-                  <Avatar src={user.profileImageUrl} size="xs" />
-                  <div className="flex-1 flex gap-2">
-                    <div className="flex-1 flex items-center gap-1 px-4 py-2 rounded-xl border border-gray-200 bg-transparent focus-within:ring-2 focus-within:ring-amber-300 transition-all duration-200">
-                      <span className="text-xs text-amber-500 font-medium whitespace-nowrap flex-shrink-0">
+                  <div className="hidden md:block flex-shrink-0">
+                    <Avatar src={user.profileImageUrl} size="xs" />
+                  </div>
+                  <div className="flex-1 min-w-0 flex flex-col md:flex-row gap-2">
+                    <div className="flex-1 min-w-0 flex items-center gap-1 px-4 py-2 rounded-xl border border-gray-200 bg-transparent focus-within:ring-2 focus-within:ring-amber-300 transition-all duration-200">
+                      <span className="text-xs text-amber-500 font-medium whitespace-nowrap flex-shrink-0 truncate max-w-[6rem]">
                         @{replyingTo!.targetNickname}
                       </span>
                       <input
@@ -348,8 +350,10 @@ export default function CommentSection({ postId, user, onCountChange }: CommentS
                         autoFocus
                       />
                     </div>
-                    <Button size="sm" className="flex-shrink-0" onClick={handleAddReply}>등록</Button>
-                    <Button variant="ghost" size="sm" onClick={() => setReplyingTo(null)}>취소</Button>
+                    <div className="flex gap-2 justify-end flex-shrink-0">
+                      <Button size="sm" onClick={handleAddReply}>등록</Button>
+                      <Button variant="ghost" size="sm" onClick={() => setReplyingTo(null)}>취소</Button>
+                    </div>
                   </div>
                 </div>
               )}
