@@ -28,7 +28,10 @@ export default function ProfilePage({ params }: { params: Promise<{ nickname: st
 
   useEffect(() => {
     api.get<User>(`/api/users/${decodedNickname}`)
-      .then((res) => setProfile(res.data))
+      .then((res) => {
+        setProfile(res.data);
+        setIsFollowing(res.data.isFollowing ?? false);
+      })
       .catch(() => router.push('/'))
       .finally(() => setLoading(false));
 
@@ -204,18 +207,24 @@ export default function ProfilePage({ params }: { params: Promise<{ nickname: st
                 >
                   {isFollowing ? '구독 중' : '📣 구독하기'}
                 </button>
-                <button
-                  onClick={async () => {
-                    if (!user || !profile) return;
-                    try {
-                      await api.post(`/api/dm/rooms?targetNickname=${encodeURIComponent(profile.nickname)}`);
-                    } catch { /* ignore */ }
-                    router.push('/dm');
-                  }}
-                  className="flex-1 md:flex-none px-5 py-2.5 rounded-xl bg-gray-900 text-white font-semibold text-sm hover:bg-gray-800 transition-colors flex items-center justify-center gap-1.5"
-                >
-                  💬 메시지
-                </button>
+                {isFollowing && (
+                  <button
+                    onClick={async () => {
+                      if (!user || !profile) return;
+                      try {
+                        const res = await api.post<{ roomId: number }>(
+                          `/api/dm/rooms?targetNickname=${encodeURIComponent(profile.nickname)}`
+                        );
+                        router.push(`/dm?room=${res.data.roomId}`);
+                      } catch {
+                        router.push('/dm');
+                      }
+                    }}
+                    className="flex-1 md:flex-none px-5 py-2.5 rounded-xl bg-gray-900 text-white font-semibold text-sm hover:bg-gray-800 transition-colors flex items-center justify-center gap-1.5"
+                  >
+                    💬 메시지
+                  </button>
+                )}
               </>
             )}
           </div>

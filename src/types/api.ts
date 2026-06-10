@@ -35,6 +35,8 @@ export interface User {
   totalLikeCount: number;
   ranking: number | null;
   createdAt: string;
+  /** 백엔드 계약 추가 필요: GET /api/users/{nickname} 응답에 포함 */
+  isFollowing?: boolean;
 }
 
 // 게시글 상세
@@ -251,7 +253,16 @@ export interface DmMessage {
   imageUrl?: string;
   readAt: string | null;
   createdAt: string;
+  /** 클라이언트 전용 — 낙관적 UI 매칭용 */
+  clientMessageId?: string;
+  /** 클라이언트 전용 — 낙관적 UI 상태 */
+  status?: 'sending' | 'sent' | 'failed';
 }
+
+// DM 방 채널 WS 이벤트
+export type DmRoomEvent =
+  | { type: 'MESSAGE'; message: DmMessage }
+  | { type: 'READ'; readerNickname: string; readAt: string };
 
 // 랭킹 페이지 API 응답 (GET /api/posts/ranking)
 export interface RankingPageResponse {
