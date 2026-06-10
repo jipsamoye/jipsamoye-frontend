@@ -129,31 +129,35 @@ export default function CommentSection({ postId, user, onCountChange }: CommentS
       <div className="flex items-center gap-3 mt-6 pt-5 border-t border-gray-100">
         {user ? (
           <>
-            <Avatar src={user.profileImageUrl} size="md" />
+            <div className="hidden md:block flex-shrink-0">
+              <Avatar src={user.profileImageUrl} size="md" />
+            </div>
             <input
               value={commentText}
               onChange={(e) => setCommentText(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && !e.nativeEvent.isComposing && handleAddParent()}
               placeholder="댓글 달기"
-              className="flex-1 bg-[#F2F2F2] rounded-xl py-3.5 px-5 text-sm outline-none placeholder:text-[#B0B0B0]"
+              className="flex-1 min-w-0 bg-[#F2F2F2] rounded-xl py-3.5 px-5 text-sm outline-none placeholder:text-[#B0B0B0]"
             />
             <button
               onClick={handleAddParent}
-              className="bg-[#1A1A1A] text-white text-sm font-semibold rounded-xl py-3.5 px-5 whitespace-nowrap hover:bg-[#333] transition-colors"
+              className="flex-shrink-0 bg-[#1A1A1A] text-white text-sm font-semibold rounded-xl py-3.5 px-5 whitespace-nowrap hover:bg-[#333] transition-colors"
             >
               댓글
             </button>
           </>
         ) : (
           <div
-            className="flex items-center gap-3 flex-1 cursor-pointer"
+            className="flex items-center gap-3 flex-1 min-w-0 cursor-pointer"
             onClick={() => showLoginRequiredToast('comment')}
           >
-            <Avatar src={null} size="md" />
-            <div className="flex-1 bg-[#F2F2F2] rounded-xl py-3.5 px-5 text-sm text-[#B0B0B0] select-none">
+            <div className="hidden md:block flex-shrink-0">
+              <Avatar src={null} size="md" />
+            </div>
+            <div className="flex-1 min-w-0 bg-[#F2F2F2] rounded-xl py-3.5 px-5 text-sm text-[#B0B0B0] select-none">
               회원만 댓글 달 수 있어요!
             </div>
-            <div className="bg-[#D4D4D4] text-[#ABABAB] text-sm font-semibold rounded-xl py-3.5 px-5 whitespace-nowrap">
+            <div className="flex-shrink-0 bg-[#D4D4D4] text-[#ABABAB] text-sm font-semibold rounded-xl py-3.5 px-5 whitespace-nowrap">
               댓글
             </div>
           </div>
