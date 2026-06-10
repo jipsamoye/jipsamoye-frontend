@@ -301,4 +301,67 @@ describe('CommentSection', () => {
     );
     expect(disabledBtn).toBeTruthy();
   });
+
+  // ── 본인 댓글 답글 버튼 숨김 ────────────────────────────────────────────────
+
+  it('본인이 작성한 부모 댓글에는 답글 버튼이 노출되지 않는다', () => {
+    setupHook({ comments: [makeComment({ id: 1, nickname: '나', content: '내 댓글' })] });
+    const { container } = render(<CommentSection postId="42" user={makeUser('나')} />);
+    const thread = container.querySelector('#comment-1') as HTMLElement;
+    const replyBtn = Array.from(thread.querySelectorAll('button')).find((b) => b.textContent === '답글');
+    expect(replyBtn).toBeUndefined();
+  });
+
+  it('타인이 작성한 부모 댓글에는 답글 버튼이 노출된다', () => {
+    setupHook({ comments: [makeComment({ id: 2, nickname: '집사A', content: '남 댓글' })] });
+    const { container } = render(<CommentSection postId="42" user={makeUser('나')} />);
+    const thread = container.querySelector('#comment-2') as HTMLElement;
+    const replyBtn = Array.from(thread.querySelectorAll('button')).find((b) => b.textContent === '답글');
+    expect(replyBtn).toBeTruthy();
+  });
+
+  it('대댓글: 본인 답글엔 답글 버튼이 없고, 타인 답글엔 있다', () => {
+    setupHook({
+      comments: [
+        makeComment({
+          id: 3,
+          nickname: '집사A',
+          replyCount: 2,
+          replies: [
+            makeComment({ id: 31, nickname: '나', mentionedNickname: '집사A' }),
+            makeComment({ id: 32, nickname: '낯선이', mentionedNickname: '집사A' }),
+          ],
+        }),
+      ],
+    });
+    const { container } = render(<CommentSection postId="42" user={makeUser('나')} />);
+    const myReply = container.querySelector('#comment-31') as HTMLElement;
+    const otherReply = container.querySelector('#comment-32') as HTMLElement;
+    expect(Array.from(myReply.querySelectorAll('button')).find((b) => b.textContent === '답글')).toBeUndefined();
+    expect(Array.from(otherReply.querySelectorAll('button')).find((b) => b.textContent === '답글')).toBeTruthy();
+  });
+
+  // ── 답글 입력창 모바일 반응형 ──────────────────────────────────────────────
+
+  it('[모바일 픽스] 답글 입력창: 클릭 시 열리고 flex-col md:flex-row + 아바타 hidden md:block 이 적용된다', () => {
+    setupHook({ comments: [makeComment({ id: 2, nickname: '집사A', content: '남 댓글' })] });
+    const { container, getByPlaceholderText } = render(
+      <CommentSection postId="42" user={makeUser('나')} />,
+    );
+    const thread = container.querySelector('#comment-2') as HTMLElement;
+    const replyBtn = Array.from(thread.querySelectorAll('button')).find((b) => b.textContent === '답글')!;
+    fireEvent.click(replyBtn);
+
+    const input = getByPlaceholderText('답글을 입력하세요');
+    expect(input).toBeInTheDocument();
+
+    // 입력칸+버튼 묶음: 모바일 세로 스택 / md+ 가로 한 줄
+    const row = input.closest('.flex-col') as HTMLElement;
+    expect(row).not.toBeNull();
+    expect(row.className).toContain('md:flex-row');
+
+    // 답글 입력창 루트(ml-12) 안의 아바타 래퍼는 모바일에서 숨김
+    const replyForm = input.closest('.ml-12') as HTMLElement;
+    expect(replyForm.querySelector('div.hidden.md\\:block')).toBeTruthy();
+  });
 });
