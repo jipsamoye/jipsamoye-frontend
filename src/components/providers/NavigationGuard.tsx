@@ -113,7 +113,7 @@ export default function NavigationGuardProvider({ children }: { children: React.
   return (
     <NavigationGuardContext.Provider value={{ setBlocked, guardedPush, interceptLink }}>
       {children}
-      <Modal isOpen={showModal} onClose={cancelLeave}>
+      <Modal isOpen={showModal} onClose={cancelLeave} ariaLabel="페이지 이동 확인">
         <div className="text-center">
           <h3 className="text-lg font-bold mb-2">{messageRef.current}</h3>
           <p className="text-sm text-gray-500 mb-6">작성한 내용이 모두 초기화돼요</p>
