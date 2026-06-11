@@ -8,6 +8,7 @@ import { useAuthContext } from '@/components/providers/AuthProvider';
 import { useNavigationGuard } from '@/components/providers/NavigationGuard';
 import { useFormGuard } from '@/hooks/useFormGuard';
 import { showToast } from '@/components/common/Toast';
+import { BOARD_CONFIG } from '@/lib/constants';
 import BoardEditor from './BoardEditor';
 
 interface BoardFormProps {
@@ -23,7 +24,7 @@ const CATEGORY_OPTIONS: { value: BoardCategory; label: string }[] = [
   { value: 'QUESTION', label: '질문' },
 ];
 
-const TITLE_MAX = 100;
+const { TITLE_MAX } = BOARD_CONFIG;
 
 export default function BoardForm({
   mode,

@@ -5,6 +5,10 @@ export const POST_CONFIG = {
   MAX_IMAGE_SIZE: 10 * 1024 * 1024, // 10MB
 };
 
+export const BOARD_CONFIG = {
+  TITLE_MAX: 100,
+};
+
 export const ALLOWED_IMAGE_EXTS = ['jpg', 'jpeg', 'png', 'webp'];
 
 export const PAGINATION = {
