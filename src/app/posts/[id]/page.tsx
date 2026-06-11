@@ -223,7 +223,11 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
           <h3 className="text-lg font-bold mb-4">{post.nickname}님의 다른 게시글</h3>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {authorPosts.slice(0, 4).map((p) => (
-              <PostCard key={p.id} post={p} />
+              <PostCard
+                key={p.id}
+                post={p}
+                sizes="(max-width: 767px) calc(50vw - 24px), 180px"
+              />
             ))}
           </div>
         </section>
