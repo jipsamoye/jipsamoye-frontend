@@ -12,7 +12,7 @@ interface LoginModalProps {
 
 export default function LoginModal({ isOpen, onClose, onGuestLogin }: LoginModalProps) {
   return (
-    <Modal isOpen={isOpen} onClose={onClose}>
+    <Modal isOpen={isOpen} onClose={onClose} ariaLabel="로그인">
       <div className="text-center">
         <h2 className="text-xl font-bold mb-2">집사모여</h2>
         <p className="text-sm text-gray-500 mb-6">
