@@ -10,3 +10,5 @@ export const ALLOWED_IMAGE_EXTS = ['jpg', 'jpeg', 'png', 'webp'];
 export const PAGINATION = {
   DEFAULT_SIZE: 20,
 };
+
+export const COMMENT_MAX = 500;
