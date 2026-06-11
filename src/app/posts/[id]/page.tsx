@@ -33,12 +33,14 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
       .then((res) => {
         setPost(res.data);
         setCommentCount(res.data.commentCount ?? 0);
+        setLiked(res.data.isLiked ?? false);
         api.get<PageResponse<PetPostListItem>>(`/api/users/${res.data.nickname}/posts?page=0&size=4`)
-          .then((r) => setAuthorPosts(r.data.content.filter((p) => p.id !== Number(id))));
+          .then((r) => setAuthorPosts(r.data.content.filter((p) => p.id !== Number(id))))
+          .catch(() => {});
       })
       .catch(() => router.push('/'))
       .finally(() => setLoading(false));
-  }, [id, router, user]);
+  }, [id, router]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {

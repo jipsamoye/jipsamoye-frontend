@@ -10,16 +10,17 @@ import PostEditor from '@/components/domain/PostEditor';
 export default function EditPostPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const router = useRouter();
-  const { user } = useAuthContext();
+  const { user, loading: authLoading } = useAuthContext();
 
   const [postData, setPostData] = useState<{ title: string; content: string; imageUrls: string[] } | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (authLoading) return;
     api.get<PetPost>(`/api/posts/${id}`)
       .then((res) => {
         if (user && res.data.nickname !== user.nickname) {
-          router.push(`/posts/${id}`);
+          router.replace(`/posts/${id}`);
           return;
         }
         setPostData({
@@ -28,9 +29,9 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
           imageUrls: res.data.imageUrls,
         });
       })
-      .catch(() => router.push('/'))
+      .catch(() => router.replace('/'))
       .finally(() => setLoading(false));
-  }, [id, user, router]);
+  }, [id, user, authLoading, router]);
 
   if (loading) {
     return <div className="flex justify-center py-20 text-gray-400">불러오는 중...</div>;

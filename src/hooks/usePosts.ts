@@ -70,6 +70,7 @@ export function useSearchPosts(keyword: string) {
 
   const search = useCallback(async (resetPage = false) => {
     if (!keyword.trim()) return;
+    if (loading) return;
     const currentPage = resetPage ? 0 : page;
     setLoading(true);
     try {
@@ -89,7 +90,7 @@ export function useSearchPosts(keyword: string) {
     } finally {
       setLoading(false);
     }
-  }, [keyword, page]);
+  }, [keyword, page, loading]);
 
   return { posts, loading, hasNext, search, setPosts };
 }

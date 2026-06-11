@@ -31,7 +31,10 @@ export default function BoardDetailPage({ params }: { params: Promise<{ id: stri
 
   useEffect(() => {
     api.get<BoardPost>(`/api/boards/${id}`, { silent: true })
-      .then((res) => setPost(res.data))
+      .then((res) => {
+        setPost(res.data);
+        setLiked(res.data.isLiked ?? false);
+      })
       .catch(() => router.replace('/board'))
       .finally(() => setLoading(false));
   }, [id, router]);

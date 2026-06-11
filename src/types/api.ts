@@ -51,6 +51,8 @@ export interface PetPost {
   profileImageUrl: string | null;
   createdAt: string;
   updatedAt: string;
+  /** 백엔드 계약 추가 필요: 현재 유저의 좋아요 여부 */
+  isLiked?: boolean;
 }
 
 // 게시글 목록 (카드)
@@ -167,6 +169,8 @@ export interface BoardPost {
   nickname: string;
   profileImageUrl: string | null;
   createdAt: string;
+  /** 백엔드 계약 추가 필요: 현재 유저의 좋아요 여부 */
+  isLiked?: boolean;
 }
 
 // 자유게시판 글 작성/수정 요청
