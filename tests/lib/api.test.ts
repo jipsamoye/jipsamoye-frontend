@@ -120,4 +120,54 @@ describe('api request wrapper', () => {
     await expect(api.post('/api/posts', {})).rejects.toMatchObject({ code: 'INVALID_INPUT' });
     expect(showToastMock).not.toHaveBeenCalled();
   });
+
+  it('204 No Content 응답이면 json()을 호출하지 않고 data: null, code: SUCCESS로 resolve한다', async () => {
+    const jsonMock = vi.fn();
+    global.fetch = vi.fn().mockResolvedValueOnce({
+      status: 204,
+      statusText: 'No Content',
+      json: jsonMock,
+    }) as unknown as typeof fetch;
+
+    const res = await api.delete('/api/posts/1');
+
+    expect(res.code).toBe('SUCCESS');
+    expect(res.data).toBeNull();
+    expect(jsonMock).not.toHaveBeenCalled();
+  });
+
+  it('비-JSON 5xx 응답이면 raw SyntaxError가 새어나오지 않고 HTTP_ERROR envelope로 reject한다', async () => {
+    global.fetch = vi.fn().mockResolvedValueOnce({
+      status: 502,
+      statusText: 'Bad Gateway',
+      json: async () => {
+        throw new SyntaxError('Unexpected token < in JSON at position 0');
+      },
+    }) as unknown as typeof fetch;
+
+    await expect(api.get('/api/posts')).rejects.toMatchObject({
+      code: 'HTTP_ERROR',
+      status: 502,
+    });
+  });
+
+  it('HTTP_ERROR envelope에는 SyntaxError 인스턴스가 포함되지 않는다', async () => {
+    global.fetch = vi.fn().mockResolvedValueOnce({
+      status: 502,
+      statusText: 'Bad Gateway',
+      json: async () => {
+        throw new SyntaxError('Unexpected token');
+      },
+    }) as unknown as typeof fetch;
+
+    let caught: unknown;
+    try {
+      await api.get('/api/posts');
+    } catch (e) {
+      caught = e;
+    }
+
+    expect(caught).not.toBeInstanceOf(SyntaxError);
+    expect(caught).toMatchObject({ code: 'HTTP_ERROR', status: 502, message: 'Bad Gateway' });
+  });
 });

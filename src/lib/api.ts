@@ -33,7 +33,21 @@ async function request<T>(
     throw { status: 401, code: 'UNAUTHORIZED', message: '로그인이 필요합니다.', data: null } as ApiResponse<null>;
   }
 
-  const data: ApiResponse<T> = await res.json();
+  if (res.status === 204) {
+    return { status: 204, code: 'SUCCESS', message: '', data: null as T };
+  }
+
+  let data: ApiResponse<T>;
+  try {
+    data = await res.json();
+  } catch {
+    throw {
+      status: res.status,
+      code: 'HTTP_ERROR',
+      message: res.statusText || '서버에 연결할 수 없어요',
+      data: null,
+    } as ApiResponse<null>;
+  }
 
   if (data.code !== 'SUCCESS' && data.code !== 'CREATED') {
     throw data;
