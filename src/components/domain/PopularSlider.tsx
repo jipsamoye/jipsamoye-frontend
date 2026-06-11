@@ -45,31 +45,53 @@ export default function PopularSlider({ items }: PopularSliderProps) {
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
 
+  const rafIdRef = useRef<number | null>(null);
+
   const goToProfile = (nickname: string) => (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     router.push(`/users/${encodeURIComponent(nickname)}`);
   };
 
-  const checkScroll = () => {
+  const checkScroll = useCallback(() => {
     const el = scrollRef.current;
     if (!el) return;
     setCanScrollLeft(el.scrollLeft > 0);
     setCanScrollRight(el.scrollLeft + el.clientWidth < el.scrollWidth - 1);
-  };
+  }, []);
 
+  // 마운트 시 1회만 리스너 등록 (scroll은 rAF throttle)
   useEffect(() => {
     checkScroll();
     const el = scrollRef.current;
+
+    const handleScroll = () => {
+      if (rafIdRef.current !== null) return;
+      rafIdRef.current = requestAnimationFrame(() => {
+        checkScroll();
+        rafIdRef.current = null;
+      });
+    };
+
     if (el) {
-      el.addEventListener('scroll', checkScroll);
+      el.addEventListener('scroll', handleScroll);
       window.addEventListener('resize', checkScroll);
     }
+
     return () => {
-      el?.removeEventListener('scroll', checkScroll);
+      el?.removeEventListener('scroll', handleScroll);
       window.removeEventListener('resize', checkScroll);
+      if (rafIdRef.current !== null) {
+        cancelAnimationFrame(rafIdRef.current);
+        rafIdRef.current = null;
+      }
     };
-  }, [items]);
+  }, [checkScroll]);
+
+  // items 변경 시 화살표 가시성 재계산 (리스너 재등록 없이)
+  useEffect(() => {
+    checkScroll();
+  }, [items, checkScroll]);
 
   const scroll = (direction: 'left' | 'right') => {
     const el = scrollRef.current;

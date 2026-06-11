@@ -291,7 +291,7 @@ export default function PostEditor({
           onChange={(e) => {
             const v = e.target.value.slice(0, TITLE_MAX);
             if (v.length >= TITLE_MAX && !titleToastShown.current) {
-              showToast('제목은 30자까지 입력할 수 있어요!');
+              showToast(`제목은 ${TITLE_MAX}자까지 입력할 수 있어요!`);
               titleToastShown.current = true;
             }
             setTitle(v);
@@ -331,7 +331,7 @@ export default function PostEditor({
           onChange={(e) => {
             const v = e.target.value.slice(0, CONTENT_MAX);
             if (v.length >= CONTENT_MAX && !contentToastShown.current) {
-              showToast('내용은 500자까지 입력할 수 있어요!');
+              showToast(`내용은 ${CONTENT_MAX}자까지 입력할 수 있어요!`);
               contentToastShown.current = true;
             }
             setContent(v);
