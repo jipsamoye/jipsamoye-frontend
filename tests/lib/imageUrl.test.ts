@@ -74,12 +74,18 @@ describe('toThumbnailUrl', () => {
 });
 
 describe('buildSrcSet', () => {
-  it('200w와 800w 엔트리를 콤마 구분해 반환한다', () => {
+  it('150w(200 썸네일)와 600w(800 썸네일) 엔트리를 콤마 구분해 반환한다', () => {
     const original = 'https://images.jipsamoye.com/posts/42/abc.jpg';
     const srcset = buildSrcSet(original);
     expect(srcset).toBe(
-      'https://images.jipsamoye.com/posts/42/thumbnails/abc_200.webp 200w, ' +
-      'https://images.jipsamoye.com/posts/42/thumbnails/abc_800.webp 800w'
+      'https://images.jipsamoye.com/posts/42/thumbnails/abc_200.webp 150w, ' +
+      'https://images.jipsamoye.com/posts/42/thumbnails/abc_800.webp 600w'
     );
+  });
+
+  it('비CDN URL은 썸네일 변환 없이 두 후보 모두 원본 URL로 반환한다', () => {
+    const external = 'https://example.com/img.jpg';
+    const srcset = buildSrcSet(external);
+    expect(srcset).toBe('https://example.com/img.jpg 150w, https://example.com/img.jpg 600w');
   });
 });

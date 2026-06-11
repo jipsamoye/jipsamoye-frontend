@@ -38,7 +38,12 @@ export default function RankingGrid({ posts, initialLoading }: RankingGridProps)
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
       {posts.map((post, i) => (
-        <PostCard key={post.id} post={post} index={i} />
+        <PostCard
+          key={post.id}
+          post={post}
+          index={i}
+          sizes="(max-width: 767px) calc(100vw - 32px), (max-width: 1023px) calc(50vw - 24px), calc(25vw - 92px)"
+        />
       ))}
     </div>
   );

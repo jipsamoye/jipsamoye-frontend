@@ -8,12 +8,16 @@ import Thumbnail from '@/components/common/Thumbnail';
 import Avatar from '@/components/common/Avatar';
 import ProfileHoverCard from '@/components/domain/ProfileHoverCard';
 
+const DEFAULT_SIZES =
+  '(max-width: 767px) calc(50vw - 24px), (max-width: 1023px) calc(33.3vw - 21px), calc(25vw - 92px)';
+
 interface PostCardProps {
   post: PetPostListItem;
   index?: number;
+  sizes?: string;
 }
 
-export default function PostCard({ post, index = 99 }: PostCardProps) {
+export default function PostCard({ post, index = 99, sizes = DEFAULT_SIZES }: PostCardProps) {
   const [loaded, setLoaded] = useState(false);
   const router = useRouter();
 
@@ -33,7 +37,7 @@ export default function PostCard({ post, index = 99 }: PostCardProps) {
               <Thumbnail
                 src={post.thumbnailUrl}
                 alt={post.title}
-                sizes="(max-width: 768px) 50vw, 253px"
+                sizes={sizes}
                 loading={index < 8 ? 'eager' : 'lazy'}
                 fetchPriority={index < 4 ? 'high' : 'auto'}
                 onLoad={() => setLoaded(true)}

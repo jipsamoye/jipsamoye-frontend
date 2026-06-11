@@ -3,7 +3,7 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import Thumbnail from '@/components/common/Thumbnail';
 
 describe('Thumbnail', () => {
-  it('CDN URL이면 200 썸네일을 src로, 200w/800w를 srcset으로 렌더한다', () => {
+  it('CDN URL이면 200 썸네일을 src로, 150w/600w를 srcset으로 렌더한다', () => {
     render(
       <Thumbnail
         src="https://images.jipsamoye.com/posts/42/abc.jpg"
@@ -14,8 +14,8 @@ describe('Thumbnail', () => {
 
     const img = screen.getByAltText('테스트') as HTMLImageElement;
     expect(img.getAttribute('src')).toBe('https://images.jipsamoye.com/posts/42/thumbnails/abc_200.webp');
-    expect(img.getAttribute('srcset')).toContain('_200.webp 200w');
-    expect(img.getAttribute('srcset')).toContain('_800.webp 800w');
+    expect(img.getAttribute('srcset')).toContain('_200.webp 150w');
+    expect(img.getAttribute('srcset')).toContain('_800.webp 600w');
     expect(img.getAttribute('sizes')).toBe('(max-width: 768px) 50vw, 253px');
   });
 

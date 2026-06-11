@@ -15,7 +15,7 @@ function FadeImage({ src, alt, eager }: { src: string; alt: string; eager?: bool
       <Thumbnail
         src={src}
         alt={alt}
-        sizes="(max-width: 768px) 50vw, 199px"
+        sizes="(max-width: 1023px) max(200px, calc(25vw - 20px)), max(200px, calc(25vw - 92px))"
         loading={eager ? 'eager' : 'lazy'}
         fetchPriority={eager ? 'high' : 'auto'}
         onLoad={() => setLoaded(true)}
