@@ -1,12 +1,13 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { api } from '@/lib/api';
 import { BoardListItem as BoardListItemType, BoardCategory, BoardSearchType, PageResponse } from '@/types/api';
 import BoardListItem from '@/components/domain/BoardListItem';
 import Skeleton from '@/components/common/Skeleton';
 import Pagination from '@/components/common/Pagination';
 import { MagnifyingGlassIcon } from '@/components/layout/icons';
+import { useScrollRestore } from '@/hooks/useScrollRestore';
 
 type Tab = 'ALL' | BoardCategory;
 
@@ -17,6 +18,33 @@ const TABS: { value: Tab; label: string }[] = [
 ];
 
 const PAGE_SIZE = 20;
+
+interface BoardSnapshot {
+  items: BoardListItemType[];
+  currentPage: number;
+  totalPages: number;
+  tab: Tab;
+  searchType: BoardSearchType;
+  searchInput: string;
+  activeQuery: string | null;
+}
+
+const VALID_TABS: Tab[] = ['ALL', 'GENERAL', 'QUESTION'];
+const VALID_SEARCH_TYPES: BoardSearchType[] = ['TITLE_CONTENT', 'TITLE'];
+
+function isBoardSnapshot(data: unknown): data is BoardSnapshot {
+  if (!data || typeof data !== 'object') return false;
+  const d = data as Record<string, unknown>;
+  return (
+    Array.isArray(d.items) &&
+    typeof d.currentPage === 'number' &&
+    typeof d.totalPages === 'number' &&
+    (VALID_TABS as unknown[]).includes(d.tab) &&
+    (VALID_SEARCH_TYPES as unknown[]).includes(d.searchType) &&
+    typeof d.searchInput === 'string' &&
+    (d.activeQuery === null || typeof d.activeQuery === 'string')
+  );
+}
 
 export default function BoardPage() {
   const [tab, setTab] = useState<Tab>('ALL');
@@ -29,7 +57,60 @@ export default function BoardPage() {
   const [searchInput, setSearchInput] = useState('');
   const [activeQuery, setActiveQuery] = useState<string | null>(null);
 
+  // 복원 모드 게이트 — restore 시 true로 세팅, fetch effect는 이 플래그가 true이면
+  // 전부 스킵한다. 사용자 인터랙션 핸들러에서 setState 전에 false로 해제한다.
+  // skipNextFetchRef(1회용)과 달리 복원값으로 인한 deps 변경 실행도 전부 막는다.
+  const restoredModeRef = useRef(false);
+
+  // 최신 상태를 capture에서 읽을 수 있도록 ref 미러
+  const itemsRef = useRef(items);
+  itemsRef.current = items;
+  const tabRef = useRef(tab);
+  tabRef.current = tab;
+  const searchTypeRef = useRef(searchType);
+  searchTypeRef.current = searchType;
+  const searchInputRef = useRef(searchInput);
+  searchInputRef.current = searchInput;
+  const activeQueryRef = useRef(activeQuery);
+  activeQueryRef.current = activeQuery;
+  const currentPageRef = useRef(currentPage);
+  currentPageRef.current = currentPage;
+  const totalPagesRef = useRef(totalPages);
+  totalPagesRef.current = totalPages;
+
+  useScrollRestore<BoardSnapshot>('board', {
+    capture: () => {
+      // 로딩 중이면 빈 목록 저장 방지 — null 반환으로 저장 스킵
+      if (loading) return null;
+      return {
+        items: itemsRef.current,
+        currentPage: currentPageRef.current,
+        totalPages: totalPagesRef.current,
+        tab: tabRef.current,
+        searchType: searchTypeRef.current,
+        searchInput: searchInputRef.current,
+        activeQuery: activeQueryRef.current,
+      };
+    },
+    restore: (snap) => {
+      setItems(snap.items);
+      setCurrentPage(snap.currentPage);
+      setTotalPages(snap.totalPages);
+      setTab(snap.tab);
+      setSearchType(snap.searchType);
+      setSearchInput(snap.searchInput);
+      setActiveQuery(snap.activeQuery);
+      setLoading(false);
+      // 복원 모드 활성화 — fetch effect가 복원 기인 실행(마운트 1회 + deps 변경)을 전부 스킵
+      restoredModeRef.current = true;
+    },
+    validate: isBoardSnapshot,
+  });
+
   useEffect(() => {
+    // 복원 모드이면 fetch 전부 스킵 (마운트 + deps 변경 모두 포함)
+    if (restoredModeRef.current) return;
+
     let cancelled = false;
     setLoading(true);
 
@@ -59,6 +140,8 @@ export default function BoardPage() {
   }, [currentPage, tab, activeQuery, searchType]);
 
   const handleTabChange = (value: Tab) => {
+    // 사용자 인터랙션 — 복원 모드 해제 후 setState (이후 fetch effect 정상 실행)
+    restoredModeRef.current = false;
     setTab(value);
     setCurrentPage(1);
     if (activeQuery) {
@@ -70,17 +153,29 @@ export default function BoardPage() {
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const trimmed = searchInput.trim();
+    // 사용자 인터랙션 — 복원 모드 해제
+    restoredModeRef.current = false;
     setActiveQuery(trimmed ? trimmed : null);
     setCurrentPage(1);
   };
 
   const clearSearch = () => {
+    // 사용자 인터랙션 — 복원 모드 해제
+    restoredModeRef.current = false;
     setSearchInput('');
     setActiveQuery(null);
     setCurrentPage(1);
   };
 
+  const handleSearchTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    // 사용자 인터랙션 — 복원 모드 해제 후 setState (이후 fetch effect 정상 실행)
+    restoredModeRef.current = false;
+    setSearchType(e.target.value as BoardSearchType);
+  };
+
   const handlePageChange = useCallback((page: number) => {
+    // 사용자 인터랙션 — 복원 모드 해제
+    restoredModeRef.current = false;
     setCurrentPage(page);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
@@ -111,7 +206,7 @@ export default function BoardPage() {
         <form onSubmit={handleSearchSubmit} className="flex items-center gap-2">
           <select
             value={searchType}
-            onChange={(e) => setSearchType(e.target.value as BoardSearchType)}
+            onChange={handleSearchTypeChange}
             className="h-9 px-3 rounded-xl border border-gray-200 bg-white text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-amber-300"
           >
             <option value="TITLE_CONTENT">제목+내용</option>

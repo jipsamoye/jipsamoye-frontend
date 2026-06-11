@@ -10,6 +10,28 @@ import { timeAgoOrDate } from '@/lib/utils';
 import PopularSlider from '@/components/domain/PopularSlider';
 import PostCard from '@/components/domain/PostCard';
 import { PostCardSkeleton, PopularSliderSkeleton } from '@/components/common/Skeleton';
+import { useScrollRestore } from '@/hooks/useScrollRestore';
+
+interface HomeSnapshot {
+  popularPosts: PetPostListItem[];
+  boardPosts: BoardListItem[];
+  latestPosts: PetPostListItem[];
+  page: number;
+  hasNext: boolean;
+}
+
+function isHomeSnapshot(data: unknown): data is HomeSnapshot {
+  if (!data || typeof data !== 'object') return false;
+  const d = data as Record<string, unknown>;
+  return (
+    Array.isArray(d.popularPosts) &&
+    Array.isArray(d.boardPosts) &&
+    Array.isArray(d.latestPosts) &&
+    typeof d.page === 'number' &&
+    typeof d.hasNext === 'boolean'
+  );
+}
+
 function HomeContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -26,7 +48,44 @@ function HomeContent() {
   const observerRef = useRef<HTMLDivElement>(null);
   const latestSectionRef = useRef<HTMLElement>(null);
 
+  // 최신 상태를 capture에서 읽을 수 있도록 ref 미러
+  const popularPostsRef = useRef(popularPosts);
+  popularPostsRef.current = popularPosts;
+  const boardPostsRef = useRef(boardPosts);
+  boardPostsRef.current = boardPosts;
+  const latestPostsRef = useRef(latestPosts);
+  latestPostsRef.current = latestPosts;
+  const hasNextRef = useRef(hasNext);
+  hasNextRef.current = hasNext;
+
+  const restored = useScrollRestore<HomeSnapshot>('home', {
+    capture: () => {
+      // 로딩 중이면 빈 목록 저장 방지 — null 반환으로 저장 스킵
+      if (popularLoading || initialLatestLoading || latestPostsRef.current.length === 0) {
+        return null;
+      }
+      return {
+        popularPosts: popularPostsRef.current,
+        boardPosts: boardPostsRef.current,
+        latestPosts: latestPostsRef.current,
+        page: pageRef.current,
+        hasNext: hasNextRef.current,
+      };
+    },
+    restore: (snap) => {
+      setPopularPosts(snap.popularPosts);
+      setBoardPosts(snap.boardPosts);
+      setLatestPosts(snap.latestPosts);
+      pageRef.current = snap.page;
+      setHasNext(snap.hasNext);
+      setPopularLoading(false);
+      setInitialLatestLoading(false);
+    },
+    validate: isHomeSnapshot,
+  });
+
   useEffect(() => {
+    if (restored) return; // 복원 시 fetch 생략
     api.get<PetPostListItem[]>('/api/posts/top10')
       .then((res) => setPopularPosts(res.data.length > 0 ? res.data : dummyPopularPosts))
       .catch(() => setPopularPosts(dummyPopularPosts))
@@ -35,7 +94,7 @@ function HomeContent() {
     api.get<PageResponse<BoardListItem>>('/api/boards?page=0&size=5', { silent: true })
       .then((res) => setBoardPosts(res.data.content))
       .catch(() => {});
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const loadMore = useCallback(async () => {
     if (loadingRef.current || !hasNext) return;
@@ -63,6 +122,7 @@ function HomeContent() {
   }, [hasNext]);
 
   useEffect(() => {
+    if (restored) return; // 복원 시 초기 loadMore 생략
     loadMore();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -75,12 +135,13 @@ function HomeContent() {
     return () => observer.disconnect();
   }, [loadMore]);
 
-  // ?section=latest 진입 시 최신 자랑 섹션으로 부드럽게 스크롤
+  // ?section=latest 진입 시 최신 자랑 섹션으로 부드럽게 스크롤 (복원 시 건너뜀)
   useEffect(() => {
+    if (restored) return;
     if (sectionParam === 'latest' && !initialLatestLoading && latestSectionRef.current) {
       latestSectionRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
-  }, [sectionParam, initialLatestLoading]);
+  }, [sectionParam, initialLatestLoading, restored]);
 
   const popularSliderItems = popularPosts.map((p) => ({
     id: p.id,
