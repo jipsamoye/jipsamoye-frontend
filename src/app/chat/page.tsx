@@ -46,10 +46,17 @@ export default function ChatPage() {
     loadMessages();
   }, []);
 
+  // messages를 ref로 미러링 (loadOlderMessages deps에서 messages 제거용)
+  const messagesRef = useRef<ChatMessage[]>([]);
+  useEffect(() => {
+    messagesRef.current = messages;
+  }, [messages]);
+
   // 이전 메시지 로드
   const loadOlderMessages = useCallback(async () => {
-    if (loadingMore || !hasMore || messages.length === 0) return;
-    const oldestId = messages[0]?.id;
+    const currentMessages = messagesRef.current;
+    if (loadingMore || !hasMore || currentMessages.length === 0) return;
+    const oldestId = currentMessages[0]?.id;
     if (!oldestId) return;
 
     setLoadingMore(true);
@@ -73,7 +80,7 @@ export default function ChatPage() {
     } finally {
       setLoadingMore(false);
     }
-  }, [loadingMore, hasMore, messages]);
+  }, [loadingMore, hasMore]);
 
   // user를 ref로 추적
   const userRef = useRef(user);
