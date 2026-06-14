@@ -217,7 +217,9 @@ export interface BoardCommentUpdateRequest {
 export type KnownNotificationType =
   | 'LIKE'
   | 'FOLLOW'
+  | 'PET_POST_COMMENT'        // 신규: 게시글 최상위 댓글
   | 'PET_POST_COMMENT_REPLY'
+  | 'BOARD_COMMENT'           // 신규: 게시판 최상위 댓글
   | 'BOARD_COMMENT_REPLY';
 export type NotificationType = KnownNotificationType | (string & {});
 
@@ -225,7 +227,8 @@ export type NotificationType = KnownNotificationType | (string & {});
 export interface Notification {
   id: number;
   type: NotificationType;
-  targetId: number | null;        // FOLLOW=userId, PET_POST_COMMENT_REPLY=commentId
+  // type별 의미 상이: LIKE=게시글ID, FOLLOW=유저ID, *_COMMENT(_REPLY)=댓글ID
+  targetId: number | null;
   relatedPostId: number | null;   // 게시글 딥링크용 postId
   message: string;
   senderNickname: string;

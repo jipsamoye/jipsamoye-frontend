@@ -77,6 +77,50 @@ describe('getNotificationLink', () => {
     ).toBe('/posts/30');
   });
 
+  it('BOARD_COMMENT + relatedPostId + targetId → /board/{id}#comment-{tid} (회귀: /posts 로 가지 않음)', () => {
+    const link = getNotificationLink({
+      ...base,
+      type: 'BOARD_COMMENT',
+      relatedPostId: 7,
+      targetId: 55,
+    });
+    expect(link).toBe('/board/7#comment-55');
+    expect(link?.startsWith('/posts')).toBe(false);
+  });
+
+  it('BOARD_COMMENT + relatedPostId, targetId=null → /board/{id} (앵커 없음)', () => {
+    expect(
+      getNotificationLink({
+        ...base,
+        type: 'BOARD_COMMENT',
+        relatedPostId: 7,
+        targetId: null,
+      }),
+    ).toBe('/board/7');
+  });
+
+  it('PET_POST_COMMENT + relatedPostId + targetId → /posts/{id}#comment-{tid}', () => {
+    expect(
+      getNotificationLink({
+        ...base,
+        type: 'PET_POST_COMMENT',
+        relatedPostId: 42,
+        targetId: 30,
+      }),
+    ).toBe('/posts/42#comment-30');
+  });
+
+  it('PET_POST_COMMENT + relatedPostId, targetId=null → /posts/{id} (앵커 없음)', () => {
+    expect(
+      getNotificationLink({
+        ...base,
+        type: 'PET_POST_COMMENT',
+        relatedPostId: 42,
+        targetId: null,
+      }),
+    ).toBe('/posts/42');
+  });
+
   it('아무 정보 없으면 null', () => {
     expect(getNotificationLink(base)).toBeNull();
   });
