@@ -96,7 +96,7 @@ export default function Header({ isLoggedIn = false, onLoginClick, onLogout, onM
                   )}
                 </button>
                 {showNotification && (
-                  <div className="absolute right-0 top-full mt-2 w-80 bg-white border border-gray-100 rounded-2xl shadow-xl z-50 overflow-hidden">
+                  <div className="fixed right-2 top-[4.5rem] w-[min(20rem,calc(100vw-1rem))] lg:absolute lg:right-0 lg:top-full lg:mt-2 lg:w-80 bg-white border border-gray-100 rounded-2xl shadow-xl z-50 overflow-hidden">
                     <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
                       <h3 className="font-bold text-base text-gray-900">알림</h3>
                       <div className="flex items-center gap-2">
