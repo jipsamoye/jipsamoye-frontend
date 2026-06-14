@@ -21,8 +21,6 @@ const successRes = (data: unknown) => ({ status: 200, code: 'SUCCESS', message: 
 const makePage = (items: object[], hasNext = false) =>
   successRes({
     content: items,
-    totalPages: hasNext ? 2 : 1,
-    totalElements: items.length,
     currentPage: 0,
     size: 20,
     hasNext,
@@ -94,6 +92,15 @@ describe('useSearchPosts', () => {
       expect(apiMock.get).not.toHaveBeenCalled();
       expect(result.current.loading).toBe(false);
     });
+
+    it('1글자 키워드면 2글자 가드로 API를 호출하지 않는다', async () => {
+      const { result } = renderHook(() => useSearchPosts('가'));
+
+      await act(async () => { await result.current.search(true); });
+
+      expect(apiMock.get).not.toHaveBeenCalled();
+      expect(result.current.loading).toBe(false);
+    });
   });
 
   describe('정상 동작', () => {
@@ -136,6 +143,70 @@ describe('useSearchPosts', () => {
 
       expect(result.current.hasNext).toBe(false);
       expect(result.current.posts).toHaveLength(0);
+    });
+  });
+
+  describe('ref 기반 중복 가드 + id dedup', () => {
+    it('첫 응답 resolve 전 search를 연속 호출해도 API는 1번만 나간다 (동기 ref 가드)', async () => {
+      let resolveFirst!: (v: unknown) => void;
+      const firstPromise = new Promise((resolve) => { resolveFirst = resolve; });
+      apiMock.get.mockReturnValueOnce(firstPromise);
+
+      const { result } = renderHook(() => useSearchPosts('강아지'));
+
+      // setLoading 리렌더가 반영되기 전에 동기적으로 연속 호출
+      act(() => {
+        result.current.search(true);
+        result.current.search(true);
+        result.current.search(false);
+      });
+
+      // ref 가드로 첫 호출만 통과
+      expect(apiMock.get).toHaveBeenCalledTimes(1);
+
+      resolveFirst(makePage([makePost(1)]));
+      await waitFor(() => expect(result.current.loading).toBe(false));
+      expect(apiMock.get).toHaveBeenCalledTimes(1);
+    });
+
+    it('append 시 동일 id는 중복되지 않는다 (1페이지 [1,2], 2페이지 [2,3] → [1,2,3])', async () => {
+      apiMock.get
+        .mockResolvedValueOnce(makePage([makePost(1), makePost(2)], true))
+        .mockResolvedValueOnce(makePage([makePost(2), makePost(3)], false));
+
+      const { result } = renderHook(() => useSearchPosts('강아지'));
+
+      await act(async () => { await result.current.search(true); });
+      await waitFor(() => expect(result.current.loading).toBe(false));
+      expect(result.current.posts.map((p) => p.id)).toEqual([1, 2]);
+
+      await act(async () => { await result.current.search(false); });
+      await waitFor(() => expect(result.current.loading).toBe(false));
+
+      expect(result.current.posts.map((p) => p.id)).toEqual([1, 2, 3]);
+    });
+
+    it('새 검색(resetPage=true) 시작 시 이전 결과를 즉시 비운다', async () => {
+      // 첫 검색 완료
+      apiMock.get.mockResolvedValueOnce(makePage([makePost(1), makePost(2)], true));
+      const { result } = renderHook(() => useSearchPosts('강아지'));
+
+      await act(async () => { await result.current.search(true); });
+      await waitFor(() => expect(result.current.loading).toBe(false));
+      expect(result.current.posts).toHaveLength(2);
+
+      // 두 번째 검색 — 응답 지연. 시작 직후 posts가 즉시 비워져야 함
+      let resolveSecond!: (v: unknown) => void;
+      const secondPromise = new Promise((resolve) => { resolveSecond = resolve; });
+      apiMock.get.mockReturnValueOnce(secondPromise);
+
+      act(() => { result.current.search(true); });
+
+      await waitFor(() => expect(result.current.posts).toHaveLength(0));
+
+      resolveSecond(makePage([makePost(9)]));
+      await waitFor(() => expect(result.current.loading).toBe(false));
+      expect(result.current.posts.map((p) => p.id)).toEqual([9]);
     });
   });
 });

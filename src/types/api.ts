@@ -6,14 +6,18 @@ export interface ApiResponse<T> {
   data: T;
 }
 
-// 페이지네이션 응답
-export interface PageResponse<T> {
+// 슬라이스 응답 (무한스크롤 — totalPages/totalElements 없음)
+export interface SliceResponse<T> {
   content: T[];
-  totalPages: number;
-  totalElements: number;
   currentPage: number;
   size: number;
   hasNext: boolean;
+}
+
+// 페이지네이션 응답
+export interface PageResponse<T> extends SliceResponse<T> {
+  totalPages: number;
+  totalElements: number;
 }
 
 // 소셜 링크
