@@ -431,7 +431,6 @@ function DmPageInner() {
                   <p className="text-sm font-medium text-gray-900">
                     {activePartner.nickname}
                   </p>
-                  <p className="text-xs text-gray-400">@{activePartner.nickname}</p>
                 </div>
               </div>
               {/* 닫기 버튼 (X 아이콘) */}

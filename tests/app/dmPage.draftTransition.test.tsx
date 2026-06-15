@@ -124,7 +124,7 @@ describe('DM 페이지 — dm-rooms push 핸들러 (draft→실제 roomId 전환
     // dm-rooms 핸들러가 등록될 때까지 대기
     await waitFor(() => expect(getHandler()).toBeTypeOf('function'));
     // draft 채팅창 헤더에 상대 닉네임 표시 (draft 상태)
-    await waitFor(() => expect(screen.getByText('@상대방')).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText('상대방', { selector: 'p' })).toBeInTheDocument());
     // draft 상태에서는 방 목록 비어있음 ("아직 주고 받은 메세지가 없어요")
     expect(screen.getByText('아직 주고 받은 메세지가 없어요')).toBeInTheDocument();
 
@@ -145,7 +145,7 @@ describe('DM 페이지 — dm-rooms push 핸들러 (draft→실제 roomId 전환
 
     render(<DmPage />);
     await waitFor(() => expect(getHandler()).toBeTypeOf('function'));
-    await waitFor(() => expect(screen.getByText('@상대방')).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText('상대방', { selector: 'p' })).toBeInTheDocument());
 
     // draft 대상과 다른 닉네임의 방 push
     act(() => {
@@ -155,7 +155,7 @@ describe('DM 페이지 — dm-rooms push 핸들러 (draft→실제 roomId 전환
     // 그 방은 목록에 추가되지만(applyRoomUpdate), draft 헤더는 그대로 유지됨
     await waitFor(() => expect(screen.getByText('딴메시지')).toBeInTheDocument());
     // 헤더는 여전히 draft 상대(@상대방) — 전환되지 않음
-    expect(screen.getByText('@상대방')).toBeInTheDocument();
+    expect(screen.getByText('상대방', { selector: 'p' })).toBeInTheDocument();
   });
 
   it('(c) 이미 열린 방에 대한 push → 목록 unread 0 강제', async () => {

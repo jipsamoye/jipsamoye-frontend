@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { api } from '@/lib/api';
 import { PetPost, PetPostListItem, PageResponse } from '@/types/api';
 import { useAuthContext } from '@/components/providers/AuthProvider';
+import { useOpenDm } from '@/hooks/useOpenDm';
 import Avatar from '@/components/common/Avatar';
 import DetailImage from '@/components/common/DetailImage';
 import Modal from '@/components/common/Modal';
@@ -18,6 +19,7 @@ import { formatDateTime } from '@/lib/utils';
 export default function PostDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const router = useRouter();
+  const openDm = useOpenDm();
   const { user } = useAuthContext();
   const [post, setPost] = useState<PetPost | null>(null);
   const [authorPosts, setAuthorPosts] = useState<PetPostListItem[]>([]);
@@ -151,12 +153,11 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
                 <div className="absolute right-0 top-full mt-1 w-36 bg-white border border-gray-100 rounded-2xl shadow-xl py-1 z-50">
                   {!isAuthor && (
                     <button
-                      onClick={async () => {
+                      onClick={() => {
                         setShowPostMenu(false);
-                        try {
-                          await api.post(`/api/dm/rooms?targetNickname=${encodeURIComponent(post.nickname)}`);
-                        } catch { /* ignore */ }
-                        router.push('/dm');
+                        // 기존 방이면 roomId로, 없으면 draft 대화로 연다. 작성자 프로필 이미지를
+                        // 함께 넘겨 draft 대화창 헤더 아바타를 즉시 표시.
+                        void openDm(post.nickname, post.profileImageUrl);
                       }}
                       className="w-full px-4 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
                     >
