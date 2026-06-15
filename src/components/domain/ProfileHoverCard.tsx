@@ -16,8 +16,9 @@ import {
   safePolygon,
 } from '@floating-ui/react';
 import { api } from '@/lib/api';
-import { User, DmRoomResolve } from '@/types/api';
+import { User } from '@/types/api';
 import { useAuthContext } from '@/components/providers/AuthProvider';
+import { useOpenDm } from '@/hooks/useOpenDm';
 import ProfileHoverCardContent from '@/components/domain/ProfileHoverCardContent';
 
 interface ProfileHoverCardProps {
@@ -34,6 +35,7 @@ interface ProfileHoverCardProps {
  */
 export default function ProfileHoverCard({ nickname, children }: ProfileHoverCardProps) {
   const router = useRouter();
+  const openDm = useOpenDm();
   const { user: currentUser } = useAuthContext();
   const [open, setOpen] = useState(false);
   const [profile, setProfile] = useState<User | null>(null);
@@ -105,24 +107,13 @@ export default function ProfileHoverCard({ nickname, children }: ProfileHoverCar
     } catch { /* 401이면 api 클라이언트가 토스트 + unauthorizedHandler 처리 */ }
   };
 
-  const handleMessage = async (e: React.MouseEvent) => {
+  const handleMessage = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     if (!currentUser) return;
-    // resolve: 메시지가 오간 기존 방이면 roomId로 이동, 없으면 방을 만들지 않고
-    // draft 대화로 연다(?draft=닉네임). 첫 메시지 전송 시 백엔드가 방을 생성(버그①).
-    try {
-      const res = await api.post<DmRoomResolve>(
-        `/api/dm/rooms?targetNickname=${encodeURIComponent(nickname)}`
-      );
-      if (res.data?.roomId != null) {
-        router.push(`/dm?room=${res.data.roomId}`);
-      } else {
-        router.push(`/dm?draft=${encodeURIComponent(nickname)}`);
-      }
-    } catch {
-      router.push('/dm');
-    }
+    // 기존 방이면 roomId로, 없으면 draft 대화(?draft=닉네임&img=)로 연다.
+    // 프로필 이미지를 함께 넘겨 draft 대화창 헤더 아바타를 즉시 표시.
+    void openDm(nickname, profile?.profileImageUrl ?? null);
   };
 
   const handleEditProfile = (e: React.MouseEvent) => {

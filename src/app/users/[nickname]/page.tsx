@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { api } from '@/lib/api';
 import { User, PetPostListItem, PageResponse, PresignedUrlResponse } from '@/types/api';
 import { useAuthContext } from '@/components/providers/AuthProvider';
+import { useOpenDm } from '@/hooks/useOpenDm';
 import Avatar from '@/components/common/Avatar';
 import PostCard from '@/components/domain/PostCard';
 import ProfileEditModal from '@/components/domain/ProfileEditModal';
@@ -16,6 +17,7 @@ export default function ProfilePage({ params }: { params: Promise<{ nickname: st
   const { nickname } = use(params);
   const decodedNickname = decodeURIComponent(nickname);
   const router = useRouter();
+  const openDm = useOpenDm();
   const { user, updateUser } = useAuthContext();
 
   const [profile, setProfile] = useState<User | null>(null);
@@ -209,16 +211,11 @@ export default function ProfilePage({ params }: { params: Promise<{ nickname: st
                 </button>
                 {isFollowing && (
                   <button
-                    onClick={async () => {
+                    onClick={() => {
                       if (!user || !profile) return;
-                      try {
-                        const res = await api.post<{ roomId: number }>(
-                          `/api/dm/rooms?targetNickname=${encodeURIComponent(profile.nickname)}`
-                        );
-                        router.push(`/dm?room=${res.data.roomId}`);
-                      } catch {
-                        router.push('/dm');
-                      }
+                      // 기존 방이면 roomId로, 없으면 draft 대화로 연다.
+                      // 프로필 이미지를 함께 넘겨 draft 대화창 헤더 아바타를 즉시 표시.
+                      void openDm(profile.nickname, profile.profileImageUrl);
                     }}
                     className="flex-1 md:flex-none px-5 py-2.5 rounded-xl bg-gray-900 text-white font-semibold text-sm hover:bg-gray-800 transition-colors flex items-center justify-center gap-1.5"
                   >

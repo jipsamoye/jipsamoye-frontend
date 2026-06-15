@@ -129,8 +129,10 @@ function DmPageInner() {
         setMobileView('chat');
       }
     } else if (draftParam) {
-      // 아직 방이 없는 상대와의 draft 대화. 프로필 이미지는 dm-rooms 갱신/방 전환 시 채워짐.
-      setDraftPartner({ nickname: draftParam, profileImageUrl: null });
+      // 아직 방이 없는 상대와의 draft 대화. 진입부(프로필/호버카드)가 ?img= 로 넘긴
+      // 프로필 이미지를 헤더 아바타에 즉시 반영. 없으면 dm-rooms 갱신/방 전환 시 채워짐.
+      const imgParam = searchParams.get('img');
+      setDraftPartner({ nickname: draftParam, profileImageUrl: imgParam || null });
       setSelectedRoomId(null);
       setMobileView('chat');
     } else {
