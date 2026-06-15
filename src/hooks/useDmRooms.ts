@@ -8,6 +8,12 @@ interface UseDmRoomsResult {
   resetUnread: (roomId: number) => void;
   updateLastMessage: (roomId: number, content: string) => void;
   applyServerLastMessage: (roomId: number, content: string, at: string) => void;
+  /**
+   * 사용자별 채널(/user/sub/dm/rooms)에서 온 방 업데이트를 목록에 반영(버그②).
+   * @param payload 서버가 내려준 방 스냅샷(DmRoom 형태)
+   * @param openRoomId 현재 열려 있는 방 id — 일치하면 unread를 0으로 강제(읽음 흐름 충돌 방지)
+   */
+  applyRoomUpdate: (payload: DmRoom, openRoomId: number | null) => void;
 }
 
 export function useDmRooms(userNickname: string | null): UseDmRoomsResult {
@@ -50,5 +56,42 @@ export function useDmRooms(userNickname: string | null): UseDmRoomsResult {
     []
   );
 
-  return { rooms, setRooms, resetUnread, updateLastMessage, applyServerLastMessage };
+  /**
+   * 사용자별 채널 payload를 목록에 반영(버그②).
+   * - 기존 방: lastMessage/lastMessageAt/unreadCount 갱신 + 최상단 정렬.
+   * - 신규 방: 목록 최상단에 삽입.
+   * - 현재 열려 있는 방이면 unreadCount=0 강제(방 입장 읽음 흐름과 충돌 방지).
+   */
+  const applyRoomUpdate = useCallback(
+    (payload: DmRoom, openRoomId: number | null) => {
+      const isOpen = openRoomId != null && payload.roomId === openRoomId;
+      setRooms((prev) => {
+        const existing = prev.find((r) => r.roomId === payload.roomId);
+        const merged: DmRoom = existing
+          ? {
+              ...existing,
+              lastMessage: payload.lastMessage,
+              lastMessageAt: payload.lastMessageAt,
+              unreadCount: isOpen ? 0 : payload.unreadCount,
+              // 프로필 정보는 서버 값 우선, 누락 시 기존 값 유지(헤더/목록 깜빡임 방지)
+              otherUserNickname: payload.otherUserNickname || existing.otherUserNickname,
+              otherUserProfileImageUrl:
+                payload.otherUserProfileImageUrl ?? existing.otherUserProfileImageUrl,
+            }
+          : { ...payload, unreadCount: isOpen ? 0 : payload.unreadCount };
+        const rest = prev.filter((r) => r.roomId !== payload.roomId);
+        return [merged, ...rest];
+      });
+    },
+    []
+  );
+
+  return {
+    rooms,
+    setRooms,
+    resetUnread,
+    updateLastMessage,
+    applyServerLastMessage,
+    applyRoomUpdate,
+  };
 }

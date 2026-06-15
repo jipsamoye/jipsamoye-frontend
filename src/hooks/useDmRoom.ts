@@ -6,6 +6,8 @@ import type { DmMessage, DmRoomEvent, PageResponse } from '@/types/api';
 
 interface UseDmRoomOptions {
   roomId: number | null;
+  /** draft(roomId=null) 상태에서 첫 메시지를 보낼 상대 닉네임 */
+  targetNickname?: string | null;
   userNickname: string | null;
   onMessageSent?: (roomId: number, content: string, createdAt: string) => void;
   onUnread?: (roomId: number) => void;
@@ -25,6 +27,7 @@ interface UseDmRoomResult {
 
 export function useDmRoom({
   roomId,
+  targetNickname,
   userNickname,
   onMessageSent,
   onUnread,
@@ -96,24 +99,37 @@ export function useDmRoom({
         if (onMessageSent) {
           onMessageSent(roomId, incoming.content, incoming.createdAt);
         }
+        // 상대가 보낸 메시지를 방에서 실시간 수신 → 즉시 읽음 처리 트리거.
+        // 이래야 상대 쪽 "1"(안읽음 표시)이 바로 사라진다(버그③).
+        // 내가 보낸 메시지의 에코는 read 불필요.
+        if (incoming.senderNickname !== userNickname) {
+          wsService.send('/pub/dm/read', { roomId });
+        }
       } else if (event.type === 'READ') {
-        // 내가 보낸 메시지의 readAt 갱신
-        setMessages((prev) =>
-          prev.map((m) =>
-            m.senderNickname === userNickname && !m.readAt
-              ? { ...m, readAt: event.readAt }
-              : m
-          )
-        );
+        // 내가 읽은 read의 에코(readerNickname === 나)는 무시한다.
+        // 버그③로 수신 즉시 /pub/dm/read를 publish하므로 내 read 에코가 되돌아올 수 있는데,
+        // 이를 그대로 반영하면 "상대가 읽었다"가 아닌 내 read로 내 메시지가 잘못 읽음 처리됨.
+        // 상대(readerNickname !== 나)가 읽은 경우에만 내 메시지의 readAt을 갱신.
+        if (event.readerNickname !== userNickname) {
+          setMessages((prev) =>
+            prev.map((m) =>
+              m.senderNickname === userNickname && !m.readAt
+                ? { ...m, readAt: event.readAt }
+                : m
+            )
+          );
+        }
       }
     });
 
     return unsubscribe;
   }, [roomId, userNickname]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // NOTE: 메시지를 GET으로 로드하는 행위 자체가 백엔드에서 읽음 처리를 트리거한다.
-  // 백엔드는 조회 시 해당 방의 메시지를 모두 읽음 처리하고 상대에게 READ 이벤트를 브로드캐스트하므로
-  // 프론트에서 별도로 read 이벤트를 publish할 필요가 없다.
+  // NOTE: 읽음 처리는 두 경로로 트리거된다.
+  //  1) 방 입장 시 GET /messages — 백엔드가 조회 시점에 미읽음 메시지를 읽음 처리(보완용).
+  //  2) 방에 머무는 동안 상대 메시지를 실시간 수신할 때 — 위 MESSAGE 핸들러에서
+  //     `/pub/dm/read`를 즉시 publish(버그③). GET만으로는 이미 방에 있는 사용자가
+  //     새 메시지를 받아도 읽음 처리가 안 돼 상대 쪽 "1"이 남아 있었음.
 
   /** 위로 스크롤 시 과거 메시지 prepend */
   const loadOlderMessages = useCallback(async () => {
@@ -164,7 +180,8 @@ export function useDmRoom({
   /** 메시지 전송 (낙관적 UI) */
   const sendMessage = useCallback(
     (content: string) => {
-      if (!content.trim() || !roomId || !userNickname) return;
+      // 실제 방(roomId) 또는 draft(targetNickname) 둘 중 하나는 있어야 전송 가능.
+      if (!content.trim() || !userNickname || (!roomId && !targetNickname)) return;
 
       const clientMessageId = crypto.randomUUID();
       const optimistic: DmMessage = {
@@ -181,8 +198,11 @@ export function useDmRoom({
 
       setMessages((prev) => [...prev, optimistic]);
 
+      // draft면 roomId=null + targetNickname으로 전송(백엔드가 방 생성).
+      // 첫 메시지 후 /user/sub/dm/rooms로 새 roomId가 오면 page에서 draft→실제 방 전환.
       const sent = wsService.send('/pub/dm/send', {
-        roomId,
+        roomId: roomId ?? null,
+        targetNickname: roomId ? null : (targetNickname ?? null),
         content: content.trim(),
         imageUrl: null,
         clientMessageId,
@@ -196,19 +216,20 @@ export function useDmRoom({
         );
       }
     },
-    [roomId, userNickname]
+    [roomId, targetNickname, userNickname]
   );
 
   /** 실패한 메시지 재전송 */
   const retryMessage = useCallback(
     (clientMessageId: string) => {
-      if (!roomId || !userNickname) return;
+      if (!userNickname || (!roomId && !targetNickname)) return;
       setMessages((prev) => {
         const target = prev.find((m) => m.clientMessageId === clientMessageId);
         if (!target) return prev;
 
         const sent = wsService.send('/pub/dm/send', {
-          roomId,
+          roomId: roomId ?? null,
+          targetNickname: roomId ? null : (targetNickname ?? null),
           content: target.content,
           imageUrl: null,
           clientMessageId,
@@ -221,7 +242,7 @@ export function useDmRoom({
         );
       });
     },
-    [roomId, userNickname]
+    [roomId, targetNickname, userNickname]
   );
 
   return {

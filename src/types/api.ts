@@ -256,9 +256,18 @@ export interface DmRoom {
   unreadCount: number;
 }
 
+/**
+ * POST /api/dm/rooms?targetNickname= 응답 (resolve).
+ * - 메시지가 오간 기존 방이면 roomId 포함(DmRoom).
+ * - 아직 방이 없으면 roomId=null + 상대 정보만 내려오는 draft 응답.
+ */
+export type DmRoomResolve = Omit<DmRoom, 'roomId'> & { roomId: number | null };
+
 // DM 메시지
 export interface DmMessage {
   id: number;
+  /** 어느 방의 메시지인지 (이벤트/에코 payload에 포함) */
+  roomId?: number;
   senderNickname: string;
   content: string;
   imageUrl?: string;
@@ -270,10 +279,10 @@ export interface DmMessage {
   status?: 'sending' | 'sent' | 'failed';
 }
 
-// DM 방 채널 WS 이벤트
+// DM 방 채널 WS 이벤트 (roomId 포함)
 export type DmRoomEvent =
-  | { type: 'MESSAGE'; message: DmMessage }
-  | { type: 'READ'; readerNickname: string; readAt: string };
+  | { type: 'MESSAGE'; roomId: number; message: DmMessage }
+  | { type: 'READ'; roomId: number; readerNickname: string; readAt: string };
 
 // 랭킹 페이지 API 응답 (GET /api/posts/ranking)
 export interface RankingPageResponse {

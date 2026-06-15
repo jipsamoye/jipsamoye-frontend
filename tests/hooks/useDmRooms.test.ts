@@ -96,4 +96,61 @@ describe('useDmRooms', () => {
     const { result } = renderHook(() => useDmRooms('집사'));
     await waitFor(() => expect(result.current.rooms).toHaveLength(0));
   });
+
+  // ─── [버그②] applyRoomUpdate ─────────────────────────────────────────────
+
+  it('applyRoomUpdate: 기존 방의 lastMessage/at/unread 갱신 + 최상단 정렬', async () => {
+    apiMock.get.mockResolvedValueOnce(
+      successRes([
+        makeRoom({ roomId: 1, lastMessage: 'a', unreadCount: 0 }),
+        makeRoom({ roomId: 2, lastMessage: 'b', unreadCount: 0 }),
+      ])
+    );
+    const { result } = renderHook(() => useDmRooms('집사'));
+    await waitFor(() => expect(result.current.rooms).toHaveLength(2));
+
+    act(() =>
+      result.current.applyRoomUpdate(
+        makeRoom({ roomId: 2, lastMessage: '새 메시지', lastMessageAt: '2026-06-11T12:00:00', unreadCount: 4 }),
+        null // 열린 방 없음
+      )
+    );
+
+    // roomId 2가 최상단으로
+    expect(result.current.rooms[0].roomId).toBe(2);
+    expect(result.current.rooms[0].lastMessage).toBe('새 메시지');
+    expect(result.current.rooms[0].lastMessageAt).toBe('2026-06-11T12:00:00');
+    expect(result.current.rooms[0].unreadCount).toBe(4);
+    expect(result.current.rooms).toHaveLength(2);
+  });
+
+  it('applyRoomUpdate: 목록에 없는 방이면 최상단에 새로 삽입', async () => {
+    apiMock.get.mockResolvedValueOnce(successRes([makeRoom({ roomId: 1 })]));
+    const { result } = renderHook(() => useDmRooms('집사'));
+    await waitFor(() => expect(result.current.rooms).toHaveLength(1));
+
+    act(() =>
+      result.current.applyRoomUpdate(
+        makeRoom({ roomId: 99, otherUserNickname: '신규', lastMessage: '첫 메시지', unreadCount: 1 }),
+        null
+      )
+    );
+
+    expect(result.current.rooms).toHaveLength(2);
+    expect(result.current.rooms[0].roomId).toBe(99);
+    expect(result.current.rooms[0].otherUserNickname).toBe('신규');
+  });
+
+  it('applyRoomUpdate: 현재 열려 있는 방이면 unreadCount를 0으로 강제', async () => {
+    apiMock.get.mockResolvedValueOnce(successRes([makeRoom({ roomId: 1, unreadCount: 0 })]));
+    const { result } = renderHook(() => useDmRooms('집사'));
+    await waitFor(() => expect(result.current.rooms).toHaveLength(1));
+
+    // 서버 payload는 unread 5지만, 열린 방이므로 0으로 강제
+    act(() =>
+      result.current.applyRoomUpdate(makeRoom({ roomId: 1, unreadCount: 5 }), 1)
+    );
+
+    expect(result.current.rooms[0].unreadCount).toBe(0);
+  });
 });

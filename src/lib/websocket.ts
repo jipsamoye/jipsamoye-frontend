@@ -6,7 +6,7 @@ import type { DmMessage, DmRoomEvent } from '@/types/api';
 type MessageHandler = (data: unknown) => void;
 type DmRoomEventHandler = (event: DmRoomEvent) => void;
 
-type Channel = 'notification' | 'chat';
+type Channel = 'notification' | 'chat' | 'dm-rooms';
 
 class WebSocketService {
   private client: Client | null = null;
@@ -40,6 +40,8 @@ class WebSocketService {
         this.connected = true;
         this.subscribeChannel('notification', '/user/sub/notifications');
         this.subscribeChannel('chat', '/sub/chat/room');
+        // 사용자별 DM 방 목록 채널 — 방 밖(목록 화면)에서도 새 메시지/방 실시간 반영
+        this.subscribeChannel('dm-rooms', '/user/sub/dm/rooms');
         // 이미 등록된 DM 방 구독 전부 복구 (연결 전 등록 + 재연결 시)
         this.pendingDmRooms.forEach((handler, roomId) => {
           this.subscribeDmRoomNow(roomId, handler);
@@ -98,17 +100,20 @@ class WebSocketService {
       try {
         const raw = JSON.parse(message.body) as Record<string, unknown>;
         let event: DmRoomEvent;
+        // roomId는 이벤트 payload에 포함됨. 누락 시 구독한 방 id로 폴백.
+        const evtRoomId = typeof raw.roomId === 'number' ? raw.roomId : roomId;
         if (raw.type === 'READ') {
           event = {
             type: 'READ',
+            roomId: evtRoomId,
             readerNickname: raw.readerNickname as string,
             readAt: raw.readAt as string,
           };
         } else if (raw.type === 'MESSAGE') {
-          event = { type: 'MESSAGE', message: raw.message as DmMessage };
+          event = { type: 'MESSAGE', roomId: evtRoomId, message: raw.message as DmMessage };
         } else {
           // type 필드 없음 → raw가 DmMessage 자체 (레거시 폴백)
-          event = { type: 'MESSAGE', message: raw as unknown as DmMessage };
+          event = { type: 'MESSAGE', roomId: evtRoomId, message: raw as unknown as DmMessage };
         }
         handler(event);
       } catch {
