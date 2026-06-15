@@ -86,6 +86,40 @@ describe('wsService', () => {
     expect(notificationSub).not.toMatch(/\/sub\/notifications\/me$/);
   });
 
+  it('연결 후 사용자별 DM 방 채널을 /user/sub/dm/rooms 로 구독한다 (버그②)', () => {
+    wsService.connect('테스터');
+    const client = clientInstances[0];
+    client.config.onConnect();
+
+    const subscribedDestinations = client.subscribe.mock.calls.map((call) => call[0] as string);
+    expect(subscribedDestinations).toContain('/user/sub/dm/rooms');
+  });
+
+  it('dm-rooms 채널 메시지가 on("dm-rooms") 핸들러로 전달된다 (버그②)', () => {
+    wsService.connect('테스터');
+    const client = clientInstances[0];
+    client.config.onConnect();
+
+    const handler = vi.fn();
+    wsService.on('dm-rooms', handler);
+
+    const sub = client.subscribe.mock.calls.find((call) => call[0] === '/user/sub/dm/rooms');
+    expect(sub).toBeTruthy();
+    const stompCallback = sub![1] as (msg: { body: string }) => void;
+
+    const payload = {
+      roomId: 7,
+      otherUserNickname: '상대방',
+      otherUserProfileImageUrl: null,
+      lastMessage: '안녕',
+      lastMessageAt: '2026-06-11T10:00:00',
+      unreadCount: 1,
+    };
+    stompCallback({ body: JSON.stringify(payload) });
+
+    expect(handler).toHaveBeenCalledWith(payload);
+  });
+
   it('send 는 destination 과 JSON 직렬화된 body 로 publish 한다 (userId 없이)', () => {
     wsService.connect('테스터');
     const client = clientInstances[0];
@@ -175,12 +209,14 @@ describe('wsService', () => {
 
       const payload = {
         type: 'MESSAGE',
+        roomId: 1,
         message: { id: 1, senderNickname: '상대방', content: '안녕', readAt: null, createdAt: '2026-06-11T10:00:00Z' },
       };
       stompCallback({ body: JSON.stringify(payload) });
 
       expect(handler).toHaveBeenCalledWith({
         type: 'MESSAGE',
+        roomId: 1,
         message: payload.message,
       });
     });
@@ -198,11 +234,12 @@ describe('wsService', () => {
       );
       const stompCallback = dmSubCall![1] as (msg: { body: string }) => void;
 
-      const payload = { type: 'READ', readerNickname: '상대방', readAt: '2026-06-11T10:05:00Z' };
+      const payload = { type: 'READ', roomId: 1, readerNickname: '상대방', readAt: '2026-06-11T10:05:00Z' };
       stompCallback({ body: JSON.stringify(payload) });
 
       expect(handler).toHaveBeenCalledWith({
         type: 'READ',
+        roomId: 1,
         readerNickname: '상대방',
         readAt: '2026-06-11T10:05:00Z',
       });
@@ -221,12 +258,13 @@ describe('wsService', () => {
       );
       const stompCallback = dmSubCall![1] as (msg: { body: string }) => void;
 
-      // type 필드 없는 raw DmMessage (레거시 형식)
+      // type 필드 없는 raw DmMessage (레거시 형식). roomId 누락 시 구독한 방 id(1)로 폴백.
       const rawMsg = { id: 5, senderNickname: '상대방', content: '폴백', readAt: null, createdAt: '2026-06-11T10:00:00Z' };
       stompCallback({ body: JSON.stringify(rawMsg) });
 
       expect(handler).toHaveBeenCalledWith({
         type: 'MESSAGE',
+        roomId: 1,
         message: rawMsg,
       });
     });

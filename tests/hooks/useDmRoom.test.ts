@@ -281,6 +281,31 @@ describe('useDmRoom', () => {
     expect(result.current.messages[0].readAt).toBe(originalReadAt);
   });
 
+  it('READ 이벤트: 내 read 에코(readerNickname === 나)는 무시하고 내 메시지를 읽음 처리하지 않는다', async () => {
+    // 버그③로 수신 즉시 /pub/dm/read를 publish하므로 내 read 에코가 되돌아올 수 있다.
+    // 이때 내 미읽음 메시지가 잘못 "읽음" 처리되면 안 된다.
+    const myMsg = makeMsg({ id: 1, senderNickname: '나', readAt: null });
+    apiMock.get.mockResolvedValueOnce(makePageRes([myMsg]));
+    let capturedHandler: DmEventHandler | undefined;
+    wsMock.onDmRoom.mockImplementation((_roomId, handler) => {
+      capturedHandler = handler;
+      return () => {};
+    });
+
+    const { result } = renderHook(() =>
+      useDmRoom({ roomId: 1, userNickname: '나', onMessageSent: undefined, onUnread: undefined })
+    );
+    await waitFor(() => expect(result.current.messages).toHaveLength(1));
+
+    // 내 read 에코 도착 — readerNickname이 나
+    act(() => {
+      capturedHandler!({ type: 'READ', roomId: 1, readerNickname: '나', readAt: '2026-06-11T10:05:00.000Z' });
+    });
+
+    // 내 메시지는 여전히 미읽음(readAt=null) 유지
+    expect(result.current.messages[0].readAt).toBeNull();
+  });
+
   // ─── 무한스크롤 ──────────────────────────────────────────────────────────
 
   it('hasOlderMessages=true 일 때 loadOlderMessages 호출 시 이전 메시지 prepend', async () => {
@@ -459,10 +484,128 @@ describe('useDmRoom', () => {
     act(() => {
       capturedHandler!({
         type: 'MESSAGE',
+        roomId: 1,
         message: makeMsg({ id: 99, content: '에코', createdAt: '2026-06-11T10:01:00.000Z' }),
       });
     });
 
     expect(onMessageSent).toHaveBeenCalledWith(1, '에코', '2026-06-11T10:01:00.000Z');
+  });
+
+  // ─── [버그①] draft(roomId=null) 상태 ────────────────────────────────────────
+
+  it('draft(roomId=null) 상태에선 GET 메시지 로드와 onDmRoom 구독을 하지 않는다', () => {
+    const { result } = renderHook(() =>
+      useDmRoom({
+        roomId: null,
+        targetNickname: '상대방',
+        userNickname: '나',
+        onMessageSent: undefined,
+        onUnread: undefined,
+      })
+    );
+    expect(apiMock.get).not.toHaveBeenCalled();
+    expect(wsMock.onDmRoom).not.toHaveBeenCalled();
+    expect(result.current.messages).toHaveLength(0);
+  });
+
+  it('draft에서 sendMessage 시 roomId=null + targetNickname 포함 payload를 전송한다', () => {
+    const { result } = renderHook(() =>
+      useDmRoom({
+        roomId: null,
+        targetNickname: '상대방',
+        userNickname: '나',
+        onMessageSent: undefined,
+        onUnread: undefined,
+      })
+    );
+
+    act(() => result.current.sendMessage('첫 메시지'));
+
+    // 낙관적 버블 추가
+    expect(result.current.messages).toHaveLength(1);
+    expect(result.current.messages[0].status).toBe('sending');
+
+    expect(wsMock.send).toHaveBeenCalledWith('/pub/dm/send', {
+      roomId: null,
+      targetNickname: '상대방',
+      content: '첫 메시지',
+      imageUrl: null,
+      clientMessageId: 'mock-uuid-1',
+    });
+  });
+
+  it('실제 방(roomId 있음)에서 sendMessage 시 targetNickname=null로 전송한다', async () => {
+    apiMock.get.mockResolvedValueOnce(makePageRes([]));
+    const { result } = renderHook(() =>
+      useDmRoom({
+        roomId: 5,
+        targetNickname: null,
+        userNickname: '나',
+        onMessageSent: undefined,
+        onUnread: undefined,
+      })
+    );
+    await waitFor(() => expect(apiMock.get).toHaveBeenCalled());
+
+    act(() => result.current.sendMessage('일반 메시지'));
+
+    expect(wsMock.send).toHaveBeenCalledWith('/pub/dm/send', {
+      roomId: 5,
+      targetNickname: null,
+      content: '일반 메시지',
+      imageUrl: null,
+      clientMessageId: 'mock-uuid-1',
+    });
+  });
+
+  // ─── [버그③] 수신 즉시 read publish ─────────────────────────────────────────
+
+  it('상대가 보낸 메시지를 실시간 수신하면 /pub/dm/read를 즉시 publish한다', async () => {
+    apiMock.get.mockResolvedValueOnce(makePageRes([]));
+    let capturedHandler: DmEventHandler | undefined;
+    wsMock.onDmRoom.mockImplementation((_roomId, handler) => {
+      capturedHandler = handler;
+      return () => {};
+    });
+
+    renderHook(() =>
+      useDmRoom({ roomId: 3, userNickname: '나', onMessageSent: undefined, onUnread: undefined })
+    );
+    await waitFor(() => expect(apiMock.get).toHaveBeenCalled());
+
+    act(() => {
+      capturedHandler!({
+        type: 'MESSAGE',
+        roomId: 3,
+        message: makeMsg({ id: 50, senderNickname: '상대방', content: '안녕' }),
+      });
+    });
+
+    expect(wsMock.send).toHaveBeenCalledWith('/pub/dm/read', { roomId: 3 });
+  });
+
+  it('내가 보낸 메시지의 에코 수신 시에는 /pub/dm/read를 publish하지 않는다', async () => {
+    apiMock.get.mockResolvedValueOnce(makePageRes([]));
+    let capturedHandler: DmEventHandler | undefined;
+    wsMock.onDmRoom.mockImplementation((_roomId, handler) => {
+      capturedHandler = handler;
+      return () => {};
+    });
+
+    renderHook(() =>
+      useDmRoom({ roomId: 3, userNickname: '나', onMessageSent: undefined, onUnread: undefined })
+    );
+    await waitFor(() => expect(apiMock.get).toHaveBeenCalled());
+
+    act(() => {
+      capturedHandler!({
+        type: 'MESSAGE',
+        roomId: 3,
+        message: makeMsg({ id: 51, senderNickname: '나', content: '내 메시지' }),
+      });
+    });
+
+    expect(wsMock.send).not.toHaveBeenCalledWith('/pub/dm/read', { roomId: 3 });
   });
 });

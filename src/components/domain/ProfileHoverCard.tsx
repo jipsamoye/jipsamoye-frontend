@@ -16,7 +16,7 @@ import {
   safePolygon,
 } from '@floating-ui/react';
 import { api } from '@/lib/api';
-import { User } from '@/types/api';
+import { User, DmRoomResolve } from '@/types/api';
 import { useAuthContext } from '@/components/providers/AuthProvider';
 import ProfileHoverCardContent from '@/components/domain/ProfileHoverCardContent';
 
@@ -109,11 +109,17 @@ export default function ProfileHoverCard({ nickname, children }: ProfileHoverCar
     e.preventDefault();
     e.stopPropagation();
     if (!currentUser) return;
+    // resolve: 메시지가 오간 기존 방이면 roomId로 이동, 없으면 방을 만들지 않고
+    // draft 대화로 연다(?draft=닉네임). 첫 메시지 전송 시 백엔드가 방을 생성(버그①).
     try {
-      const res = await api.post<{ roomId: number }>(
+      const res = await api.post<DmRoomResolve>(
         `/api/dm/rooms?targetNickname=${encodeURIComponent(nickname)}`
       );
-      router.push(`/dm?room=${res.data.roomId}`);
+      if (res.data?.roomId != null) {
+        router.push(`/dm?room=${res.data.roomId}`);
+      } else {
+        router.push(`/dm?draft=${encodeURIComponent(nickname)}`);
+      }
     } catch {
       router.push('/dm');
     }
