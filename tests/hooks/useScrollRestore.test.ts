@@ -371,6 +371,44 @@ describe('useScrollRestore', () => {
     });
   });
 
+  describe('[repro] 깊은 스크롤 복원 — 레이아웃이 늦게 자라도 목표 위치까지 도달', () => {
+    // 실제 버그(운영/모바일): 복원된 목록이 커밋·레이아웃되기 전에 scrollTo가 실행되면
+    // document 높이가 아직 짧아 scrollTo가 클램프된다 → "보던 화면보다 더 위"로 떨어짐.
+    // 깊을수록 심하고 위쪽은 멀쩡 = 전형적 클램프. 목표에 도달할 때까지 재시도해야 한다.
+    it('초기엔 클램프되지만 문서가 자란 뒤 저장된 깊은 scrollY까지 도달한다', async () => {
+      const snapshot: TestSnapshot = { items: ['deep'], page: 5 };
+      sessionStorageStore[`${KEY_PREFIX}deep`] = JSON.stringify({ data: snapshot, scrollY: 3000 });
+      triggerPopstate();
+
+      // 레이아웃 시뮬레이션: 처음엔 maxScroll=500(클램프), scrollTo 5회 이후 5000으로 성장
+      let maxScroll = 500;
+      let curY = 0;
+      let calls = 0;
+      scrollToMock.mockImplementation((_x: number, y: number) => {
+        calls += 1;
+        if (calls >= 5) maxScroll = 5000;
+        curY = Math.min(y, maxScroll);
+      });
+      Object.defineProperty(window, 'scrollY', { get: () => curY, configurable: true });
+
+      await act(async () => {
+        renderHook(() =>
+          useScrollRestore<TestSnapshot>('deep', {
+            capture: vi.fn(() => snapshot),
+            restore: vi.fn(),
+          })
+        );
+      });
+
+      // 단발 scrollTo였다면 500에 클램프된 채 끝났을 것. 재시도로 최종 3000 도달해야 함.
+      expect(curY).toBe(3000);
+
+      // cleanup
+      Object.defineProperty(window, 'scrollY', { value: 0, writable: true, configurable: true });
+      scrollToMock.mockReset();
+    });
+  });
+
   describe('[major4] validate 콜백', () => {
     it('validate가 실패하면 복원하지 않는다', async () => {
       // data 구조가 잘못된 스냅샷 (items가 배열이 아님)

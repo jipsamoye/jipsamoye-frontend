@@ -146,18 +146,28 @@ export function useScrollRestore<T>(
     restoreRef.current(snap.data);
     // 복원된 scrollY를 즉시 ref에 반영 (복원 직후 빠른 이탈 대비)
     scrollYRef.current = snap.scrollY;
-    // 렌더 반영 후 스크롤 복원.
-    // restore setState가 passive effect이므로 단일 rAF이 콘텐츠 커밋 전에
-    // 실행되어 scrollTo가 클램프될 수 있다 → 더블 rAF으로 확실히 레이아웃 후 실행.
-    let raf2 = 0;
-    const raf1 = requestAnimationFrame(() => {
-      raf2 = requestAnimationFrame(() => {
-        window.scrollTo(0, snap.scrollY);
-      });
-    });
+
+    // 스크롤 복원: 고정 더블 rAF은 모바일 등 커밋·레이아웃이 느린 환경에서 복원된 목록이 아직
+    // 안 자란 채 scrollTo가 실행돼 **클램프**된다(깊이 내려갈수록 "보던 화면보다 더 위"로 떨어짐).
+    // → 목표 위치에 도달할 때까지(또는 최대 시도 횟수까지) 프레임마다 재시도해 자가 보정한다.
+    //   도달하면 즉시 종료하므로 빠른 환경에선 1~2프레임으로 끝난다.
+    const target = snap.scrollY;
+    const MAX_ATTEMPTS = 90; // 약 1.5초(@60fps). 느린 기기일수록 더 긴 시간 창을 가진다.
+    let attempts = 0;
+    let rafId = 0;
+    let cancelled = false;
+    const settle = () => {
+      if (cancelled) return;
+      window.scrollTo(0, target);
+      attempts += 1;
+      // 목표 도달(클램프 없이) 또는 시도 소진 시 종료. 미도달이면 다음 프레임 재시도.
+      if (Math.abs(window.scrollY - target) <= 2 || attempts >= MAX_ATTEMPTS) return;
+      rafId = requestAnimationFrame(settle);
+    };
+    rafId = requestAnimationFrame(settle);
     return () => {
-      cancelAnimationFrame(raf1);
-      cancelAnimationFrame(raf2);
+      cancelled = true;
+      cancelAnimationFrame(rafId);
     };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
