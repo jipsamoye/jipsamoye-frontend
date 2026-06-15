@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useCallback, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { api } from '@/lib/api';
-import { PetPostListItem, PageResponse, BoardListItem } from '@/types/api';
+import { PetPostListItem, PageResponse, CursorResponse, BoardListItem } from '@/types/api';
 import { dummyPopularPosts, dummyLatestPosts } from '@/lib/dummyData';
 import { timeAgoOrDate } from '@/lib/utils';
 import PopularSlider from '@/components/domain/PopularSlider';
@@ -16,7 +16,7 @@ interface HomeSnapshot {
   popularPosts: PetPostListItem[];
   boardPosts: BoardListItem[];
   latestPosts: PetPostListItem[];
-  page: number;
+  cursor: number | null;
   hasNext: boolean;
 }
 
@@ -27,7 +27,7 @@ function isHomeSnapshot(data: unknown): data is HomeSnapshot {
     Array.isArray(d.popularPosts) &&
     Array.isArray(d.boardPosts) &&
     Array.isArray(d.latestPosts) &&
-    typeof d.page === 'number' &&
+    (typeof d.cursor === 'number' || d.cursor === null) &&
     typeof d.hasNext === 'boolean'
   );
 }
@@ -41,7 +41,7 @@ function HomeContent() {
   const [latestPosts, setLatestPosts] = useState<PetPostListItem[]>([]);
   const [initialLatestLoading, setInitialLatestLoading] = useState(true);
   const [boardPosts, setBoardPosts] = useState<BoardListItem[]>([]);
-  const pageRef = useRef(0);
+  const cursorRef = useRef<number | null>(null);
   const [hasNext, setHasNext] = useState(true);
   const [loading, setLoading] = useState(false);
   const loadingRef = useRef(false);
@@ -68,7 +68,7 @@ function HomeContent() {
         popularPosts: popularPostsRef.current,
         boardPosts: boardPostsRef.current,
         latestPosts: latestPostsRef.current,
-        page: pageRef.current,
+        cursor: cursorRef.current,
         hasNext: hasNextRef.current,
       };
     },
@@ -76,7 +76,7 @@ function HomeContent() {
       setPopularPosts(snap.popularPosts);
       setBoardPosts(snap.boardPosts);
       setLatestPosts(snap.latestPosts);
-      pageRef.current = snap.page;
+      cursorRef.current = snap.cursor;
       setHasNext(snap.hasNext);
       setPopularLoading(false);
       setInitialLatestLoading(false);
@@ -101,14 +101,18 @@ function HomeContent() {
     loadingRef.current = true;
     setLoading(true);
     try {
-      const res = await api.get<PageResponse<PetPostListItem>>(`/api/posts?page=${pageRef.current}&size=20`);
+      const url =
+        cursorRef.current == null
+          ? '/api/posts?size=20'
+          : `/api/posts?cursor=${cursorRef.current}&size=20`;
+      const res = await api.get<CursorResponse<PetPostListItem>>(url);
       setLatestPosts((prev) => {
         const existingIds = new Set(prev.map((p) => p.id));
         const newPosts = res.data.content.filter((p) => !existingIds.has(p.id));
         return [...prev, ...newPosts];
       });
       setHasNext(res.data.hasNext);
-      pageRef.current += 1;
+      cursorRef.current = res.data.nextCursor;
     } catch {
       if (latestPosts.length === 0) {
         setLatestPosts(dummyLatestPosts);

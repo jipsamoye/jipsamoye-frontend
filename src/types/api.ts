@@ -20,6 +20,14 @@ export interface PageResponse<T> extends SliceResponse<T> {
   totalElements: number;
 }
 
+// 커서 페이징 응답 (무한스크롤 — 마지막 id 기준 커서)
+export interface CursorResponse<T> {
+  content: T[];
+  size: number;
+  hasNext: boolean;
+  nextCursor: number | null;
+}
+
 // 소셜 링크
 export interface SocialLink {
   type: 'INSTAGRAM' | 'YOUTUBE';

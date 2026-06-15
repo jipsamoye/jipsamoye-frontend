@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { api } from '@/lib/api';
-import { PetPost, PetPostListItem, PageResponse, SliceResponse } from '@/types/api';
+import { PetPost, PetPostListItem, CursorResponse, SliceResponse } from '@/types/api';
 
 export function usePopularPosts() {
   const [posts, setPosts] = useState<PetPostListItem[]>([]);
@@ -20,7 +20,7 @@ export function usePopularPosts() {
 
 export function useLatestPosts() {
   const [posts, setPosts] = useState<PetPostListItem[]>([]);
-  const [page, setPage] = useState(0);
+  const cursorRef = useRef<number | null>(null);
   const [hasNext, setHasNext] = useState(true);
   const [loading, setLoading] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
@@ -29,17 +29,25 @@ export function useLatestPosts() {
     if (loading || !hasNext) return;
     setLoading(true);
     try {
-      const res = await api.get<PageResponse<PetPostListItem>>(`/api/posts?page=${page}&size=20`);
-      setPosts((prev) => [...prev, ...res.data.content]);
+      const url =
+        cursorRef.current == null
+          ? '/api/posts?size=20'
+          : `/api/posts?cursor=${cursorRef.current}&size=20`;
+      const res = await api.get<CursorResponse<PetPostListItem>>(url);
+      setPosts((prev) => {
+        const existingIds = new Set(prev.map((p) => p.id));
+        const newPosts = res.data.content.filter((p) => !existingIds.has(p.id));
+        return [...prev, ...newPosts];
+      });
       setHasNext(res.data.hasNext);
-      setPage((prev) => prev + 1);
+      cursorRef.current = res.data.nextCursor;
     } catch {
       setHasNext(false);
     } finally {
       setLoading(false);
       setInitialLoading(false);
     }
-  }, [page, loading, hasNext]);
+  }, [loading, hasNext]);
 
   useEffect(() => {
     loadMore();
