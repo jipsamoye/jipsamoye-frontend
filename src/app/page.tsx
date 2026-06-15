@@ -91,7 +91,7 @@ function HomeContent() {
       .catch(() => setPopularPosts(dummyPopularPosts))
       .finally(() => setPopularLoading(false));
 
-    api.get<PageResponse<BoardListItem>>('/api/boards?page=0&size=5', { silent: true })
+    api.get<PageResponse<BoardListItem>>('/api/boards?page=0&size=3', { silent: true })
       .then((res) => setBoardPosts(res.data.content))
       .catch(() => {});
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
@@ -181,7 +181,7 @@ function HomeContent() {
       <section>
         <div className="flex items-center justify-between mb-5">
           <h2 className="text-2xl font-bold text-gray-900">이주의 자랑</h2>
-          <Link href="/ranking" className="text-sm text-gray-400 hover:text-gray-600 transition-colors">
+          <Link href="/ranking" className="text-base text-gray-900 hover:text-gray-600 transition-colors">
             더보기
           </Link>
         </div>
@@ -205,7 +205,7 @@ function HomeContent() {
           <div>
             <div className="flex items-center justify-between mb-5">
               <h2 className="text-2xl font-bold text-gray-900">자유게시판 최신 글</h2>
-              <Link href="/board" className="text-sm text-gray-400 hover:text-gray-600 transition-colors">
+              <Link href="/board" className="text-base text-gray-900 hover:text-gray-600 transition-colors">
                 더보기
               </Link>
             </div>
@@ -241,12 +241,14 @@ function HomeContent() {
               <h2 className="text-2xl font-bold text-gray-900">공지사항</h2>
             </div>
             <div className="space-y-0">
-              <div className="flex items-center justify-between gap-3 py-2.5 border-b border-gray-100">
-                <span className="text-sm font-semibold text-gray-900 truncate">집사모여 서비스 오픈 안내</span>
+              <div className="flex items-center gap-2 py-2.5 border-b border-gray-100">
+                <span className="flex-shrink-0 text-xs font-bold px-2.5 py-1 rounded-lg bg-gray-900 text-white">공지</span>
+                <span className="text-sm font-semibold text-gray-900 truncate flex-1">집사모여 서비스 오픈 안내</span>
                 <span className="text-xs text-gray-400 flex-shrink-0">04. 14.</span>
               </div>
-              <div className="flex items-center justify-between gap-3 py-2.5">
-                <span className="text-sm font-semibold text-gray-900 truncate">커뮤니티 이용 규칙 안내</span>
+              <div className="flex items-center gap-2 py-2.5">
+                <span className="flex-shrink-0 text-xs font-bold px-2.5 py-1 rounded-lg bg-gray-900 text-white">공지</span>
+                <span className="text-sm font-semibold text-gray-900 truncate flex-1">커뮤니티 이용 규칙 안내</span>
                 <span className="text-xs text-gray-400 flex-shrink-0">04. 14.</span>
               </div>
             </div>
