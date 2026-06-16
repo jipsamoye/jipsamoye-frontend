@@ -212,7 +212,11 @@ export default function ProfilePage({ params }: { params: Promise<{ nickname: st
                 {/* 메시지 버튼: 본인이 아니면 구독 여부와 무관하게 항상 노출 */}
                 <button
                   onClick={() => {
-                    if (!user || !profile) return;
+                    if (!user) {
+                      showLoginRequiredToast('message');
+                      return;
+                    }
+                    if (!profile) return;
                     // 기존 방이면 roomId로, 없으면 draft 대화로 연다.
                     // 프로필 이미지를 함께 넘겨 draft 대화창 헤더 아바타를 즉시 표시.
                     void openDm(profile.nickname, profile.profileImageUrl);

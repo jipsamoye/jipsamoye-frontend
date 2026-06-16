@@ -4,11 +4,12 @@ import { Suspense } from 'react';
 import type { User } from '@/types/api';
 
 // ─── 가변 모킹 값 ─────────────────────────────────────────────────────────────
-const { apiMock, authMock, openDmMock, pushMock } = vi.hoisted(() => ({
+const { apiMock, authMock, openDmMock, pushMock, loginToastMock } = vi.hoisted(() => ({
   apiMock: { get: vi.fn(), post: vi.fn(), patch: vi.fn(), delete: vi.fn() },
   authMock: { user: null as User | null, updateUser: vi.fn() },
   openDmMock: vi.fn(),
   pushMock: vi.fn(),
+  loginToastMock: vi.fn(),
 }));
 
 vi.mock('@/lib/api', () => ({ api: apiMock }));
@@ -17,6 +18,9 @@ vi.mock('@/components/providers/AuthProvider', () => ({
 }));
 vi.mock('@/hooks/useOpenDm', () => ({
   useOpenDm: () => openDmMock,
+}));
+vi.mock('@/components/common/Toast', () => ({
+  showLoginRequiredToast: loginToastMock,
 }));
 vi.mock('next/navigation', () => ({
   useRouter: () => ({ push: pushMock }),
@@ -78,6 +82,7 @@ describe('ProfilePage — 메시지 버튼 (DM 개방 후속)', () => {
     apiMock.get.mockReset();
     openDmMock.mockReset();
     pushMock.mockReset();
+    loginToastMock.mockReset();
     authMock.user = null;
   });
 
@@ -130,5 +135,18 @@ describe('ProfilePage — 메시지 버튼 (DM 개방 후속)', () => {
     const btn = await screen.findByText('💬 메시지');
     btn.click();
     expect(openDmMock).toHaveBeenCalledWith('뽀삐', 'https://img/x.webp');
+    expect(loginToastMock).not.toHaveBeenCalled();
+  });
+
+  it('비로그인 상태에서 메시지 버튼 클릭 시 로그인 유도 토스트만 띄우고 openDm은 호출하지 않는다', async () => {
+    authMock.user = null;
+    mockProfile(makeProfile({ isFollowing: false }));
+
+    await renderProfile();
+
+    const btn = await screen.findByText('💬 메시지');
+    btn.click();
+    expect(loginToastMock).toHaveBeenCalledWith('message');
+    expect(openDmMock).not.toHaveBeenCalled();
   });
 });
