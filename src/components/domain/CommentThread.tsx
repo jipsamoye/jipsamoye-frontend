@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, Fragment } from 'react';
 import Link from 'next/link';
 import { User } from '@/types/api';
 import { BaseThreadedComment } from '@/hooks/useThreadedComments';
@@ -171,6 +171,37 @@ export default function CommentThread<TComment extends RenderableComment>({
     return <Avatar src={src} size={size} />;
   };
 
+  const renderReplyInput = (withIndent: boolean) => {
+    if (!user || !replyingTo) return null;
+    return (
+      <div className={`${withIndent ? 'ml-12 ' : ''}mt-3 flex gap-3`}>
+        <div className="hidden md:block flex-shrink-0">
+          <Avatar src={user.profileImageUrl} size="xs" />
+        </div>
+        <div className="flex-1 min-w-0 flex flex-col md:flex-row gap-2">
+          <div className="flex-1 min-w-0 flex items-center gap-1 px-4 py-2 rounded-xl border border-gray-200 bg-transparent focus-within:ring-2 focus-within:ring-amber-300 transition-all duration-200">
+            <span className="text-xs text-amber-500 font-medium whitespace-nowrap flex-shrink-0 truncate max-w-[6rem]">
+              @{replyingTo.targetNickname}
+            </span>
+            <input
+              value={replyText}
+              onChange={(e) => setReplyText(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && !e.nativeEvent.isComposing && handleAddReply()}
+              placeholder="답글을 입력하세요"
+              {...(commentMaxLength !== undefined ? { maxLength: commentMaxLength } : {})}
+              className="flex-1 min-w-0 bg-transparent text-sm focus:outline-none"
+              autoFocus
+            />
+          </div>
+          <div className="flex gap-2 justify-end flex-shrink-0">
+            <Button size="sm" onClick={handleAddReply}>등록</Button>
+            <Button variant="ghost" size="sm" onClick={() => setReplyingTo(null)}>취소</Button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <>
       {/* 댓글 입력 */}
@@ -229,7 +260,6 @@ export default function CommentThread<TComment extends RenderableComment>({
           const replies = (comment.replies ?? []) as RenderableComment[];
           const moreCount = comment.replyCount - replies.length;
           const canActOnParent = !comment.isMasked && user?.nickname === comment.nickname;
-          const showReplyInputForThisRoot = replyingTo?.rootId === comment.id;
 
           return (
             <div key={comment.id} id={`comment-${comment.id}`}>
@@ -302,70 +332,77 @@ export default function CommentThread<TComment extends RenderableComment>({
                 </div>
               </div>
 
+              {/* 부모 댓글에 답글 → 부모 바로 아래 (답글 목록 위) */}
+              {replyingTo?.parentId === comment.id && renderReplyInput(true)}
+
               {/* 답글 목록 */}
               {replies.length > 0 && (
                 <div className="ml-12 flex flex-col">
                   {replies.map((reply) => {
                     const canActOnReply = user?.nickname === reply.nickname && !reply.isMasked;
                     return (
-                      <div key={reply.id} id={`comment-${reply.id}`} className="flex gap-3 py-3 border-b border-gray-100">
-                        <Link href={`/users/${reply.nickname}`}>
-                          <Avatar src={reply.profileImageUrl} size="md" />
-                        </Link>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <Link href={`/users/${reply.nickname}`} className="text-sm font-semibold text-gray-700 hover:underline">
-                              {reply.nickname}
-                            </Link>
-                            {!reply.isMasked && <HeartBadge count={reply.authorTotalLikeCount} />}
+                      <Fragment key={reply.id}>
+                        <div id={`comment-${reply.id}`} className="flex gap-3 py-3 border-b border-gray-100">
+                          <Link href={`/users/${reply.nickname}`}>
+                            <Avatar src={reply.profileImageUrl} size="md" />
+                          </Link>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <Link href={`/users/${reply.nickname}`} className="text-sm font-semibold text-gray-700 hover:underline">
+                                {reply.nickname}
+                              </Link>
+                              {!reply.isMasked && <HeartBadge count={reply.authorTotalLikeCount} />}
+                            </div>
+                            {editingId === reply.id ? (
+                              <div className="flex gap-2 mt-1">
+                                <input
+                                  value={editText}
+                                  onChange={(e) => setEditText(e.target.value)}
+                                  {...(commentMaxLength !== undefined ? { maxLength: commentMaxLength } : {})}
+                                  className="flex-1 px-3 py-1 rounded border border-gray-200 bg-transparent text-sm focus:outline-none"
+                                />
+                                <Button size="sm" onClick={() => handleEdit(reply.id)}>저장</Button>
+                                <Button variant="ghost" size="sm" onClick={() => setEditingId(null)}>취소</Button>
+                              </div>
+                            ) : (
+                              <>
+                                {renderContent(reply, true)}
+                                <div className="text-xs text-gray-400 mt-1">{formatDateTime(reply.createdAt)}</div>
+                              </>
+                            )}
+                            {!reply.isMasked && (
+                              <div className="flex items-center gap-3 mt-1">
+                                {user && editingId !== reply.id && user.nickname !== reply.nickname && (
+                                  <button
+                                    onClick={() => startReply(comment.id, reply.id, reply.nickname)}
+                                    className="text-xs text-gray-400 hover:text-amber-500 transition-all duration-200"
+                                  >
+                                    답글
+                                  </button>
+                                )}
+                                {canActOnReply && editingId !== reply.id && (
+                                  <>
+                                    <button
+                                      onClick={() => { setEditingId(reply.id); setEditText(reply.content ?? ''); }}
+                                      className="text-xs text-gray-400 hover:text-gray-600"
+                                    >
+                                      수정
+                                    </button>
+                                    <button
+                                      onClick={() => handleDelete(reply.id)}
+                                      className="text-xs text-gray-400 hover:text-red-500"
+                                    >
+                                      삭제
+                                    </button>
+                                  </>
+                                )}
+                              </div>
+                            )}
                           </div>
-                          {editingId === reply.id ? (
-                            <div className="flex gap-2 mt-1">
-                              <input
-                                value={editText}
-                                onChange={(e) => setEditText(e.target.value)}
-                                {...(commentMaxLength !== undefined ? { maxLength: commentMaxLength } : {})}
-                                className="flex-1 px-3 py-1 rounded border border-gray-200 bg-transparent text-sm focus:outline-none"
-                              />
-                              <Button size="sm" onClick={() => handleEdit(reply.id)}>저장</Button>
-                              <Button variant="ghost" size="sm" onClick={() => setEditingId(null)}>취소</Button>
-                            </div>
-                          ) : (
-                            <>
-                              {renderContent(reply, true)}
-                              <div className="text-xs text-gray-400 mt-1">{formatDateTime(reply.createdAt)}</div>
-                            </>
-                          )}
-                          {!reply.isMasked && (
-                            <div className="flex items-center gap-3 mt-1">
-                              {user && editingId !== reply.id && user.nickname !== reply.nickname && (
-                                <button
-                                  onClick={() => startReply(comment.id, reply.id, reply.nickname)}
-                                  className="text-xs text-gray-400 hover:text-amber-500 transition-all duration-200"
-                                >
-                                  답글
-                                </button>
-                              )}
-                              {canActOnReply && editingId !== reply.id && (
-                                <>
-                                  <button
-                                    onClick={() => { setEditingId(reply.id); setEditText(reply.content ?? ''); }}
-                                    className="text-xs text-gray-400 hover:text-gray-600"
-                                  >
-                                    수정
-                                  </button>
-                                  <button
-                                    onClick={() => handleDelete(reply.id)}
-                                    className="text-xs text-gray-400 hover:text-red-500"
-                                  >
-                                    삭제
-                                  </button>
-                                </>
-                              )}
-                            </div>
-                          )}
                         </div>
-                      </div>
+                        {/* 답글에 답글 → 그 답글 바로 아래 (interleave) */}
+                        {replyingTo?.parentId === reply.id && renderReplyInput(false)}
+                      </Fragment>
                     );
                   })}
                 </div>
@@ -383,34 +420,6 @@ export default function CommentThread<TComment extends RenderableComment>({
                 </div>
               )}
 
-              {/* 답글 입력창 */}
-              {showReplyInputForThisRoot && user && (
-                <div className="ml-12 mt-3 flex gap-3">
-                  <div className="hidden md:block flex-shrink-0">
-                    <Avatar src={user.profileImageUrl} size="xs" />
-                  </div>
-                  <div className="flex-1 min-w-0 flex flex-col md:flex-row gap-2">
-                    <div className="flex-1 min-w-0 flex items-center gap-1 px-4 py-2 rounded-xl border border-gray-200 bg-transparent focus-within:ring-2 focus-within:ring-amber-300 transition-all duration-200">
-                      <span className="text-xs text-amber-500 font-medium whitespace-nowrap flex-shrink-0 truncate max-w-[6rem]">
-                        @{replyingTo!.targetNickname}
-                      </span>
-                      <input
-                        value={replyText}
-                        onChange={(e) => setReplyText(e.target.value)}
-                        onKeyDown={(e) => e.key === 'Enter' && !e.nativeEvent.isComposing && handleAddReply()}
-                        placeholder="답글을 입력하세요"
-                        {...(commentMaxLength !== undefined ? { maxLength: commentMaxLength } : {})}
-                        className="flex-1 min-w-0 bg-transparent text-sm focus:outline-none"
-                        autoFocus
-                      />
-                    </div>
-                    <div className="flex gap-2 justify-end flex-shrink-0">
-                      <Button size="sm" onClick={handleAddReply}>등록</Button>
-                      <Button variant="ghost" size="sm" onClick={() => setReplyingTo(null)}>취소</Button>
-                    </div>
-                  </div>
-                </div>
-              )}
             </div>
           );
         })}

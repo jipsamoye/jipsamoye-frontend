@@ -364,4 +364,123 @@ describe('CommentSection', () => {
     const replyForm = input.closest('.ml-12') as HTMLElement;
     expect(replyForm.querySelector('div.hidden.md\\:block')).toBeTruthy();
   });
+
+  // ── 답글 입력창이 대상 댓글 바로 아래에 렌더된다 ─────────────────────────────
+
+  it('부모 댓글에 답글 → 입력창이 부모 댓글 바로 아래(첫 답글 앞)에 렌더된다', () => {
+    setupHook({
+      comments: [
+        makeComment({
+          id: 1,
+          nickname: '집사A',
+          replyCount: 2,
+          replies: [
+            makeComment({ id: 10, nickname: '집사B' }),
+            makeComment({ id: 11, nickname: '집사C' }),
+          ],
+        }),
+      ],
+    });
+    const { container, getByPlaceholderText } = render(
+      <CommentSection postId="42" user={makeUser('나')} />,
+    );
+    // 부모 댓글(#comment-1) 안의 '답글' 버튼 클릭
+    const parent = container.querySelector('#comment-1') as HTMLElement;
+    const replyBtn = Array.from(parent.querySelectorAll('button')).find((b) => b.textContent === '답글')!;
+    fireEvent.click(replyBtn);
+
+    const input = getByPlaceholderText('답글을 입력하세요');
+    const comment10 = container.querySelector('#comment-10') as HTMLElement;
+    // input 이 #comment-10 보다 앞에 위치해야 한다
+    expect(comment10.compareDocumentPosition(input) & Node.DOCUMENT_POSITION_PRECEDING).toBeTruthy();
+  });
+
+  it('특정 답글에 답글 → 입력창이 그 답글 바로 아래(다음 답글 앞)에 렌더된다', () => {
+    setupHook({
+      comments: [
+        makeComment({
+          id: 1,
+          nickname: '집사A',
+          replyCount: 2,
+          replies: [
+            makeComment({ id: 10, nickname: '집사B' }),
+            makeComment({ id: 11, nickname: '집사C' }),
+          ],
+        }),
+      ],
+    });
+    const { container, getByPlaceholderText } = render(
+      <CommentSection postId="42" user={makeUser('나')} />,
+    );
+    // #comment-10 안의 '답글' 버튼만 정확히 선택해 클릭
+    const reply10 = container.querySelector('#comment-10') as HTMLElement;
+    const replyBtn = Array.from(reply10.querySelectorAll('button')).find((b) => b.textContent === '답글')!;
+    fireEvent.click(replyBtn);
+
+    const input = getByPlaceholderText('답글을 입력하세요');
+    const comment10 = container.querySelector('#comment-10') as HTMLElement;
+    const comment11 = container.querySelector('#comment-11') as HTMLElement;
+    // input 은 #comment-10 뒤이고 #comment-11 앞이어야 한다
+    expect(comment10.compareDocumentPosition(input) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(comment11.compareDocumentPosition(input) & Node.DOCUMENT_POSITION_PRECEDING).toBeTruthy();
+  });
+
+  it('답글 대상 전환 시 입력창은 항상 1개만 존재한다', () => {
+    setupHook({
+      comments: [
+        makeComment({
+          id: 1,
+          nickname: '집사A',
+          replyCount: 2,
+          replies: [
+            makeComment({ id: 10, nickname: '집사B' }),
+            makeComment({ id: 11, nickname: '집사C' }),
+          ],
+        }),
+      ],
+    });
+    const { container, queryAllByPlaceholderText } = render(
+      <CommentSection postId="42" user={makeUser('나')} />,
+    );
+    // 첫 번째 대상: #comment-10
+    const reply10 = container.querySelector('#comment-10') as HTMLElement;
+    fireEvent.click(Array.from(reply10.querySelectorAll('button')).find((b) => b.textContent === '답글')!);
+    expect(queryAllByPlaceholderText('답글을 입력하세요')).toHaveLength(1);
+
+    // 다른 대상으로 전환: #comment-11
+    const reply11 = container.querySelector('#comment-11') as HTMLElement;
+    fireEvent.click(Array.from(reply11.querySelectorAll('button')).find((b) => b.textContent === '답글')!);
+    expect(queryAllByPlaceholderText('답글을 입력하세요')).toHaveLength(1);
+  });
+
+  it('부모 댓글에 답글 시 입력창 래퍼에 ml-12 적용 / 답글에 답글 시 미적용', () => {
+    setupHook({
+      comments: [
+        makeComment({
+          id: 1,
+          nickname: '집사A',
+          replyCount: 1,
+          replies: [makeComment({ id: 10, nickname: '집사B' })],
+        }),
+      ],
+    });
+    const { container, getByPlaceholderText } = render(
+      <CommentSection postId="42" user={makeUser('나')} />,
+    );
+
+    // 부모 댓글에 답글: 입력창이 ml-12 래퍼 안에 있어야 한다
+    const parent = container.querySelector('#comment-1') as HTMLElement;
+    fireEvent.click(Array.from(parent.querySelectorAll('button')).find((b) => b.textContent === '답글')!);
+    const parentInput = getByPlaceholderText('답글을 입력하세요');
+    expect(parentInput.closest('.ml-12')).toBeTruthy();
+
+    // 답글에 답글: 입력창 직속 래퍼에는 ml-12 가 없어야 한다 (답글 목록 ml-12 안에 있으므로)
+    const reply10 = container.querySelector('#comment-10') as HTMLElement;
+    fireEvent.click(Array.from(reply10.querySelectorAll('button')).find((b) => b.textContent === '답글')!);
+    const replyInput = getByPlaceholderText('답글을 입력하세요');
+    // 입력창의 최상위 래퍼(mt-3 flex gap-3)에 ml-12 가 없는지 확인
+    const replyWrapper = replyInput.closest('.mt-3.flex.gap-3') as HTMLElement;
+    expect(replyWrapper).not.toBeNull();
+    expect(replyWrapper.className).not.toContain('ml-12');
+  });
 });
