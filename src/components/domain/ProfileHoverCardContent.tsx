@@ -54,7 +54,7 @@ export default function ProfileHoverCardContent({
       <div className="rounded-xl border-2 border-amber-200 bg-white p-3 mb-3">
         <div className="grid grid-cols-3 gap-2 divide-x divide-amber-100">
           <div className="flex flex-col items-center gap-1 px-1">
-            <span className="text-[10px] text-gray-600">❤ 받은하트</span>
+            <span className="text-[10px] text-gray-600"><span className="text-amber-500">❤</span> 받은하트</span>
             <span className="text-xs font-bold text-amber-700 tabular-nums">
               {profile ? profile.totalLikeCount.toLocaleString() : '-'}
             </span>

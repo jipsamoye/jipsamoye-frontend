@@ -141,7 +141,7 @@ describe('ProfileHoverCardContent', () => {
         {...noopHandlers}
       />
     );
-    const heartValue = screen.getByText('❤ 받은하트').nextElementSibling;
+    const heartValue = screen.getByText('받은하트').nextElementSibling;
     expect(heartValue).toHaveTextContent('1,234');
   });
 
@@ -155,8 +155,21 @@ describe('ProfileHoverCardContent', () => {
         {...noopHandlers}
       />
     );
-    const heartValue = screen.getByText('❤ 받은하트').nextElementSibling;
+    const heartValue = screen.getByText('받은하트').nextElementSibling;
     expect(heartValue).toHaveTextContent('0');
+  });
+
+  it('받은하트 하트 아이콘에 amber-500 색상이 적용된다 (프로필 페이지와 통일)', () => {
+    render(
+      <ProfileHoverCardContent
+        nickname="뽀삐"
+        profile={baseUser()}
+        following={false}
+        isMe={false}
+        {...noopHandlers}
+      />
+    );
+    expect(screen.getByText('❤')).toHaveClass('text-amber-500');
   });
 
   it('ranking이 숫자이면 그대로 표시된다', () => {
