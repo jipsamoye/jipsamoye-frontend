@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { PetPostListItem } from '@/types/api';
 import Thumbnail from '@/components/common/Thumbnail';
 import Avatar from '@/components/common/Avatar';
+import HighlightedText from '@/components/common/HighlightedText';
 import ProfileHoverCard from '@/components/domain/ProfileHoverCard';
 
 const DEFAULT_SIZES =
@@ -15,9 +16,16 @@ interface PostCardProps {
   post: PetPostListItem;
   index?: number;
   sizes?: string;
+  /** 검색 결과에서 제목의 일치 구간을 메인 컬러로 강조할 키워드 */
+  highlightKeyword?: string;
 }
 
-export default function PostCard({ post, index = 99, sizes = DEFAULT_SIZES }: PostCardProps) {
+export default function PostCard({
+  post,
+  index = 99,
+  sizes = DEFAULT_SIZES,
+  highlightKeyword,
+}: PostCardProps) {
   const [loaded, setLoaded] = useState(false);
   const router = useRouter();
 
@@ -52,7 +60,13 @@ export default function PostCard({ post, index = 99, sizes = DEFAULT_SIZES }: Po
         </div>
         <div className="pt-3 pb-1">
           <div className="flex items-center gap-2 mb-2 min-w-0">
-            <p className="font-semibold text-sm text-gray-900 truncate min-w-0">{post.title}</p>
+            <p className="font-semibold text-sm text-gray-900 truncate min-w-0">
+              {highlightKeyword ? (
+                <HighlightedText text={post.title} keyword={highlightKeyword} />
+              ) : (
+                post.title
+              )}
+            </p>
             <div className="flex items-center gap-1.5 flex-shrink-0">
               <span className="text-xs text-amber-600 font-medium tabular-nums">❤ {post.likeCount}</span>
               <span className="text-xs text-gray-500 font-medium tabular-nums">💬 {post.commentCount}</span>

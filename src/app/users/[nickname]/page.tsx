@@ -209,19 +209,18 @@ export default function ProfilePage({ params }: { params: Promise<{ nickname: st
                 >
                   {isFollowing ? '구독 중' : '📣 구독하기'}
                 </button>
-                {isFollowing && (
-                  <button
-                    onClick={() => {
-                      if (!user || !profile) return;
-                      // 기존 방이면 roomId로, 없으면 draft 대화로 연다.
-                      // 프로필 이미지를 함께 넘겨 draft 대화창 헤더 아바타를 즉시 표시.
-                      void openDm(profile.nickname, profile.profileImageUrl);
-                    }}
-                    className="flex-1 md:flex-none px-5 py-2.5 rounded-xl bg-gray-900 text-white font-semibold text-sm hover:bg-gray-800 transition-colors flex items-center justify-center gap-1.5"
-                  >
-                    💬 메시지
-                  </button>
-                )}
+                {/* 메시지 버튼: 본인이 아니면 구독 여부와 무관하게 항상 노출 */}
+                <button
+                  onClick={() => {
+                    if (!user || !profile) return;
+                    // 기존 방이면 roomId로, 없으면 draft 대화로 연다.
+                    // 프로필 이미지를 함께 넘겨 draft 대화창 헤더 아바타를 즉시 표시.
+                    void openDm(profile.nickname, profile.profileImageUrl);
+                  }}
+                  className="flex-1 md:flex-none px-5 py-2.5 rounded-xl bg-gray-900 text-white font-semibold text-sm hover:bg-gray-800 transition-colors flex items-center justify-center gap-1.5"
+                >
+                  💬 메시지
+                </button>
               </>
             )}
           </div>

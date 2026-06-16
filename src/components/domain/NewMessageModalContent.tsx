@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Avatar from '@/components/common/Avatar';
+import HighlightedText from '@/components/common/HighlightedText';
 import { useUserSearch } from '@/hooks/useUserSearch';
 import type { FollowUser } from '@/types/api';
 
@@ -53,7 +54,6 @@ export default function NewMessageModalContent({
 
   // 표시할 리스트: 검색 중이면 검색 결과, 아니면 팔로잉 추천.
   const items: NewMessageTarget[] = isSearching ? results : followingList;
-  const showBadge = isSearching;
 
   return (
     <div className="flex flex-col gap-4">
@@ -90,9 +90,11 @@ export default function NewMessageModalContent({
           </p>
         ) : (
           items.map((item) => {
-            const following =
-              showBadge &&
-              (results.find((r) => r.nickname === item.nickname)?.isFollowing ?? false);
+            // 검색 모드: 결과의 isFollowing 분기.
+            // 추천 모드(빈 검색어): GET /following 전원이 내 팔로잉이므로 항상 배지 노출.
+            const following = isSearching
+              ? results.find((r) => r.nickname === item.nickname)?.isFollowing ?? false
+              : true;
             return (
               <div
                 key={item.nickname}
@@ -101,7 +103,11 @@ export default function NewMessageModalContent({
                 <div className="flex items-center gap-3 min-w-0">
                   <Avatar src={item.profileImageUrl} alt={item.nickname} size="md" />
                   <span className="text-sm font-medium text-gray-900 truncate">
-                    {item.nickname}
+                    {isSearching ? (
+                      <HighlightedText text={item.nickname} keyword={trimmed} />
+                    ) : (
+                      item.nickname
+                    )}
                   </span>
                   {following && (
                     <span className="flex-shrink-0 px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 text-[11px] font-medium">

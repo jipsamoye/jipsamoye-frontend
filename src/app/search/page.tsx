@@ -90,6 +90,7 @@ export default function SearchPage() {
               <PostCard
                 key={post.id}
                 post={post}
+                highlightKeyword={query}
                 sizes="(max-width: 767px) calc(100vw - 32px), (max-width: 1023px) calc(50vw - 24px), calc(25vw - 92px)"
               />
             ))}

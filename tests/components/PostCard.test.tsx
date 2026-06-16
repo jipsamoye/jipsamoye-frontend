@@ -108,4 +108,20 @@ describe('PostCard', () => {
     expect(container.textContent).toContain('🐾');
     expect(screen.queryByAltText('귀여운 냥이')).toBeNull();
   });
+
+  it('highlightKeyword 없으면 제목을 강조 없이 렌더한다', () => {
+    const { container } = render(<PostCard post={samplePost} />);
+    expect(container.textContent).toContain('귀여운 냥이');
+    expect(container.querySelectorAll('span.text-primary')).toHaveLength(0);
+  });
+
+  it('highlightKeyword가 있으면 제목의 일치 구간을 메인 컬러로 강조한다', () => {
+    const { container } = render(<PostCard post={samplePost} highlightKeyword="냥이" />);
+    // 제목 전체는 보존, "냥이"만 강조
+    expect(container.textContent).toContain('귀여운 냥이');
+    const highlighted = Array.from(
+      container.querySelectorAll('span.text-primary')
+    ).map((el) => el.textContent);
+    expect(highlighted).toEqual(['냥이']);
+  });
 });
