@@ -19,6 +19,7 @@ import { api } from '@/lib/api';
 import { User } from '@/types/api';
 import { useAuthContext } from '@/components/providers/AuthProvider';
 import { useOpenDm } from '@/hooks/useOpenDm';
+import { showLoginRequiredToast } from '@/components/common/Toast';
 import ProfileHoverCardContent from '@/components/domain/ProfileHoverCardContent';
 
 interface ProfileHoverCardProps {
@@ -110,7 +111,10 @@ export default function ProfileHoverCard({ nickname, children }: ProfileHoverCar
   const handleMessage = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (!currentUser) return;
+    if (!currentUser) {
+      showLoginRequiredToast('message');
+      return;
+    }
     // 기존 방이면 roomId로, 없으면 draft 대화(?draft=닉네임&img=)로 연다.
     // 프로필 이미지를 함께 넘겨 draft 대화창 헤더 아바타를 즉시 표시.
     void openDm(nickname, profile?.profileImageUrl ?? null);

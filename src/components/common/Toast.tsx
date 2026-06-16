@@ -22,13 +22,14 @@ export function showToast(text: string, options?: { variant?: ToastVariant }) {
   listeners.forEach((fn) => fn(msg));
 }
 
-export type LoginAction = 'like' | 'comment' | 'reply' | 'follow';
+export type LoginAction = 'like' | 'comment' | 'reply' | 'follow' | 'message';
 
 const LOGIN_ACTION_MESSAGES: Record<LoginAction, string> = {
   like: '로그인하고 좋아요를 눌러보세요',
   comment: '로그인하고 댓글을 남겨보세요',
   reply: '로그인하고 답글을 달아보세요',
   follow: '로그인하고 다른 집사를 팔로우해보세요',
+  message: '로그인하고 다른 집사에게 메시지를 보내보세요',
 };
 
 export function showLoginRequiredToast(action: LoginAction) {
