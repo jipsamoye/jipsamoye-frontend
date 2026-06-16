@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, beforeAll, vi } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import type { User } from '@/types/api';
 
 // jsdom은 matchMedia를 구현하지 않음 → hover-capable 감지 useEffect용 스텁.
@@ -121,6 +121,47 @@ describe('ProfileHoverCard — 메시지 버튼 로그인 가드', () => {
 
     fireEvent.click(screen.getByRole('button', { name: /메시지/ }));
     expect(openDmMock).toHaveBeenCalledWith('뽀삐', null);
+    expect(loginToastMock).not.toHaveBeenCalled();
+  });
+});
+
+describe('ProfileHoverCard — 구독하기 버튼 로그인 가드', () => {
+  beforeEach(() => {
+    apiMock.get.mockReset();
+    apiMock.post.mockReset();
+    openDmMock.mockReset();
+    pushMock.mockReset();
+    loginToastMock.mockReset();
+    authMock.user = null;
+    apiMock.get.mockResolvedValue(successRes(baseUser()));
+  });
+
+  it('비로그인 상태에서 구독하기 클릭 시 follow 토스트만 띄우고 follow API는 호출하지 않는다', () => {
+    authMock.user = null;
+    render(
+      <ProfileHoverCard nickname="뽀삐">
+        <span>트리거</span>
+      </ProfileHoverCard>
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: /구독하기/ }));
+    expect(loginToastMock).toHaveBeenCalledWith('follow');
+    expect(apiMock.post).not.toHaveBeenCalled();
+  });
+
+  it('로그인 상태에서 구독하기 클릭 시 follow API를 호출하고 토스트는 띄우지 않는다', async () => {
+    authMock.user = baseUser({ nickname: '내계정' });
+    apiMock.post.mockResolvedValue(successRes(true));
+    render(
+      <ProfileHoverCard nickname="뽀삐">
+        <span>트리거</span>
+      </ProfileHoverCard>
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: /구독하기/ }));
+    await waitFor(() =>
+      expect(apiMock.post).toHaveBeenCalledWith('/api/users/%EB%BD%80%EC%82%90/follow')
+    );
     expect(loginToastMock).not.toHaveBeenCalled();
   });
 });

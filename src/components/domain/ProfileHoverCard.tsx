@@ -98,6 +98,10 @@ export default function ProfileHoverCard({ nickname, children }: ProfileHoverCar
   const handleFollow = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    if (!currentUser) {
+      showLoginRequiredToast('follow');
+      return;
+    }
     try {
       const res = await api.post<boolean>(`/api/users/${encodeURIComponent(nickname)}/follow`);
       setFollowing(res.data);
