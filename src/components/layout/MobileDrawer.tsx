@@ -5,11 +5,13 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { HomeIcon, TrophyIcon, NoteIcon, OpenChatIcon, PaperAirplaneIcon } from './icons';
 import { useNavigationGuard } from '@/components/providers/NavigationGuard';
+import { useAuthContext } from '@/components/providers/AuthProvider';
 
 interface NavItem {
   label: string;
   href: string;
   icon: (filled: boolean) => React.ReactNode;
+  requiresAuth?: boolean;
 }
 
 const navItems: NavItem[] = [
@@ -17,7 +19,7 @@ const navItems: NavItem[] = [
   { label: '랭킹', href: '/ranking', icon: (f) => <TrophyIcon filled={f} /> },
   { label: '자유게시판', href: '/board', icon: (f) => <NoteIcon filled={f} /> },
   { label: '오픈채팅', href: '/chat', icon: (f) => <OpenChatIcon filled={f} /> },
-  { label: 'DM', href: '/dm', icon: (f) => <PaperAirplaneIcon filled={f} /> },
+  { label: 'DM', href: '/dm', icon: (f) => <PaperAirplaneIcon filled={f} />, requiresAuth: true },
 ];
 
 interface MobileDrawerProps {
@@ -28,6 +30,7 @@ interface MobileDrawerProps {
 export default function MobileDrawer({ isOpen, onClose }: MobileDrawerProps) {
   const pathname = usePathname();
   const { interceptLink } = useNavigationGuard();
+  const { user } = useAuthContext();
 
   useEffect(() => {
     if (isOpen) {
@@ -68,7 +71,7 @@ export default function MobileDrawer({ isOpen, onClose }: MobileDrawerProps) {
         </div>
 
         <nav className="flex flex-col py-4">
-          {navItems.map((item) => {
+          {navItems.filter((item) => !item.requiresAuth || !!user).map((item) => {
             const isActive = pathname === item.href;
             return (
               <Link

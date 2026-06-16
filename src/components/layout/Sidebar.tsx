@@ -4,11 +4,13 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { HomeIcon, TrophyIcon, NoteIcon, OpenChatIcon, PaperAirplaneIcon } from './icons';
 import { useNavigationGuard } from '@/components/providers/NavigationGuard';
+import { useAuthContext } from '@/components/providers/AuthProvider';
 
 interface NavItem {
   label: string;
   href: string;
   icon: (filled: boolean) => React.ReactNode;
+  requiresAuth?: boolean;
 }
 
 const navItems: NavItem[] = [
@@ -16,17 +18,18 @@ const navItems: NavItem[] = [
   { label: '랭킹', href: '/ranking', icon: (f) => <TrophyIcon filled={f} /> },
   { label: '자유게시판', href: '/board', icon: (f) => <NoteIcon filled={f} /> },
   { label: '오픈채팅', href: '/chat', icon: (f) => <OpenChatIcon filled={f} /> },
-  { label: 'DM', href: '/dm', icon: (f) => <PaperAirplaneIcon filled={f} /> },
+  { label: 'DM', href: '/dm', icon: (f) => <PaperAirplaneIcon filled={f} />, requiresAuth: true },
 ];
 
 export default function Sidebar() {
   const pathname = usePathname();
   const { interceptLink } = useNavigationGuard();
+  const { user } = useAuthContext();
 
   return (
     <aside className="hidden lg:flex flex-col fixed left-0 top-16 w-64 h-[calc(100vh-4rem)] border-r border-gray-300 bg-white p-4">
       <nav className="flex flex-col gap-1">
-        {navItems.map((item) => {
+        {navItems.filter((item) => !item.requiresAuth || !!user).map((item) => {
           const isActive = pathname === item.href;
           return (
             <Link
