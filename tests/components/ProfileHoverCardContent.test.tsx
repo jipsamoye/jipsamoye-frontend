@@ -3,9 +3,9 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { User } from '@/types/api';
 import ProfileHoverCardContent from '@/components/domain/ProfileHoverCardContent';
 
-// [차단 1] User 타입에 isFollowing 필드 추가 확인용
-// 실제 렌더는 following prop으로 결정되고, isFollowing 초기화는 ProfileHoverCard에서 담당.
-// 여기서는 following=true 일 때 메시지 버튼이 표시되는 동작만 검증.
+// DM 개방: 메시지 버튼은 본인(isMe)이 아니면 팔로우 여부와 무관하게 항상 노출된다.
+// following prop은 구독 버튼의 텍스트/스타일(구독 중 vs 구독하기)에만 영향을 준다.
+// isFollowing 초기화는 ProfileHoverCard에서 담당.
 
 const baseUser = (overrides: Partial<User> = {}): User => ({
   nickname: '뽀삐',
@@ -30,7 +30,7 @@ const noopHandlers = {
 };
 
 describe('ProfileHoverCardContent', () => {
-  it('타인이고 following=false 일 때 구독하기 버튼만 표시 (메시지 버튼 없음)', () => {
+  it('타인이고 following=false 일 때 구독하기 + 메시지 버튼 모두 표시', () => {
     render(
       <ProfileHoverCardContent
         nickname="뽀삐"
@@ -41,7 +41,7 @@ describe('ProfileHoverCardContent', () => {
       />
     );
     expect(screen.getByRole('button', { name: /구독하기/ })).toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: /메시지/ })).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /메시지/ })).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /프로필 편집/ })).not.toBeInTheDocument();
   });
 
@@ -204,13 +204,13 @@ describe('ProfileHoverCardContent', () => {
     expect(onFollow).toHaveBeenCalledTimes(1);
   });
 
-  it('메시지 클릭 시 onMessage가 호출된다 (following=true 필요)', () => {
+  it('메시지 클릭 시 onMessage가 호출된다 (following=false 여도 노출·동작)', () => {
     const onMessage = vi.fn();
     render(
       <ProfileHoverCardContent
         nickname="뽀삐"
         profile={baseUser()}
-        following={true}
+        following={false}
         isMe={false}
         onFollow={vi.fn()}
         onMessage={onMessage}
@@ -238,11 +238,22 @@ describe('ProfileHoverCardContent', () => {
     expect(onEditProfile).toHaveBeenCalledTimes(1);
   });
 
-  // ─── [차단 1] isFollowing 초기화 — following prop 게이팅 ──────────────────
+  // ─── DM 개방: 메시지 버튼은 following과 무관하게 타인이면 항상 노출 ──────────
 
-  it('[차단 1] 서버 isFollowing=true 이면 following=true 로 넘겨야 메시지 버튼이 표시된다', () => {
-    // ProfileHoverCard에서 res.data.isFollowing ?? false 로 setFollowing() 하고
-    // ProfileHoverCardContent에 following={true}로 전달해야 함.
+  it('following=false(미구독)여도 타인이면 메시지 버튼이 노출된다', () => {
+    render(
+      <ProfileHoverCardContent
+        nickname="뽀삐"
+        profile={baseUser({ isFollowing: false })}
+        following={false}
+        isMe={false}
+        {...noopHandlers}
+      />
+    );
+    expect(screen.getByRole('button', { name: /메시지/ })).toBeInTheDocument();
+  });
+
+  it('following=true(구독 중)일 때도 메시지 버튼이 노출된다', () => {
     render(
       <ProfileHoverCardContent
         nickname="뽀삐"
@@ -255,32 +266,42 @@ describe('ProfileHoverCardContent', () => {
     expect(screen.getByRole('button', { name: /메시지/ })).toBeInTheDocument();
   });
 
-  it('[차단 1] isFollowing=false 인 상태(새로고침 후 초기값)에서 메시지 버튼이 없다', () => {
+  it('본인이면 following과 무관하게 메시지 버튼이 노출되지 않는다', () => {
     render(
       <ProfileHoverCardContent
         nickname="뽀삐"
-        profile={baseUser({ isFollowing: false })}
+        profile={baseUser()}
         following={false}
-        isMe={false}
+        isMe={true}
         {...noopHandlers}
       />
     );
     expect(screen.queryByRole('button', { name: /메시지/ })).not.toBeInTheDocument();
   });
 
-  it('[차단 1] isFollowing 필드가 undefined(구형 백엔드)이면 following=false로 기본 처리되어야 한다', () => {
-    const userWithoutIsFollowing = baseUser();
-    delete (userWithoutIsFollowing as Partial<User>).isFollowing;
-    // following prop이 false면 메시지 버튼 없음 — ?? false 처리 검증
-    render(
+  it('following prop은 구독 버튼 라벨에만 영향을 준다 (메시지 노출엔 무영향)', () => {
+    const { rerender } = render(
       <ProfileHoverCardContent
         nickname="뽀삐"
-        profile={userWithoutIsFollowing}
+        profile={baseUser()}
         following={false}
         isMe={false}
         {...noopHandlers}
       />
     );
-    expect(screen.queryByRole('button', { name: /메시지/ })).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /구독하기/ })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /메시지/ })).toBeInTheDocument();
+
+    rerender(
+      <ProfileHoverCardContent
+        nickname="뽀삐"
+        profile={baseUser()}
+        following={true}
+        isMe={false}
+        {...noopHandlers}
+      />
+    );
+    expect(screen.getByRole('button', { name: '구독 중' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /메시지/ })).toBeInTheDocument();
   });
 });

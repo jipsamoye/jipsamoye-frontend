@@ -11,6 +11,7 @@ import Modal from '@/components/common/Modal';
 import { timeAgo, formatTime } from '@/lib/utils';
 import { useDmRooms } from '@/hooks/useDmRooms';
 import { useDmRoom } from '@/hooks/useDmRoom';
+import NewMessageModalContent, { type NewMessageTarget } from '@/components/domain/NewMessageModalContent';
 import type { DmRoom, DmRoomResolve, FollowUser, PageResponse } from '@/types/api';
 
 /** draft(아직 방이 생성되지 않은) 대화 상대 정보 */
@@ -34,6 +35,16 @@ export function shouldScrollToBottom(
   return nextLastId !== prevLastId && nextLastId != null;
 }
 
+// ─── DM 목록(왼쪽 패널) 검색 필터 ─────────────────────────────────────────
+// 기존 대화방을 닉네임으로 클라이언트 필터만 한다. API 호출 없음(새 메시지 모달 검색과 무관).
+export function filterRoomsByNickname<T extends { otherUserNickname: string }>(
+  rooms: T[],
+  query: string
+): T[] {
+  const q = query.toLowerCase();
+  return rooms.filter((room) => room.otherUserNickname.toLowerCase().includes(q));
+}
+
 // ─── 딥링크 처리 + 실제 DM UI ─────────────────────────────────────────────
 
 function DmPageInner() {
@@ -47,7 +58,6 @@ function DmPageInner() {
   const [mobileView, setMobileView] = useState<'list' | 'chat'>('list');
   const [searchQuery, setSearchQuery] = useState('');
   const [showNewMessageModal, setShowNewMessageModal] = useState(false);
-  const [modalSearchQuery, setModalSearchQuery] = useState('');
   const [followingList, setFollowingList] = useState<FollowUser[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
@@ -206,7 +216,6 @@ function DmPageInner() {
   const handleOpenNewMessageModal = useCallback(() => {
     if (!user) return;
     setShowNewMessageModal(true);
-    setModalSearchQuery('');
     api
       .get<PageResponse<FollowUser>>(`/api/users/${user.nickname}/following?page=0&size=20`)
       .then((res) => setFollowingList(res.data?.content ?? []))
@@ -214,13 +223,13 @@ function DmPageInner() {
   }, [user]);
 
   const handleCreateRoom = useCallback(
-    async (followUser: FollowUser) => {
+    async (target: NewMessageTarget) => {
       if (!user) return;
       // resolve: 메시지가 오간 기존 방이면 roomId 포함, 없으면 draft 응답(roomId=null).
       // 방을 즉시 만들지 않고, 메시지가 없으면 draft 상태로만 연다(버그①).
       try {
         const res = await api.post<DmRoomResolve>(
-          `/api/dm/rooms?targetNickname=${encodeURIComponent(followUser.nickname)}`
+          `/api/dm/rooms?targetNickname=${encodeURIComponent(target.nickname)}`
         );
         const resolved = res.data;
         if (resolved && resolved.roomId != null) {
@@ -236,8 +245,8 @@ function DmPageInner() {
         } else {
           // 아직 방 없음 → draft 상태로 빈 채팅창 열기
           setDraftPartner({
-            nickname: followUser.nickname,
-            profileImageUrl: resolved?.otherUserProfileImageUrl ?? followUser.profileImageUrl ?? null,
+            nickname: target.nickname,
+            profileImageUrl: resolved?.otherUserProfileImageUrl ?? target.profileImageUrl ?? null,
           });
           setSelectedRoomId(null);
         }
@@ -248,10 +257,6 @@ function DmPageInner() {
       setShowNewMessageModal(false);
     },
     [user, setRooms]
-  );
-
-  const filteredFollowing = followingList.filter((f) =>
-    f.nickname.toLowerCase().includes(modalSearchQuery.toLowerCase())
   );
 
   // ─── 로딩 / 미로그인 ─────────────────────────────────────────────────────
@@ -332,9 +337,7 @@ function DmPageInner() {
         ) : (
           <div className="flex-1 overflow-y-auto">
             {(() => {
-              const filtered = rooms.filter((room) =>
-                room.otherUserNickname.toLowerCase().includes(searchQuery.toLowerCase())
-              );
+              const filtered = filterRoomsByNickname(rooms, searchQuery);
               if (filtered.length === 0) {
                 return (
                   <p className="py-8 text-center text-sm text-gray-400">
@@ -590,76 +593,10 @@ function DmPageInner() {
         onClose={() => setShowNewMessageModal(false)}
         title="메세지 보내기"
       >
-        <div className="flex flex-col gap-4">
-          <div className="relative">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth={1.5}
-              stroke="currentColor"
-              className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"
-              />
-            </svg>
-            <input
-              type="text"
-              value={modalSearchQuery}
-              onChange={(e) => setModalSearchQuery(e.target.value)}
-              placeholder="누구에게 메시지를 보낼까요?"
-              className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-gray-100 bg-gray-50 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-300 focus:border-transparent transition-all duration-200"
-            />
-          </div>
-
-          <div className="-mx-2 max-h-72 overflow-y-auto">
-            {filteredFollowing.length === 0 ? (
-              <p className="py-6 text-center text-sm text-gray-400">
-                {modalSearchQuery ? '검색 결과가 없어요' : '팔로잉 중인 유저가 없어요'}
-              </p>
-            ) : (
-              filteredFollowing.map((followUser) => (
-                <div
-                  key={followUser.nickname}
-                  className="flex items-center justify-between px-2 py-2.5 rounded-lg hover:bg-gray-50 transition-colors"
-                >
-                  <div className="flex items-center gap-3">
-                    <Avatar
-                      src={followUser.profileImageUrl}
-                      alt={followUser.nickname}
-                      size="md"
-                    />
-                    <span className="text-sm font-medium text-gray-900">
-                      {followUser.nickname}
-                    </span>
-                  </div>
-                  <button
-                    onClick={() => handleCreateRoom(followUser)}
-                    className="p-2 rounded-full text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      strokeWidth={2}
-                      stroke="currentColor"
-                      className="w-5 h-5"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3"
-                      />
-                    </svg>
-                  </button>
-                </div>
-              ))
-            )}
-          </div>
-        </div>
+        <NewMessageModalContent
+          followingList={followingList}
+          onSelect={handleCreateRoom}
+        />
       </Modal>
     </div>
   );

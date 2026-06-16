@@ -100,6 +100,13 @@ export interface FollowUser {
   profileImageUrl: string | null;
 }
 
+// 유저 검색 결과 (GET /api/users/search)
+export interface UserSearchItem {
+  nickname: string;
+  profileImageUrl: string | null;
+  isFollowing: boolean;
+}
+
 // Presigned URL 응답
 export interface PresignedUrlResponse {
   presignedUrl: string;
