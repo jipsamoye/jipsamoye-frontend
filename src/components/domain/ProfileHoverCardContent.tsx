@@ -95,15 +95,14 @@ export default function ProfileHoverCardContent({
           >
             {following ? '구독 중' : '📣 구독하기'}
           </button>
-          {following && (
-            <button
-              type="button"
-              onClick={onMessage}
-              className="flex-1 py-2 rounded-xl bg-gray-900 hover:bg-gray-800 text-white text-xs font-bold transition-colors"
-            >
-              💬 메시지
-            </button>
-          )}
+          {/* 메시지 버튼: 본인이 아니면 팔로우 여부와 무관하게 항상 노출 */}
+          <button
+            type="button"
+            onClick={onMessage}
+            className="flex-1 py-2 rounded-xl bg-gray-900 hover:bg-gray-800 text-white text-xs font-bold transition-colors"
+          >
+            💬 메시지
+          </button>
         </div>
       )}
     </div>
