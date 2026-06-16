@@ -4,8 +4,8 @@ import { useState, useEffect, useRef, useCallback, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { api } from '@/lib/api';
-import { PetPostListItem, PageResponse, CursorResponse, BoardListItem } from '@/types/api';
-import { dummyPopularPosts, dummyLatestPosts } from '@/lib/dummyData';
+import { PetPostListItem, PageResponse, CursorResponse, BoardListItem, RankingPageResponse } from '@/types/api';
+import { dummyLatestPosts } from '@/lib/dummyData';
 import { timeAgoOrDate } from '@/lib/utils';
 import PopularSlider from '@/components/domain/PopularSlider';
 import PostCard from '@/components/domain/PostCard';
@@ -86,9 +86,11 @@ function HomeContent() {
 
   useEffect(() => {
     if (restored) return; // 복원 시 fetch 생략
-    api.get<PetPostListItem[]>('/api/posts/top10')
-      .then((res) => setPopularPosts(res.data.length > 0 ? res.data : dummyPopularPosts))
-      .catch(() => setPopularPosts(dummyPopularPosts))
+    // "이주의 자랑" = 이번 주(월~일) 올라온 글 중 좋아요순 상위 10개.
+    // /top10(역대 누적)이 아닌 주간 랭킹을 사용해야 라벨 의미와 일치한다.
+    api.get<RankingPageResponse>('/api/posts/ranking?period=WEEKLY&page=0&size=10')
+      .then((res) => setPopularPosts(res.data.posts.content))
+      .catch(() => setPopularPosts([]))
       .finally(() => setPopularLoading(false));
 
     api.get<PageResponse<BoardListItem>>('/api/boards?page=0&size=3', { silent: true })
