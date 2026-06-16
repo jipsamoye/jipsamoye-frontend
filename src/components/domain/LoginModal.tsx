@@ -1,7 +1,6 @@
 'use client';
 
 import Modal from '@/components/common/Modal';
-import Button from '@/components/common/Button';
 import { startNaverLogin } from '@/lib/naverAuth';
 
 interface LoginModalProps {
@@ -39,12 +38,18 @@ export default function LoginModal({ isOpen, onClose, onGuestLogin }: LoginModal
           </div>
 
           {/* Guest 로그인 — 실제 동작 */}
-          <Button variant="secondary" size="lg" className="w-full" onClick={() => { onGuestLogin(); onClose(); }}>
-            Guest로 로그인하기
-          </Button>
-          <p className="text-xs text-gray-400 mt-1">
-            회원가입 없이 임시 계정으로 모든 기능을 체험할 수 있어요
-          </p>
+          <button
+            onClick={() => { onGuestLogin(); onClose(); }}
+            className="flex items-center justify-center gap-2 w-full py-3 rounded-xl border-[1.5px] border-amber-300 bg-white text-amber-600 font-medium text-sm hover:bg-amber-50 hover:border-amber-400 transition-all duration-200"
+          >
+            <span aria-hidden="true">🐾</span>
+            게스트로 둘러보기
+          </button>
+          <div className="mt-1 flex justify-center">
+            <span className="inline-block px-3.5 py-1.5 rounded-full bg-amber-50 text-amber-600 text-sm font-semibold leading-snug">
+              회원가입 없이 모든 기능을 체험할 수 있어요
+            </span>
+          </div>
         </div>
       </div>
     </Modal>
