@@ -4,14 +4,10 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { ChatMessage } from '@/types/api';
 import { api } from '@/lib/api';
 import { wsService } from '@/lib/websocket';
+import { formatTime } from '@/lib/utils';
+import { showToast } from '@/components/common/Toast';
 import { useAuthContext } from '@/components/providers/AuthProvider';
 import Avatar from '@/components/common/Avatar';
-
-function formatTime(dateStr: string): string {
-  const utcStr = dateStr.endsWith('Z') ? dateStr : dateStr + 'Z';
-  const date = new Date(utcStr);
-  return date.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
-}
 
 export default function ChatPage() {
   const { user, loading: authLoading } = useAuthContext();
@@ -162,7 +158,12 @@ export default function ChatPage() {
   function handleSend() {
     const trimmed = input.trim();
     if (!trimmed || !user) return;
-    wsService.send('/pub/chat/send', { content: trimmed });
+    const sent = wsService.send('/pub/chat/send', { content: trimmed });
+    if (!sent) {
+      // WS 미연결/재연결 대기/인증 거부 등으로 전송 실패. 입력을 보존하고 사용자에게 알림.
+      showToast('연결이 불안정해요. 잠시 후 다시 보내주세요');
+      return;
+    }
     setInput('');
     setTimeout(() => scrollToBottom(), 100);
   }
