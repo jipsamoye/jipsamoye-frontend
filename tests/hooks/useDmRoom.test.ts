@@ -608,4 +608,157 @@ describe('useDmRoom', () => {
 
     expect(wsMock.send).not.toHaveBeenCalledWith('/pub/dm/read', { roomId: 3 });
   });
+
+  // ─── [M-7] 전송 타임아웃 → status=failed ─────────────────────────────────────
+
+  describe('전송 타임아웃 (M-7)', () => {
+    it('send 성공 후 8초 내 에코가 없으면 status=failed로 전환된다', async () => {
+      vi.useFakeTimers();
+      try {
+        apiMock.get.mockResolvedValueOnce(makePageRes([]));
+        const { result } = renderHook(() =>
+          useDmRoom({ roomId: 1, userNickname: '나', onMessageSent: undefined, onUnread: undefined })
+        );
+        // REST 초기 로드(마이크로태스크) 정리 — fake timer 환경에서 act 경고 방지
+        await act(async () => { await Promise.resolve(); });
+
+        act(() => result.current.sendMessage('타임아웃 테스트'));
+        expect(result.current.messages[0].status).toBe('sending');
+
+        act(() => {
+          vi.advanceTimersByTime(8000);
+        });
+        expect(result.current.messages[0].status).toBe('failed');
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+
+    it('8초 내 에코가 도착하면 타임아웃이 해제되어 failed로 전환되지 않는다', async () => {
+      vi.useFakeTimers();
+      try {
+        apiMock.get.mockResolvedValueOnce(makePageRes([]));
+        let capturedHandler: DmEventHandler | undefined;
+        wsMock.onDmRoom.mockImplementation((_roomId, handler) => {
+          capturedHandler = handler;
+          return () => {};
+        });
+
+        const { result } = renderHook(() =>
+          useDmRoom({ roomId: 1, userNickname: '나', onMessageSent: undefined, onUnread: undefined })
+        );
+        // REST 초기 로드(마이크로태스크) 정리 — fake timer 환경에서 act 경고 방지
+        await act(async () => { await Promise.resolve(); });
+
+        act(() => result.current.sendMessage('에코 도착'));
+        const clientMessageId = result.current.messages[0].clientMessageId!;
+
+        // 5초 시점에 에코 도착
+        act(() => {
+          vi.advanceTimersByTime(5000);
+          capturedHandler!({
+            type: 'MESSAGE',
+            roomId: 1,
+            message: makeMsg({
+              id: 500,
+              senderNickname: '나',
+              content: '에코 도착',
+              clientMessageId,
+              createdAt: '2026-06-11T10:00:05.000Z',
+            }),
+          });
+        });
+        expect(result.current.messages[0].status).toBe('sent');
+
+        // 추가로 8초 더 경과해도 failed로 바뀌지 않는다 (타임아웃 해제됨)
+        act(() => {
+          vi.advanceTimersByTime(8000);
+        });
+        expect(result.current.messages[0].status).toBe('sent');
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+
+    it('send 실패(=false) 시에는 즉시 failed이며 타임아웃을 시작하지 않는다', async () => {
+      vi.useFakeTimers();
+      try {
+        apiMock.get.mockResolvedValueOnce(makePageRes([]));
+        wsMock.send.mockReturnValue(false);
+
+        const { result } = renderHook(() =>
+          useDmRoom({ roomId: 1, userNickname: '나', onMessageSent: undefined, onUnread: undefined })
+        );
+        // REST 초기 로드(마이크로태스크) 정리 — fake timer 환경에서 act 경고 방지
+        await act(async () => { await Promise.resolve(); });
+
+        act(() => result.current.sendMessage('즉시 실패'));
+        expect(result.current.messages[0].status).toBe('failed');
+
+        act(() => {
+          vi.advanceTimersByTime(8000);
+        });
+        expect(result.current.messages[0].status).toBe('failed');
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+
+    it('retryMessage 성공 시 타임아웃이 재시작되어 미수신 시 다시 failed로 전환된다', async () => {
+      vi.useFakeTimers();
+      try {
+        apiMock.get.mockResolvedValueOnce(makePageRes([]));
+        wsMock.send.mockReturnValueOnce(false); // 첫 전송 실패
+
+        const { result } = renderHook(() =>
+          useDmRoom({ roomId: 1, userNickname: '나', onMessageSent: undefined, onUnread: undefined })
+        );
+        // REST 초기 로드(마이크로태스크) 정리 — fake timer 환경에서 act 경고 방지
+        await act(async () => { await Promise.resolve(); });
+
+        act(() => result.current.sendMessage('재전송 타임아웃'));
+        expect(result.current.messages[0].status).toBe('failed');
+        const clientMessageId = result.current.messages[0].clientMessageId!;
+
+        // 재전송 성공
+        wsMock.send.mockReturnValue(true);
+        act(() => result.current.retryMessage(clientMessageId));
+        expect(result.current.messages[0].status).toBe('sending');
+
+        act(() => {
+          vi.advanceTimersByTime(8000);
+        });
+        expect(result.current.messages[0].status).toBe('failed');
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+
+    it('방 변경(언마운트) 시 대기 중인 타임아웃이 정리되어 이후 상태 변화가 없다', async () => {
+      vi.useFakeTimers();
+      try {
+        apiMock.get.mockResolvedValue(makePageRes([]));
+        const { result, unmount } = renderHook(() =>
+          useDmRoom({ roomId: 1, userNickname: '나', onMessageSent: undefined, onUnread: undefined })
+        );
+        // REST 초기 로드(마이크로태스크) 정리 — fake timer 환경에서 act 경고 방지
+        await act(async () => { await Promise.resolve(); });
+
+        act(() => result.current.sendMessage('정리 테스트'));
+        expect(result.current.messages[0].status).toBe('sending');
+
+        // 언마운트 → 타이머 정리
+        unmount();
+
+        // 타이머가 정리되었으므로 advance해도 경고/오류 없이 통과,
+        // 언마운트 후 마지막 상태(sending) 유지 — failed로 바뀌지 않음
+        act(() => {
+          vi.advanceTimersByTime(8000);
+        });
+        expect(result.current.messages[0].status).toBe('sending');
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+  });
 });

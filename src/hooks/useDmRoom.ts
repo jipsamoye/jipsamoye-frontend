@@ -4,6 +4,9 @@ import { wsService } from '@/lib/websocket';
 import { nowKstString } from '@/lib/utils';
 import type { DmMessage, DmRoomEvent, PageResponse } from '@/types/api';
 
+/** 전송 후 서버 에코 대기 타임아웃 — 초과 시 status='failed'로 전환 (M-7) */
+const SEND_TIMEOUT_MS = 8000;
+
 interface UseDmRoomOptions {
   roomId: number | null;
   /** draft(roomId=null) 상태에서 첫 메시지를 보낼 상대 닉네임 */
@@ -33,6 +36,10 @@ export function useDmRoom({
   onUnread,
 }: UseDmRoomOptions): UseDmRoomResult {
   const [messages, setMessages] = useState<DmMessage[]>([]);
+  // messages 미러 ref — retryMessage가 setState 업데이터 밖에서 대상 메시지를 찾기 위해 사용.
+  // (업데이터 안에서 send/타이머 같은 부수효과를 다루면 StrictMode 이중 실행·지연 평가 문제)
+  const messagesRef = useRef<DmMessage[]>([]);
+  messagesRef.current = messages;
   const [currentPage, setCurrentPage] = useState(0);
   const [hasOlderMessages, setHasOlderMessages] = useState(false);
   const [loadingOlder, setLoadingOlder] = useState(false);
@@ -41,6 +48,48 @@ export function useDmRoom({
   const scrollAnchorRef = useRef<HTMLDivElement | null>(null);
   /** 무한스크롤 스크롤 위치 보존용 컨테이너 ref */
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
+  /**
+   * 전송 타임아웃 타이머 — clientMessageId별로 보관 (M-7).
+   * send 후 서버 에코가 일정 시간 내 도착하지 않으면 status='failed'로 전환한다.
+   * 에코 도착(치환) 시 clearSendTimeout으로 해제.
+   */
+  const sendTimeoutsRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
+
+  const clearSendTimeout = useCallback((clientMessageId: string) => {
+    const timer = sendTimeoutsRef.current.get(clientMessageId);
+    if (timer) {
+      clearTimeout(timer);
+      sendTimeoutsRef.current.delete(clientMessageId);
+    }
+  }, []);
+
+  /** send 후 호출 — SEND_TIMEOUT_MS 내 에코 미수신 시 해당 메시지를 failed로 전환 */
+  const armSendTimeout = useCallback(
+    (clientMessageId: string) => {
+      clearSendTimeout(clientMessageId);
+      const timer = setTimeout(() => {
+        sendTimeoutsRef.current.delete(clientMessageId);
+        setMessages((prev) =>
+          prev.map((m) =>
+            m.clientMessageId === clientMessageId && m.status === 'sending'
+              ? { ...m, status: 'failed' }
+              : m
+          )
+        );
+      }, SEND_TIMEOUT_MS);
+      sendTimeoutsRef.current.set(clientMessageId, timer);
+    },
+    [clearSendTimeout]
+  );
+
+  // 언마운트/방 변경 시 모든 전송 타이머 정리 (지연 setState로 인한 누수 방지)
+  useEffect(() => {
+    const timers = sendTimeoutsRef.current;
+    return () => {
+      timers.forEach((t) => clearTimeout(t));
+      timers.clear();
+    };
+  }, [roomId]);
 
   // 방 변경 시 메시지 초기화 + REST 로드
   useEffect(() => {
@@ -86,6 +135,8 @@ export function useDmRoom({
               (m) => m.clientMessageId === incoming.clientMessageId
             );
             if (idx !== -1) {
+              // 에코 도착 → 전송 타임아웃 해제 (M-7)
+              clearSendTimeout(incoming.clientMessageId);
               const next = [...prev];
               next[idx] = { ...incoming, status: 'sent' };
               return next;
@@ -214,35 +265,48 @@ export function useDmRoom({
             m.clientMessageId === clientMessageId ? { ...m, status: 'failed' } : m
           )
         );
+      } else {
+        // 전송 성공 — 에코 대기 타임아웃 시작 (미수신 시 failed 전환, M-7)
+        armSendTimeout(clientMessageId);
       }
     },
-    [roomId, targetNickname, userNickname]
+    [roomId, targetNickname, userNickname, armSendTimeout]
   );
 
   /** 실패한 메시지 재전송 */
   const retryMessage = useCallback(
     (clientMessageId: string) => {
       if (!userNickname || (!roomId && !targetNickname)) return;
-      setMessages((prev) => {
-        const target = prev.find((m) => m.clientMessageId === clientMessageId);
-        if (!target) return prev;
+      // 대상 메시지를 ref(미러)에서 찾아 부수효과(send/타이머)를 updater 밖에서 처리한다.
+      const target = messagesRef.current.find(
+        (m) => m.clientMessageId === clientMessageId
+      );
+      if (!target) return;
 
-        const sent = wsService.send('/pub/dm/send', {
-          roomId: roomId ?? null,
-          targetNickname: roomId ? null : (targetNickname ?? null),
-          content: target.content,
-          imageUrl: null,
-          clientMessageId,
-        });
-
-        return prev.map((m) =>
-          m.clientMessageId === clientMessageId
-            ? { ...m, status: sent ? 'sending' : 'failed' }
-            : m
-        );
+      const resent = wsService.send('/pub/dm/send', {
+        roomId: roomId ?? null,
+        targetNickname: roomId ? null : (targetNickname ?? null),
+        content: target.content,
+        imageUrl: null,
+        clientMessageId,
       });
+
+      setMessages((prev) =>
+        prev.map((m) =>
+          m.clientMessageId === clientMessageId
+            ? { ...m, status: resent ? 'sending' : 'failed' }
+            : m
+        )
+      );
+
+      if (resent) {
+        // 재전송 성공 — 에코 대기 타임아웃 재시작 (M-7)
+        armSendTimeout(clientMessageId);
+      } else {
+        clearSendTimeout(clientMessageId);
+      }
     },
-    [roomId, targetNickname, userNickname]
+    [roomId, targetNickname, userNickname, armSendTimeout, clearSendTimeout]
   );
 
   return {
