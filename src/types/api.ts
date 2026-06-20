@@ -299,6 +299,14 @@ export type DmRoomEvent =
   | { type: 'MESSAGE'; roomId: number; message: DmMessage }
   | { type: 'READ'; roomId: number; readerNickname: string; readAt: string };
 
+// 백엔드 M-1 구조화 에러 이벤트 (계약 FINAL)
+//   destination: /user/sub/errors
+//   payload: { code: string, message: string }
+export interface WsErrorEvent {
+  code: string;
+  message: string;
+}
+
 // 랭킹 페이지 API 응답 (GET /api/posts/ranking)
 export interface RankingPageResponse {
   period: 'WEEKLY' | 'MONTHLY';

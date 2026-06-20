@@ -5,6 +5,7 @@ import { ChatMessage } from '@/types/api';
 import { api } from '@/lib/api';
 import { wsService } from '@/lib/websocket';
 import { formatTime } from '@/lib/utils';
+import { isChatMessage, isChatProfileEvent } from '@/lib/wsGuards';
 import { showToast } from '@/components/common/Toast';
 import { useAuthContext } from '@/components/providers/AuthProvider';
 import Avatar from '@/components/common/Avatar';
@@ -85,10 +86,9 @@ export default function ChatPage() {
   // 채팅 채널 수신 (메시지 + 프로필 변경)
   useEffect(() => {
     const unsubscribe = wsService.on('chat', (data) => {
-      const parsed = data as Record<string, unknown>;
-
-      if (parsed.type === 'PROFILE_UPDATED') {
-        const profile = data as { nickname: string; profileImageUrl: string | null };
+      // 프로필 변경 이벤트 — 타입 가드로 형태 검증
+      if (isChatProfileEvent(data)) {
+        const profile = data;
         setMessages((prev) =>
           prev.map((m) =>
             m.senderNickname === profile.nickname ? { ...m, senderProfileImageUrl: profile.profileImageUrl } : m
@@ -97,9 +97,9 @@ export default function ChatPage() {
         return;
       }
 
-      // 채팅 메시지
-      const msg = data as ChatMessage;
-      if (!msg.id) return;
+      // 채팅 메시지 — 타입 가드로 형태 검증(잘못된 페이로드는 무시)
+      if (!isChatMessage(data)) return;
+      const msg = data;
       setMessages((prev) => {
         if (prev.some((m) => m.id === msg.id)) return prev;
         return [...prev, msg];

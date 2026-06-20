@@ -12,6 +12,8 @@ interface AuthContextType {
   logout: () => Promise<void>;
   withdraw: () => Promise<void>;
   updateUser: (user: User) => void;
+  /** 네트워크 호출 없이 클라이언트 세션 상태만 정리 (WS 세션 만료/401 통지용) */
+  clearSession: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -61,13 +63,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(updatedUser);
   }, []);
 
+  // WS 세션 만료/401 통지 시 클라이언트 세션만 정리 (서버 호출 없음).
+  // setUnauthorizedHandler와 동일한 정리 동작이라 일관됨.
+  const clearSession = useCallback(() => {
+    clearSessionHint();
+    setUser(null);
+  }, []);
+
   const withdraw = useCallback(async () => {
     try { await api.delete('/api/auth/withdraw'); } catch { /* ignore */ }
     setUser(null);
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, loading, loginAsGuest, logout, withdraw, updateUser }}>
+    <AuthContext.Provider value={{ user, loading, loginAsGuest, logout, withdraw, updateUser, clearSession }}>
       {children}
     </AuthContext.Provider>
   );
