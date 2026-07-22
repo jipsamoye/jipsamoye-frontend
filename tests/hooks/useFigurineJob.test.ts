@@ -323,4 +323,65 @@ describe('useFigurineJob — 게시(publish)', () => {
     expect(petPostId).toBeNull();
     expect(apiMock.post).not.toHaveBeenCalled();
   });
+
+  it('동기 이중호출: 두 번째 publish는 즉시 null, POST는 1회만', async () => {
+    const { result } = await renderCompleted();
+    apiMock.post.mockResolvedValueOnce({ status: 201, code: 'SUCCESS', message: '', data: { petPostId: 77 } });
+
+    let first: number | null = null;
+    let second: number | null = null;
+    await act(async () => {
+      const p1 = result.current.publish();
+      const p2 = result.current.publish();
+      [first, second] = await Promise.all([p1, p2]);
+    });
+
+    expect(first).toBe(77);
+    expect(second).toBeNull();
+    expect(apiMock.post).toHaveBeenCalledTimes(1);
+  });
+
+  it('409인데 복원 GET도 실패: 원본 409 메시지 토스트 + completed 복귀 (재클릭으로 수렴 가능)', async () => {
+    const { result } = await renderCompleted();
+    apiMock.post.mockRejectedValueOnce({
+      status: 409, code: 'FIGURINE_ALREADY_POSTED', message: '이미 게시된 작품이에요', data: null,
+    });
+    apiMock.get.mockRejectedValueOnce(new TypeError('Failed to fetch'));
+
+    let petPostId: number | null = null;
+    await act(async () => {
+      petPostId = await result.current.publish();
+    });
+
+    expect(petPostId).toBeNull();
+    expect(toastMock.showToast).toHaveBeenCalledWith('이미 게시된 작품이에요');
+    expect(result.current.phase).toBe('completed');
+
+    // 재클릭 시 재-409 → 복원 성공으로 수렴
+    apiMock.post.mockRejectedValueOnce({
+      status: 409, code: 'FIGURINE_ALREADY_POSTED', message: '이미 게시된 작품이에요', data: null,
+    });
+    apiMock.get.mockResolvedValueOnce(
+      successRes(makeJob({ status: 'COMPLETED', resultImageUrl: 'https://cdn/results/1.png', petPostId: 77 }))
+    );
+    await act(async () => {
+      petPostId = await result.current.publish();
+    });
+    expect(petPostId).toBe(77);
+    expect(result.current.phase).toBe('posted');
+  });
+
+  it('publish 중 401: 토스트를 띄우지 않고 completed 복귀', async () => {
+    const { result } = await renderCompleted();
+    apiMock.post.mockRejectedValueOnce({ status: 401, code: 'UNAUTHORIZED', message: '로그인이 필요합니다.', data: null });
+
+    let petPostId: number | null = null;
+    await act(async () => {
+      petPostId = await result.current.publish();
+    });
+
+    expect(petPostId).toBeNull();
+    expect(toastMock.showToast).not.toHaveBeenCalled();
+    expect(result.current.phase).toBe('completed');
+  });
 });

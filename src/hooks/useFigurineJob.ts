@@ -66,6 +66,9 @@ export function useFigurineJob(): UseFigurineJobResult {
   const runIdRef = useRef(0);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pollCountRef = useRef(0);
+  // phase는 React state라 같은 렌더 사이클 내 동기 이중 호출은 둘 다 같은 클로저 값을 보고
+  // 가드를 통과할 수 있다 — ref로 즉시 반영되는 별도 잠금을 둔다.
+  const postingRef = useRef(false);
 
   const clearTimer = useCallback(() => {
     if (timerRef.current !== null) {
@@ -166,7 +169,8 @@ export function useFigurineJob(): UseFigurineJobResult {
   }, [clearTimer, scheduleNext]);
 
   const publish = useCallback(async (): Promise<number | null> => {
-    if (!job || phase !== 'completed') return null;
+    if (!job || phase !== 'completed' || postingRef.current) return null;
+    postingRef.current = true;
     // 현재 세대 캡처 — 게시 중 reset()/unmount가 세대를 올리면 이후 setState를 모두 건너뛴다.
     const runId = runIdRef.current;
     setPhase('posting');
@@ -202,6 +206,8 @@ export function useFigurineJob(): UseFigurineJobResult {
         setPhase('completed'); // 버튼 재활성화 — 재시도 가능
       }
       return null;
+    } finally {
+      postingRef.current = false;
     }
   }, [job, phase]);
 
