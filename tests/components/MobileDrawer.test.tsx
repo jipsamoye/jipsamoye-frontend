@@ -24,7 +24,7 @@ vi.mock('@/components/layout/icons', () => ({
   NoteIcon: () => <svg />,
   OpenChatIcon: () => <svg />,
   PaperAirplaneIcon: () => <svg />,
-  SparklesIcon: () => <svg />,
+  KeycapIcon: () => <svg data-testid="keycap-icon" />,
 }));
 
 import MobileDrawer from '@/components/layout/MobileDrawer';
@@ -78,6 +78,14 @@ describe('MobileDrawer', () => {
     const { container } = render(<MobileDrawer isOpen={true} onClose={vi.fn()} />);
     expect(screen.getByText('AI 키캡 만들기')).toBeInTheDocument();
     expect(container.querySelector('a[href="/figurines/new"]')).not.toBeNull();
+  });
+
+  it('AI 키캡 메뉴는 헤더와 같은 키캡 아이콘을 쓴다', () => {
+    // 같은 기능이 진입점마다 다른 아이콘을 쓰면 같은 기능으로 인식되지 않는다.
+    authMock.user = sampleUser;
+    const { container } = render(<MobileDrawer isOpen={true} onClose={vi.fn()} />);
+    const link = container.querySelector('a[href="/figurines/new"]');
+    expect(link?.querySelector('[data-testid="keycap-icon"]')).not.toBeNull();
   });
 
   it('비로그인 상태에서는 AI 키캡 메뉴를 렌더하지 않는다', () => {

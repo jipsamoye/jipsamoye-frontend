@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { MagnifyingGlassIcon, BellIcon, SparklesIcon } from './icons';
+import { MagnifyingGlassIcon, BellIcon, KeycapIcon } from './icons';
 import Avatar from '@/components/common/Avatar';
 import { useNavigationGuard } from '@/components/providers/NavigationGuard';
 import { useNotification } from '@/components/providers/NotificationProvider';
@@ -91,7 +91,7 @@ export default function Header({ isLoggedIn = false, onLoginClick, onLogout, onM
                 aria-label="AI 키캡 만들기"
                 className="lg:hidden p-2 text-amber-500 hover:text-amber-600"
               >
-                <SparklesIcon className="w-6 h-6" />
+                <KeycapIcon filled className="w-6 h-6" />
               </Link>
               <Link href="/search" className="p-2 lg:p-2.5 text-gray-800 hover:text-gray-900">
                 <MagnifyingGlassIcon className="w-6 h-6" />

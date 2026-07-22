@@ -3,7 +3,7 @@
 import { useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { HomeIcon, TrophyIcon, NoteIcon, OpenChatIcon, PaperAirplaneIcon, SparklesIcon } from './icons';
+import { HomeIcon, TrophyIcon, NoteIcon, OpenChatIcon, PaperAirplaneIcon, KeycapIcon } from './icons';
 import { useNavigationGuard } from '@/components/providers/NavigationGuard';
 import { useAuthContext } from '@/components/providers/AuthProvider';
 
@@ -20,7 +20,7 @@ const navItems: NavItem[] = [
   { label: '자유게시판', href: '/board', icon: (f) => <NoteIcon filled={f} /> },
   { label: '오픈채팅', href: '/chat', icon: (f) => <OpenChatIcon filled={f} /> },
   { label: 'DM', href: '/dm', icon: (f) => <PaperAirplaneIcon filled={f} />, requiresAuth: true },
-  { label: 'AI 키캡 만들기', href: '/figurines/new', icon: (f) => <SparklesIcon filled={f} />, requiresAuth: true },
+  { label: 'AI 키캡 만들기', href: '/figurines/new', icon: (f) => <KeycapIcon filled={f} />, requiresAuth: true },
 ];
 
 interface MobileDrawerProps {

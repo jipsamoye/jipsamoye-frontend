@@ -13,6 +13,13 @@ vi.mock('@/components/providers/NavigationGuard', () => ({
 vi.mock('@/components/providers/HomeRefreshProvider', () => ({
   useHomeRefresh: () => ({ refreshHome: vi.fn() }),
 }));
+// 어떤 아이콘이 쓰였는지 식별하기 위해 icons 모듈을 목킹한다 (MobileDrawer.test.tsx와 동일 패턴)
+vi.mock('@/components/layout/icons', () => ({
+  MagnifyingGlassIcon: () => <svg data-testid="search-icon" />,
+  BellIcon: () => <svg data-testid="bell-icon" />,
+  KeycapIcon: () => <svg data-testid="keycap-icon" />,
+  SparklesIcon: () => <svg data-testid="sparkles-icon" />,
+}));
 vi.mock('@/components/providers/NotificationProvider', () => ({
   useNotification: () => ({
     notifications: [],
@@ -66,6 +73,14 @@ describe('Header AI 키캡 진입 버튼', () => {
   it('비로그인 상태에서는 모바일 아이콘 버튼도 렌더하지 않는다', () => {
     render(<Header />);
     expect(screen.queryByRole('link', { name: 'AI 키캡 만들기' })).toBeNull();
+  });
+
+  it('모바일 버튼은 반짝이가 아니라 키캡 아이콘을 쓴다', () => {
+    // ✨은 "AI"만 말하고 무엇을 만드는지 말하지 않아 키캡 아이콘으로 교체했다.
+    render(<Header isLoggedIn nickname="tester" profileImageUrl={null} />);
+    const mobileLink = screen.getByRole('link', { name: 'AI 키캡 만들기' });
+    expect(mobileLink.querySelector('[data-testid="keycap-icon"]')).not.toBeNull();
+    expect(mobileLink.querySelector('[data-testid="sparkles-icon"]')).toBeNull();
   });
 
   it('로고가 모바일에서 축소되어 320px에서도 줄바꿈되지 않는다', () => {

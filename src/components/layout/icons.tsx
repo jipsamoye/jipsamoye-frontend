@@ -202,6 +202,29 @@ export function SparklesIcon({ filled = false, className = "w-5 h-5" }: IconProp
   );
 }
 
+/**
+ * AI 키캡 피규어 아이콘.
+ *
+ * 아티산 키캡 제품 사진과 같은 3/4(아이소메트릭) 각도로 그린다.
+ * 윗면 → 좌측면 → 우측면 순서이며, 아래로 갈수록 폭이 넓어져
+ * 키캡 특유의 테이퍼를 만든다. filled는 옆면 명도를 낮춰 입체를 유지한다.
+ */
+export function KeycapIcon({ filled = false, className = "w-5 h-5" }: IconProps & { className?: string } = {}) {
+  return filled ? (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className={className}>
+      <path d="M12 3.4 20.4 7.6 12 11.8 3.6 7.6Z" />
+      <path d="M3.6 7.6 12 11.8v8.8L2.4 16Z" opacity={0.5} />
+      <path d="M20.4 7.6 12 11.8v8.8L21.6 16Z" opacity={0.75} />
+    </svg>
+  ) : (
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M12 3.4 20.4 7.6 12 11.8 3.6 7.6Z" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M3.6 7.6 12 11.8v8.8L2.4 16Z" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M20.4 7.6 12 11.8v8.8L21.6 16Z" />
+    </svg>
+  );
+}
+
 export function UsersIcon({ filled = false }: IconProps = {}) {
   if (filled) {
     return (
