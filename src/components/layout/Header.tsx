@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { MagnifyingGlassIcon, BellIcon } from './icons';
+import { MagnifyingGlassIcon, BellIcon, SparklesIcon } from './icons';
 import Avatar from '@/components/common/Avatar';
 import { useNavigationGuard } from '@/components/providers/NavigationGuard';
 import { useNotification } from '@/components/providers/NotificationProvider';
@@ -67,11 +67,11 @@ export default function Header({ isLoggedIn = false, onLoginClick, onLogout, onM
   return (
     <header className="fixed top-0 left-0 right-0 z-50 h-16 bg-white border-b border-gray-300">
       <div className="flex items-center justify-between h-full px-4 lg:pl-6 lg:pr-8">
-        <button onClick={handleLogoClick} className="text-2xl font-bold text-gray-900 lg:pl-4">
+        <button onClick={handleLogoClick} className="shrink-0 text-xl lg:text-2xl font-bold text-gray-900 lg:pl-4">
           집사모여
         </button>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-1 lg:gap-3">
           {isLoggedIn ? (
             <>
               <Link
@@ -86,13 +86,20 @@ export default function Header({ isLoggedIn = false, onLoginClick, onLogout, onM
               >
                 {pathname.startsWith('/board') ? '글쓰기' : '자랑하기'}
               </Link>
-              <Link href="/search" className="p-2.5 text-gray-800 hover:text-gray-900">
+              <Link
+                href="/figurines/new"
+                aria-label="AI 키캡 만들기"
+                className="lg:hidden p-2 text-amber-500 hover:text-amber-600"
+              >
+                <SparklesIcon className="w-6 h-6" />
+              </Link>
+              <Link href="/search" className="p-2 lg:p-2.5 text-gray-800 hover:text-gray-900">
                 <MagnifyingGlassIcon className="w-6 h-6" />
               </Link>
               <div className="relative" ref={notificationRef}>
                 <button
                   onClick={() => setShowNotification(!showNotification)}
-                  className="relative p-2.5 text-gray-800 hover:text-gray-900"
+                  className="relative p-2 lg:p-2.5 text-gray-800 hover:text-gray-900"
                 >
                   <BellIcon className="w-6 h-6" />
                   {unreadCount > 0 && (
@@ -161,7 +168,7 @@ export default function Header({ isLoggedIn = false, onLoginClick, onLogout, onM
               <div className="relative" ref={dropdownRef}>
                 <button
                   onClick={() => setShowDropdown(!showDropdown)}
-                  className="pl-2.5 py-2.5 text-gray-800 hover:text-gray-900"
+                  className="pl-2 py-2 lg:pl-2.5 lg:py-2.5 text-gray-800 hover:text-gray-900"
                 >
                   <Avatar src={profileImageUrl ?? null} size="sm" />
                 </button>
