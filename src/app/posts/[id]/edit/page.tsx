@@ -25,7 +25,7 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
         }
         setPostData({
           title: res.data.title,
-          content: res.data.content,
+          content: res.data.content ?? '',
           imageUrls: res.data.imageUrls,
         });
       })
