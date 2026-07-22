@@ -299,6 +299,28 @@ export type DmRoomEvent =
   | { type: 'MESSAGE'; roomId: number; message: DmMessage }
   | { type: 'READ'; roomId: number; readerNickname: string; readAt: string };
 
+// AI 키캡 피규어 생성 상태 (GET /api/figurines/{jobId})
+export type FigurineStatus = 'PENDING' | 'PROCESSING' | 'COMPLETED' | 'FAILED';
+
+// AI 키캡 피규어 잡 (POST /api/figurines, GET /api/figurines/{jobId} 응답 data)
+export interface FigurineJob {
+  jobId: number;
+  status: FigurineStatus;
+  resultImageUrl: string | null;
+  failReason: string | null;
+  petPostId: number | null;
+}
+
+// 생성 요청 (POST /api/figurines)
+export interface FigurineCreateRequest {
+  sourceImageUrl: string;
+}
+
+// 자동 게시 응답 (POST /api/figurines/{jobId}/post)
+export interface FigurinePostResponse {
+  petPostId: number;
+}
+
 // 랭킹 페이지 API 응답 (GET /api/posts/ranking)
 export interface RankingPageResponse {
   period: 'WEEKLY' | 'MONTHLY';
