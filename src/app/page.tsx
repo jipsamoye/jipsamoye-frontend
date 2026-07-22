@@ -157,6 +157,7 @@ function HomeContent() {
     commentCount: p.commentCount,
     nickname: p.nickname,
     profileImageUrl: p.profileImageUrl,
+    aiGenerated: p.aiGenerated,
   }));
 
   return (
