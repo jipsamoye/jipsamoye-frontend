@@ -75,6 +75,12 @@ export default function Header({ isLoggedIn = false, onLoginClick, onLogout, onM
           {isLoggedIn ? (
             <>
               <Link
+                href="/figurines/new"
+                className="hidden lg:flex items-center px-4 py-2 border border-amber-400 text-amber-600 rounded-xl text-base font-medium hover:bg-amber-50 transition-all duration-200"
+              >
+                AI 키캡 🧸
+              </Link>
+              <Link
                 href={pathname.startsWith('/board') ? '/board/new' : '/posts/new'}
                 className="hidden lg:flex items-center px-6 py-2 bg-amber-500 text-white rounded-xl text-base font-medium hover:bg-amber-600 transition-all duration-200"
               >
