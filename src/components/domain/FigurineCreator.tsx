@@ -89,7 +89,7 @@ export default function FigurineCreator() {
   const busy = uploading || phase === 'creating';
 
   return (
-    <main className="max-w-xl mx-auto px-4 py-10">
+    <div className="max-w-xl mx-auto py-10">
       <h1 className="text-2xl font-bold text-gray-900">AI 키캡 피규어</h1>
       <p className="mt-2 text-sm text-gray-600">
         우리 애 사진을 올리면 아티산 키캡 위 미니 피규어로 만들어 드려요.
@@ -182,6 +182,6 @@ export default function FigurineCreator() {
           </button>
         </section>
       )}
-    </main>
+    </div>
   );
 }

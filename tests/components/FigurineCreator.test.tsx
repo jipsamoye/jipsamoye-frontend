@@ -80,6 +80,17 @@ describe('FigurineCreator', () => {
     expect(screen.getByText('키캡 피규어 만들기')).toBeDisabled();
   });
 
+  it('10MB 초과 파일은 토스트 안내 후 무시한다', () => {
+    const { container } = render(<FigurineCreator />);
+    const bigFile = new File(['x'], 'cat.jpg', { type: 'image/jpeg' });
+    Object.defineProperty(bigFile, 'size', { value: 11 * 1024 * 1024 });
+    selectFile(container, bigFile);
+
+    expect(toastMock.showToast).toHaveBeenCalledWith('10MB 이하 이미지만 올릴 수 있어요');
+    expect(screen.queryByAltText('선택한 사진 미리보기')).not.toBeInTheDocument();
+    expect(screen.getByText('키캡 피규어 만들기')).toBeDisabled();
+  });
+
   it('생성 클릭: 업로드 후 반환된 URL로 start를 호출한다', async () => {
     uploadMock.uploadPostImage.mockResolvedValueOnce('https://cdn/posts/1/a.webp');
     const { container } = render(<FigurineCreator />);
