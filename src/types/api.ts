@@ -65,6 +65,8 @@ export interface PetPost {
   updatedAt: string;
   /** 백엔드 계약 추가 필요: 현재 유저의 좋아요 여부 */
   isLiked?: boolean;
+  /** 백엔드 계약 추가 필요: AI 키캡 생성 게시글 여부 (없으면 제목 휴리스틱으로 판별) */
+  aiGenerated?: boolean;
 }
 
 // 게시글 목록 (카드)
@@ -77,6 +79,8 @@ export interface PetPostListItem {
   nickname: string;
   profileImageUrl?: string | null;
   createdAt: string;
+  /** 백엔드 계약 추가 필요: AI 키캡 생성 게시글 여부 (없으면 제목 휴리스틱으로 판별) */
+  aiGenerated?: boolean;
 }
 
 // 댓글
