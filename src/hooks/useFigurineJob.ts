@@ -47,14 +47,18 @@ const DEFAULT_FAIL_MESSAGE = '이미지 생성에 실패했어요. 다른 사진
  * - **setTimeout 재귀**(setInterval 금지) — 응답이 늦어도 중첩 호출이 쌓이지 않음.
  * - **일시 네트워크 오류 내성**: 폴링 GET이 실패해도 백스톱 한도까지 계속 재시도.
  * - **401은 전파**: api 래퍼가 unauthorizedHandler 호출 + throw → 폴링 중단(전역 처리).
- * - **unmount cleanup**: cancelled 플래그 + clearTimeout. 언마운트 후 setState 금지.
+ * - **세대(runId) 가드**: unmount/reset뿐 아니라 겹치는 start() 호출(이전 세대 무효화)도
+ *   구분해야 하므로 단순 boolean 대신 세대 카운터를 사용한다(useUserSearch의 loadingRef와
+ *   같은 관례). start()마다 runId를 증가시키고, await 이후 체크포인트마다
+ *   `runId !== runIdRef.current`면 즉시 return — 이전 세대의 응답/타이머 콜백은 전부 no-op.
+ *   unmount cleanup과 reset()도 동일하게 runId를 증가시켜 진행 중이던 세대를 무효화한다.
  */
 export function useFigurineJob(): UseFigurineJobResult {
   const [job, setJob] = useState<FigurineJob | null>(null);
   const [phase, setPhase] = useState<FigurinePhase>('idle');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const cancelledRef = useRef(false);
+  const runIdRef = useRef(0);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pollCountRef = useRef(0);
 
@@ -66,10 +70,10 @@ export function useFigurineJob(): UseFigurineJobResult {
   }, []);
 
   // poll 자신을 재귀 setTimeout에서 참조해야 하므로 ref로 stale 클로저를 끊는다.
-  const pollRef = useRef<(jobId: number) => void>(() => {});
+  const pollRef = useRef<(jobId: number, runId: number) => void>(() => {});
 
-  const scheduleNext = useCallback((jobId: number) => {
-    timerRef.current = setTimeout(() => pollRef.current(jobId), POLL_INTERVAL_MS);
+  const scheduleNext = useCallback((jobId: number, runId: number) => {
+    timerRef.current = setTimeout(() => pollRef.current(jobId, runId), POLL_INTERVAL_MS);
   }, []);
 
   const failByTimeout = useCallback(() => {
@@ -77,14 +81,14 @@ export function useFigurineJob(): UseFigurineJobResult {
     setErrorMessage(TIMEOUT_MESSAGE);
   }, []);
 
-  const poll = useCallback(async (jobId: number) => {
-    if (cancelledRef.current) return;
+  const poll = useCallback(async (jobId: number, runId: number) => {
+    if (runId !== runIdRef.current) return;
 
     let res: ApiResponse<FigurineJob>;
     try {
       res = await api.get<FigurineJob>(`/api/figurines/${jobId}`, { silent: true });
     } catch (err) {
-      if (cancelledRef.current) return;
+      if (runId !== runIdRef.current) return;
       if ((err as ApiResponse<null>)?.status === 401) {
         clearTimer();
         return;
@@ -95,11 +99,11 @@ export function useFigurineJob(): UseFigurineJobResult {
         clearTimer();
         return;
       }
-      scheduleNext(jobId);
+      scheduleNext(jobId, runId);
       return;
     }
 
-    if (cancelledRef.current) return;
+    if (runId !== runIdRef.current) return;
 
     const next = res.data;
     setJob(next);
@@ -122,7 +126,7 @@ export function useFigurineJob(): UseFigurineJobResult {
       clearTimer();
       return;
     }
-    scheduleNext(jobId);
+    scheduleNext(jobId, runId);
   }, [clearTimer, scheduleNext, failByTimeout]);
 
   useEffect(() => {
@@ -130,9 +134,10 @@ export function useFigurineJob(): UseFigurineJobResult {
   }, [poll]);
 
   const start = useCallback(async (sourceImageUrl: string) => {
-    cancelledRef.current = false;
+    const runId = ++runIdRef.current;
     clearTimer();
     pollCountRef.current = 0;
+    setJob(null);
     setErrorMessage(null);
     setPhase('creating');
 
@@ -140,7 +145,7 @@ export function useFigurineJob(): UseFigurineJobResult {
     try {
       res = await api.post<FigurineJob>('/api/figurines', { sourceImageUrl });
     } catch (err) {
-      if (cancelledRef.current) return;
+      if (runId !== runIdRef.current) return;
       // 401은 api 래퍼가 이미 토스트+전역 처리. 그 외에만 사유 안내.
       if ((err as ApiResponse<null>)?.status !== 401) {
         showToast((err as ApiResponse<null>)?.message || '생성 요청에 실패했어요');
@@ -149,14 +154,14 @@ export function useFigurineJob(): UseFigurineJobResult {
       return;
     }
 
-    if (cancelledRef.current) return;
+    if (runId !== runIdRef.current) return;
     setJob(res.data);
     setPhase('generating');
-    scheduleNext(res.data.jobId);
+    scheduleNext(res.data.jobId, runId);
   }, [clearTimer, scheduleNext]);
 
   const reset = useCallback(() => {
-    cancelledRef.current = true;
+    runIdRef.current += 1;
     clearTimer();
     pollCountRef.current = 0;
     setJob(null);
@@ -164,10 +169,10 @@ export function useFigurineJob(): UseFigurineJobResult {
     setErrorMessage(null);
   }, [clearTimer]);
 
-  // unmount cleanup: 진행 중 폴링 무력화 + 타이머 해제.
+  // unmount cleanup: 진행 중이던 세대를 무효화 + 타이머 해제.
   useEffect(() => {
     return () => {
-      cancelledRef.current = true;
+      runIdRef.current += 1;
       clearTimer();
     };
   }, [clearTimer]);

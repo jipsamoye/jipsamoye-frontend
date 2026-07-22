@@ -168,4 +168,61 @@ describe('useFigurineJob — 생성/폴링', () => {
     });
     expect(apiMock.get.mock.calls.length).toBe(callsAtReset);
   });
+
+  it('겹치는 start(): 새 start가 이전 폴링 세대를 무효화한다', async () => {
+    // 첫 번째 start의 POST는 지연 resolve, 두 번째는 즉시 resolve
+    let resolveFirst: (v: unknown) => void = () => {};
+    apiMock.post
+      .mockImplementationOnce(() => new Promise((resolve) => { resolveFirst = resolve; }))
+      .mockResolvedValueOnce(successRes(makeJob({ jobId: 2 })));
+
+    const { result } = renderHook(() => useFigurineJob());
+
+    let firstStart: Promise<void>;
+    act(() => {
+      firstStart = result.current.start('https://cdn/posts/1/a.webp');
+    });
+    await act(async () => {
+      await result.current.start('https://cdn/posts/1/b.webp');
+    });
+    // 이제 첫 번째 POST가 뒤늦게 resolve — 이전 세대이므로 무시되어야 함
+    await act(async () => {
+      resolveFirst(successRes(makeJob({ jobId: 1 })));
+      await firstStart!;
+    });
+
+    expect(result.current.job?.jobId).toBe(2);
+
+    // 폴링은 jobId=2 한 루프만 돌아야 함
+    apiMock.get.mockResolvedValue(successRes(makeJob({ jobId: 2, status: 'PROCESSING' })));
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(POLL_INTERVAL_MS);
+    });
+    expect(apiMock.get).toHaveBeenCalledTimes(1);
+    expect(apiMock.get).toHaveBeenCalledWith('/api/figurines/2', { silent: true });
+  });
+
+  it('완료 후 재시도 start(): 이전 job이 즉시 초기화되고, 실패 시 idle + job=null', async () => {
+    apiMock.post.mockResolvedValueOnce(successRes(makeJob()));
+    const { result } = renderHook(() => useFigurineJob());
+    await act(async () => {
+      await result.current.start('https://cdn/posts/1/a.webp');
+    });
+    apiMock.get.mockResolvedValueOnce(
+      successRes(makeJob({ status: 'COMPLETED', resultImageUrl: 'https://cdn/results/1.png' }))
+    );
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(POLL_INTERVAL_MS);
+    });
+    expect(result.current.phase).toBe('completed');
+
+    // 재시도 — 새 POST 실패
+    apiMock.post.mockRejectedValueOnce({ status: 400, code: 'BAD_REQUEST', message: '잘못된 요청', data: null });
+    await act(async () => {
+      await result.current.start('https://cdn/posts/1/b.webp');
+    });
+
+    expect(result.current.phase).toBe('idle');
+    expect(result.current.job).toBeNull();
+  });
 });
