@@ -34,7 +34,7 @@ interface ImageItem {
 interface PostEditorProps {
   mode: 'create' | 'edit';
   initialTitle?: string;
-  initialContent?: string;
+  initialContent?: string | null;
   initialImageUrls?: string[];
   postId?: string;
 }
@@ -44,10 +44,11 @@ let imageIdCounter = 0;
 export default function PostEditor({
   mode,
   initialTitle = '',
-  initialContent = '',
+  initialContent: initialContentProp,
   initialImageUrls = EMPTY_ARRAY,
   postId,
 }: PostEditorProps) {
+  const initialContent = initialContentProp ?? '';
   const router = useRouter();
   const { user } = useAuthContext();
   const { setBlocked } = useNavigationGuard();

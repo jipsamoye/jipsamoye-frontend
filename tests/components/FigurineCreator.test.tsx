@@ -3,7 +3,7 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import type { FigurineJob, User } from '@/types/api';
 import type { FigurinePhase } from '@/hooks/useFigurineJob';
 
-const { hookState, routerMock, authMock, uploadMock, toastMock } = vi.hoisted(() => ({
+const { hookState, routerMock, authMock, uploadMock, toastMock, preloadMock } = vi.hoisted(() => ({
   hookState: {
     job: null as FigurineJob | null,
     phase: 'idle' as FigurinePhase,
@@ -16,6 +16,7 @@ const { hookState, routerMock, authMock, uploadMock, toastMock } = vi.hoisted(()
   authMock: { user: null as User | null, loading: false },
   uploadMock: { uploadPostImage: vi.fn() },
   toastMock: { showToast: vi.fn() },
+  preloadMock: { preloadImage: vi.fn() },
 }));
 
 vi.mock('next/navigation', () => ({ useRouter: () => routerMock }));
@@ -23,6 +24,7 @@ vi.mock('@/components/providers/AuthProvider', () => ({ useAuthContext: () => au
 vi.mock('@/hooks/useFigurineJob', () => ({ useFigurineJob: () => hookState }));
 vi.mock('@/lib/uploadImage', () => uploadMock);
 vi.mock('@/components/common/Toast', () => ({ showToast: toastMock.showToast }));
+vi.mock('@/lib/preloadImage', () => ({ preloadImage: preloadMock.preloadImage }));
 
 import FigurineCreator from '@/components/domain/FigurineCreator';
 
@@ -50,6 +52,7 @@ describe('FigurineCreator', () => {
     hookState.phase = 'idle';
     hookState.errorMessage = null;
     authMock.user = sampleUser;
+    preloadMock.preloadImage.mockResolvedValue(undefined);
     Object.defineProperty(URL, 'createObjectURL', {
       writable: true, configurable: true, value: vi.fn(() => 'blob:preview'),
     });
@@ -124,14 +127,40 @@ describe('FigurineCreator', () => {
     expect(screen.getByText('키캡 피규어를 만들고 있어요…')).toBeInTheDocument();
   });
 
-  it('completed: 결과 이미지 + 게시/다시 만들기 버튼을 렌더한다', () => {
+  it('completed: 프리로드 완료 후 결과 이미지 + 게시/다시 만들기 버튼을 렌더한다', async () => {
     hookState.phase = 'completed';
     hookState.job = completedJob();
     render(<FigurineCreator />);
 
-    expect(screen.getByAltText('완성된 AI 키캡 피규어')).toBeInTheDocument();
+    expect(await screen.findByAltText('완성된 AI 키캡 피규어')).toBeInTheDocument();
+    expect(preloadMock.preloadImage).toHaveBeenCalledWith('https://cdn/results/1.png');
     expect(screen.getByText('자랑 피드에 게시하기')).toBeEnabled();
     expect(screen.getByText('다른 사진으로 다시 만들기')).toBeEnabled();
+  });
+
+  it('completed 직후 프리로드가 끝나기 전엔 로딩 화면을 유지한다', () => {
+    preloadMock.preloadImage.mockImplementationOnce(() => new Promise<void>(() => {}));
+    hookState.phase = 'completed';
+    hookState.job = completedJob();
+    render(<FigurineCreator />);
+
+    expect(screen.getByText('키캡 피규어를 만들고 있어요…')).toBeInTheDocument();
+    expect(screen.queryByAltText('완성된 AI 키캡 피규어')).not.toBeInTheDocument();
+  });
+
+  it('프리로드 완료 시 결과 화면으로 전환된다', async () => {
+    let resolvePreload!: () => void;
+    preloadMock.preloadImage.mockImplementationOnce(
+      () => new Promise<void>((r) => { resolvePreload = r; })
+    );
+    hookState.phase = 'completed';
+    hookState.job = completedJob();
+    render(<FigurineCreator />);
+    expect(screen.queryByAltText('완성된 AI 키캡 피규어')).not.toBeInTheDocument();
+
+    resolvePreload();
+    expect(await screen.findByAltText('완성된 AI 키캡 피규어')).toBeInTheDocument();
+    expect(screen.queryByText('키캡 피규어를 만들고 있어요…')).not.toBeInTheDocument();
   });
 
   it('게시 클릭: publish 성공 시 게시글로 이동한다', async () => {
@@ -140,7 +169,7 @@ describe('FigurineCreator', () => {
     hookState.publish.mockResolvedValueOnce(77);
     render(<FigurineCreator />);
 
-    fireEvent.click(screen.getByText('자랑 피드에 게시하기'));
+    fireEvent.click(await screen.findByText('자랑 피드에 게시하기'));
 
     await waitFor(() => {
       expect(hookState.publish).toHaveBeenCalled();

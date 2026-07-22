@@ -55,7 +55,7 @@ export interface User {
 export interface PetPost {
   id: number;
   title: string;
-  content: string;
+  content: string | null;  // AI 키캡 자동 게시 글은 내용 없이 생성됨
   imageUrls: string[];
   likeCount: number;
   commentCount: number;
