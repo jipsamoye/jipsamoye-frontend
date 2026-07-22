@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { api } from '@/lib/api';
 import { showToast } from '@/components/common/Toast';
-import type { ApiResponse, FigurineJob } from '@/types/api';
+import type { ApiResponse, FigurineJob, FigurinePostResponse } from '@/types/api';
 
 export const POLL_INTERVAL_MS = 2_500;
 // 서버가 5분 초과 작업을 자동 FAILED 처리 → 클라이언트는 네트워크 단절 대비 6분 백스톱만 유지
@@ -33,6 +33,11 @@ interface UseFigurineJobResult {
   errorMessage: string | null;
   /** 업로드 완료된 sourceImageUrl로 생성 요청 + 폴링 시작 */
   start: (sourceImageUrl: string) => Promise<void>;
+  /**
+   * COMPLETED 상태에서 자랑 피드 자동 게시. 성공/이미 게시(409 복원) 시 petPostId,
+   * 실패 시 null 반환(completed로 복귀해 재시도 가능).
+   */
+  publish: () => Promise<number | null>;
   /** 전체 초기화 (다시 시도) */
   reset: () => void;
 }
@@ -160,6 +165,46 @@ export function useFigurineJob(): UseFigurineJobResult {
     scheduleNext(res.data.jobId, runId);
   }, [clearTimer, scheduleNext]);
 
+  const publish = useCallback(async (): Promise<number | null> => {
+    if (!job || phase !== 'completed') return null;
+    // 현재 세대 캡처 — 게시 중 reset()/unmount가 세대를 올리면 이후 setState를 모두 건너뛴다.
+    const runId = runIdRef.current;
+    setPhase('posting');
+
+    try {
+      const res = await api.post<FigurinePostResponse>(`/api/figurines/${job.jobId}/post`);
+      const petPostId = res.data.petPostId;
+      if (runId !== runIdRef.current) return petPostId;
+      setJob((prev) => (prev ? { ...prev, petPostId } : prev));
+      setPhase('posted');
+      return petPostId;
+    } catch (err) {
+      if (runId !== runIdRef.current) return null;
+
+      // 이미 게시된 잡(409) — GET으로 petPostId를 복원해 게시 완료로 수렴
+      if ((err as ApiResponse<null>)?.code === 'FIGURINE_ALREADY_POSTED') {
+        try {
+          const res = await api.get<FigurineJob>(`/api/figurines/${job.jobId}`, { silent: true });
+          if (runId === runIdRef.current && res.data.petPostId != null) {
+            setJob(res.data);
+            setPhase('posted');
+            return res.data.petPostId;
+          }
+        } catch {
+          // 복원 실패 — 아래 공통 복귀 처리로 진행
+        }
+      }
+
+      if (runId === runIdRef.current) {
+        if ((err as ApiResponse<null>)?.status !== 401) {
+          showToast((err as ApiResponse<null>)?.message || '게시에 실패했어요');
+        }
+        setPhase('completed'); // 버튼 재활성화 — 재시도 가능
+      }
+      return null;
+    }
+  }, [job, phase]);
+
   const reset = useCallback(() => {
     runIdRef.current += 1;
     clearTimer();
@@ -177,5 +222,5 @@ export function useFigurineJob(): UseFigurineJobResult {
     };
   }, [clearTimer]);
 
-  return { job, phase, errorMessage, start, reset };
+  return { job, phase, errorMessage, start, publish, reset };
 }

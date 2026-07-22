@@ -226,3 +226,101 @@ describe('useFigurineJob — 생성/폴링', () => {
     expect(result.current.job).toBeNull();
   });
 });
+
+describe('useFigurineJob — 게시(publish)', () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    apiMock.get.mockReset();
+    apiMock.post.mockReset();
+    toastMock.showToast.mockReset();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  // 헬퍼: completed 상태까지 진행시킨 훅 반환
+  async function renderCompleted() {
+    apiMock.post.mockResolvedValueOnce(successRes(makeJob()));
+    const rendered = renderHook(() => useFigurineJob());
+    await act(async () => {
+      await rendered.result.current.start('https://cdn/posts/1/a.webp');
+    });
+    apiMock.get.mockResolvedValueOnce(
+      successRes(makeJob({ status: 'COMPLETED', resultImageUrl: 'https://cdn/results/1.png' }))
+    );
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(POLL_INTERVAL_MS);
+    });
+    expect(rendered.result.current.phase).toBe('completed');
+    apiMock.post.mockReset();
+    apiMock.get.mockReset();
+    return rendered;
+  }
+
+  it('성공: POST /{jobId}/post → phase=posted, petPostId 반환', async () => {
+    const { result } = await renderCompleted();
+    apiMock.post.mockResolvedValueOnce({ status: 201, code: 'SUCCESS', message: '', data: { petPostId: 77 } });
+
+    let petPostId: number | null = null;
+    await act(async () => {
+      petPostId = await result.current.publish();
+    });
+
+    expect(apiMock.post).toHaveBeenCalledWith('/api/figurines/1/post');
+    expect(petPostId).toBe(77);
+    expect(result.current.phase).toBe('posted');
+    expect(result.current.job?.petPostId).toBe(77);
+  });
+
+  it('409 FIGURINE_ALREADY_POSTED: GET으로 petPostId 복원 후 posted 처리', async () => {
+    const { result } = await renderCompleted();
+    apiMock.post.mockRejectedValueOnce({
+      status: 409, code: 'FIGURINE_ALREADY_POSTED', message: '이미 게시된 작품이에요', data: null,
+    });
+    apiMock.get.mockResolvedValueOnce(
+      successRes(makeJob({ status: 'COMPLETED', resultImageUrl: 'https://cdn/results/1.png', petPostId: 77 }))
+    );
+
+    let petPostId: number | null = null;
+    await act(async () => {
+      petPostId = await result.current.publish();
+    });
+
+    expect(petPostId).toBe(77);
+    expect(result.current.phase).toBe('posted');
+  });
+
+  it('일반 실패(5xx): 토스트 안내 후 phase=completed로 복귀, null 반환', async () => {
+    const { result } = await renderCompleted();
+    apiMock.post.mockRejectedValueOnce({
+      status: 500, code: 'INTERNAL_ERROR', message: '잠시 후 다시 시도해 주세요', data: null,
+    });
+
+    let petPostId: number | null = null;
+    await act(async () => {
+      petPostId = await result.current.publish();
+    });
+
+    expect(petPostId).toBeNull();
+    expect(toastMock.showToast).toHaveBeenCalledWith('잠시 후 다시 시도해 주세요');
+    expect(result.current.phase).toBe('completed');
+  });
+
+  it('완료 전(phase!==completed)에는 아무 요청도 보내지 않는다', async () => {
+    apiMock.post.mockResolvedValueOnce(successRes(makeJob()));
+    const { result } = renderHook(() => useFigurineJob());
+    await act(async () => {
+      await result.current.start('https://cdn/posts/1/a.webp');
+    });
+    apiMock.post.mockReset();
+
+    let petPostId: number | null = null;
+    await act(async () => {
+      petPostId = await result.current.publish();
+    });
+
+    expect(petPostId).toBeNull();
+    expect(apiMock.post).not.toHaveBeenCalled();
+  });
+});
