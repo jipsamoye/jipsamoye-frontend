@@ -5,7 +5,9 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import Thumbnail from '@/components/common/Thumbnail';
 import Avatar from '@/components/common/Avatar';
+import AiKeycapBadge from '@/components/common/AiKeycapBadge';
 import ProfileHoverCard from '@/components/domain/ProfileHoverCard';
+import { isAiKeycapPost } from '@/lib/aiPost';
 
 function FadeImage({ src, alt, eager }: { src: string; alt: string; eager?: boolean }) {
   const [loaded, setLoaded] = useState(false);
@@ -33,6 +35,7 @@ interface PopularItem {
   commentCount?: number;
   nickname?: string;
   profileImageUrl?: string | null;
+  aiGenerated?: boolean;
 }
 
 interface PopularSliderProps {
@@ -128,6 +131,9 @@ export default function PopularSlider({ items }: PopularSliderProps) {
                 <FadeImage src={item.thumbnailUrl} alt={item.label} eager={i < 4} />
               ) : (
                 <div className="w-full h-full flex items-center justify-center text-gray-400 text-4xl">🐾</div>
+              )}
+              {isAiKeycapPost({ title: item.label, aiGenerated: item.aiGenerated }) && (
+                <AiKeycapBadge className="absolute top-3 left-3" />
               )}
             </div>
             <div className="pt-3 pb-1">
