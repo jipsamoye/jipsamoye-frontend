@@ -6,7 +6,7 @@ import { useAuthContext } from '@/components/providers/AuthProvider';
 import { useFigurineJob } from '@/hooks/useFigurineJob';
 import { uploadPostImage } from '@/lib/uploadImage';
 import { showToast } from '@/components/common/Toast';
-import DetailImage from '@/components/common/DetailImage';
+import { preloadImage } from '@/lib/preloadImage';
 import { ALLOWED_IMAGE_EXTS, POST_CONFIG } from '@/lib/constants';
 import type { ApiResponse } from '@/types/api';
 
@@ -23,7 +23,25 @@ export default function FigurineCreator() {
   const [file, setFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [revealReady, setRevealReady] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // 결과 이미지가 캐시에 준비된 뒤에만 결과 화면으로 전환 — 빈 화면·점진 렌더 방지
+  useEffect(() => {
+    if (phase !== 'completed' || !job?.resultImageUrl) return;
+    let cancelled = false;
+    preloadImage(job.resultImageUrl).then(() => {
+      if (!cancelled) setRevealReady(true);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [phase, job?.resultImageUrl]);
+
+  // 다시 만들기/초기화 시 다음 결과를 위해 리셋
+  useEffect(() => {
+    if (phase === 'idle') setRevealReady(false);
+  }, [phase]);
 
   // objectURL 누수 방지
   useEffect(() => {
@@ -129,7 +147,7 @@ export default function FigurineCreator() {
         </section>
       )}
 
-      {phase === 'generating' && (
+      {(phase === 'generating' || (phase === 'completed' && !revealReady)) && (
         <section className="flex flex-col items-center mt-10 text-center">
           {previewUrl && (
             /* eslint-disable-next-line @next/next/no-img-element -- 로컬 blob 미리보기 */
@@ -146,12 +164,13 @@ export default function FigurineCreator() {
         </section>
       )}
 
-      {(phase === 'completed' || phase === 'posting' || phase === 'posted') && job?.resultImageUrl && (
-        <section className="mt-6">
-          <DetailImage
+      {(phase === 'posting' || phase === 'posted' || (phase === 'completed' && revealReady)) && job?.resultImageUrl && (
+        <section className="mt-6 animate-[fadeIn_0.5s_ease-out]">
+          {/* eslint-disable-next-line @next/next/no-img-element -- 방금 생성된 결과라 Lambda 썸네일이 없을 수 있어 원본을 직접 표시 */}
+          <img
             src={job.resultImageUrl}
             alt="완성된 AI 키캡 피규어"
-            loading="eager"
+            decoding="async"
             className="w-full rounded-2xl"
           />
           <button
