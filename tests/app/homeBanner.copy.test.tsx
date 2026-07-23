@@ -70,4 +70,12 @@ describe('Home 배너 문구', () => {
     const highlight = screen.getByText('키캡 피규어');
     expect(highlight).toHaveClass('text-amber-600', 'font-semibold');
   });
+
+  it('배너에 발자국(🐾) 장식이 없다', () => {
+    render(<Home />);
+
+    const banner = screen.getByRole('heading', { level: 1 }).closest('section');
+    expect(banner).not.toBeNull();
+    expect(banner!.textContent).not.toContain('🐾');
+  });
 });
