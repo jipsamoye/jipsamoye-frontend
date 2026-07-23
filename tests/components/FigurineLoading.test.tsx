@@ -85,6 +85,30 @@ describe('FigurineLoading — 스캔 현상 대기 화면', () => {
     expect(container.querySelectorAll('.figurine-scan-after')).toHaveLength(1);
   });
 
+  it('빔이 지나간 자리는 색 보정 없는 원본 사진이다', () => {
+    // 브랜드색 덮개나 채도 부스트를 얹으면 "원본이 드러난다"가 아니라
+    // "우리 색으로 덧칠된다"가 되어, 흑백 → 원본 대비가 흐려진다.
+    const { container } = render(<FigurineLoading previewUrl="blob:preview" startedAt={T0} />);
+    const after = container.querySelector('.figurine-scan-after');
+    expect(after).not.toBeNull();
+
+    const img = after!.querySelector('img');
+    expect(img).not.toBeNull();
+    expect(img!.className).not.toMatch(/saturate|sepia|contrast|brightness|hue-rotate/);
+
+    // after 레이어 안에 사진을 덮는 오버레이가 없어야 한다
+    expect(after!.querySelectorAll('img')).toHaveLength(1);
+    expect(after!.innerHTML).not.toMatch(/amber-\d+\/|from-amber|to-amber|bg-gradient/);
+  });
+
+  it('before 레이어만 흑백이다 (대비의 출처)', () => {
+    const { container } = render(<FigurineLoading previewUrl="blob:preview" startedAt={T0} />);
+    const before = container.querySelector('img:not(.figurine-scan-after img)');
+    expect(before?.className).toContain('grayscale');
+    expect(container.querySelector('.figurine-scan-after img')?.className)
+      .not.toContain('grayscale');
+  });
+
   it('previewUrl이 없으면 이미지 대신 키캡 플레이스홀더를 그린다', () => {
     const { container } = render(<FigurineLoading previewUrl={null} startedAt={T0} />);
     expect(container.querySelectorAll('img')).toHaveLength(0);

@@ -48,15 +48,15 @@ export default function FigurineLoading({
               alt=""
               className="absolute inset-0 w-full h-full object-cover grayscale opacity-45"
             />
-            {/* after — 빔이 지나간 영역. 같은 사진의 컬러 + 따뜻한 틴트 */}
+            {/* after — 빔이 지나간 영역. 색 보정 없는 원본 사진 그대로.
+                틴트를 얹으면 "원본이 드러난다"가 아니라 "우리 색으로 덧칠된다"가 된다. */}
             <div className="figurine-scan-after absolute inset-0">
               {/* eslint-disable-next-line @next/next/no-img-element -- 로컬 blob 미리보기 */}
               <img
                 src={previewUrl}
                 alt=""
-                className="absolute inset-0 w-full h-full object-cover saturate-[1.15]"
+                className="absolute inset-0 w-full h-full object-cover"
               />
-              <div className="absolute inset-0 bg-gradient-to-b from-amber-500/20 to-amber-300/10" />
             </div>
           </>
         ) : (
