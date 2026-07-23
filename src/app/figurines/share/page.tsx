@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import DetailImage from '@/components/common/DetailImage';
 import { getSharedFigurineImageUrl } from '@/lib/figurineShare';
 
 /**
@@ -47,8 +48,8 @@ export default async function FigurineSharePage({ searchParams }: FigurineShareP
       <p className="mt-2 text-sm text-gray-600">
         우리 애 사진을 올리면 아티산 키캡 위 미니 피규어로 만들어 드려요.
       </p>
-      {/* eslint-disable-next-line @next/next/no-img-element -- 생성 직후 공유될 수 있어 Lambda 썸네일 없이 원본을 직접 표시 */}
-      <img src={imageUrl} alt="AI 키캡 피규어" decoding="async" className="mt-6 w-full rounded-2xl" />
+      {/* 원본(1024 PNG, ~1.3MB) 대신 800 웹피 썸네일(~35KB) 우선 — 생성 직후 썸네일이 없으면 DetailImage가 원본으로 폴백 */}
+      <DetailImage src={imageUrl} alt="AI 키캡 피규어" loading="eager" className="mt-6 w-full rounded-2xl" />
       <Link
         href="/figurines/new"
         className="block w-full mt-4 px-6 py-3 bg-amber-500 text-white rounded-xl text-base font-medium text-center hover:bg-amber-600 transition-all duration-200"
