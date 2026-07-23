@@ -111,6 +111,29 @@ describe('Header AI 키캡 진입 버튼', () => {
     expect(icon?.getAttribute('class')).toContain('h-6');
   });
 
+  it('모바일 버튼에 "AI 키캡" 텍스트 라벨이 보인다', () => {
+    // 아이콘만으로는 무엇을 만드는 버튼인지 알기 어려워 라벨을 추가했다.
+    render(<Header isLoggedIn nickname="tester" profileImageUrl={null} />);
+    const mobileLink = screen.getByRole('link', { name: 'AI 키캡 만들기' });
+    expect(mobileLink.textContent).toContain('AI 키캡');
+  });
+
+  it('모바일 버튼 라벨은 아이콘 아래 세로 스택으로 배치된다', () => {
+    render(<Header isLoggedIn nickname="tester" profileImageUrl={null} />);
+    const mobileLink = screen.getByRole('link', { name: 'AI 키캡 만들기' });
+    expect(mobileLink.className).toContain('flex-col');
+    // 헤더 높이를 해치지 않도록 라벨은 10px 고정 크기를 쓴다
+    const label = mobileLink.querySelector('span');
+    expect(label?.textContent).toBe('AI 키캡');
+    expect(label?.className).toContain('text-[10px]');
+  });
+
+  it('비로그인 상태의 모바일 버튼에도 라벨이 보인다', () => {
+    render(<Header />);
+    const mobileLink = screen.getByRole('link', { name: 'AI 키캡 만들기' });
+    expect(mobileLink.textContent).toContain('AI 키캡');
+  });
+
   it('로고가 모바일에서 축소되어 320px에서도 줄바꿈되지 않는다', () => {
     // 아이콘이 하나 늘어나면 320px에서 로고가 2줄로 접히는 회귀가 있었다.
     // text-xl(모바일) + shrink-0 조합이 이를 막는다.
