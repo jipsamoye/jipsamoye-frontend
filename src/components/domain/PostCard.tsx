@@ -59,7 +59,9 @@ export default function PostCard({
               🐾
             </div>
           )}
-          {isAiKeycapPost(post) && <AiKeycapBadge className="absolute top-3 left-3" />}
+          {isAiKeycapPost(post) && (
+            <AiKeycapBadge size="sm" className="absolute top-2 left-2 md:top-3 md:left-3" />
+          )}
         </div>
         <div className="pt-3 pb-1">
           <div className="flex items-center gap-2 mb-2 min-w-0">

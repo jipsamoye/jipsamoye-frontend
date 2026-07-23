@@ -19,4 +19,20 @@ describe('AiKeycapBadge', () => {
     const { getByText } = render(<AiKeycapBadge />);
     expect(getByText('AI 키캡').textContent).toBe('AI 키캡');
   });
+
+  it('기본(size 미지정)은 고정 크기(text-sm)를 유지한다 — 상세 페이지용', () => {
+    const { getByText } = render(<AiKeycapBadge />);
+    const badge = getByText('AI 키캡');
+    expect(badge.className).toContain('text-sm');
+    expect(badge.className).not.toContain('text-xs');
+  });
+
+  it('size="sm"이면 모바일에서 축소되고 md 이상에서 기본 크기로 복귀한다 — 카드용', () => {
+    const { getByText } = render(<AiKeycapBadge size="sm" />);
+    const badge = getByText('AI 키캡');
+    expect(badge.className).toContain('text-xs');
+    expect(badge.className).toContain('md:text-sm');
+    expect(badge.className).toContain('px-2.5');
+    expect(badge.className).toContain('md:px-4');
+  });
 });

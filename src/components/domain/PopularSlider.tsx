@@ -133,7 +133,7 @@ export default function PopularSlider({ items }: PopularSliderProps) {
                 <div className="w-full h-full flex items-center justify-center text-gray-400 text-4xl">🐾</div>
               )}
               {isAiKeycapPost({ title: item.label, aiGenerated: item.aiGenerated }) && (
-                <AiKeycapBadge className="absolute top-3 left-3" />
+                <AiKeycapBadge size="sm" className="absolute top-2 left-2 md:top-3 md:left-3" />
               )}
             </div>
             <div className="pt-3 pb-1">
