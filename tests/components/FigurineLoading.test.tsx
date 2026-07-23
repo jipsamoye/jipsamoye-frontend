@@ -43,6 +43,32 @@ describe('FigurineLoading — 스캔 현상 대기 화면', () => {
     expect(status).toHaveTextContent('사진에 따라 더 걸릴 수 있어요');
   });
 
+  it('preparing이면 경과 시간과 무관하게 업로드 카피를 보여준다', () => {
+    // startedAt이 한참 전이어도 업로드 중이면 AI 단계로 넘어가면 안 된다
+    render(<FigurineLoading previewUrl="blob:preview" startedAt={T0 - 90_000} preparing />);
+    const status = screen.getByRole('status');
+    expect(status).toHaveTextContent('사진을 올리고 있어요');
+    expect(status).toHaveTextContent('잠시만 기다려 주세요');
+    expect(status).not.toHaveTextContent('거의 다 왔어요');
+  });
+
+  it('preparing이 풀리면 AI 단계 카피가 0초부터 시작한다', () => {
+    const { rerender } = render(
+      <FigurineLoading previewUrl="blob:preview" startedAt={T0 - 90_000} preparing />,
+    );
+    // 업로드 완료 — 호출부가 startedAt을 지금으로 갱신한다
+    rerender(<FigurineLoading previewUrl="blob:preview" startedAt={Date.now()} />);
+    expect(screen.getByRole('status')).toHaveTextContent('사진에서 우리 애를 찾고 있어요');
+  });
+
+  it('preparing 중에도 스캔 스테이지와 진행바는 그대로 보인다', () => {
+    const { container } = render(
+      <FigurineLoading previewUrl="blob:preview" startedAt={T0} preparing />,
+    );
+    expect(container.querySelector('[data-testid="figurine-scan-stage"]')).not.toBeNull();
+    expect(container.querySelector('.figurine-scan-bar')).not.toBeNull();
+  });
+
   it('애니메이션 스테이지는 장식이므로 aria-hidden이다', () => {
     const { container } = render(<FigurineLoading previewUrl="blob:preview" startedAt={T0} />);
     const stage = container.querySelector('[data-testid="figurine-scan-stage"]');

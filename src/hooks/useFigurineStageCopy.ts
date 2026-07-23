@@ -27,6 +27,15 @@ export const FIGURINE_STAGES: readonly StageDef[] = [
 const HINT_NORMAL = '보통 1분 안에 완성돼요';
 const HINT_OVERTIME = '사진에 따라 더 걸릴 수 있어요';
 
+/**
+ * 버튼을 누른 뒤 AI 작업이 시작되기 전까지 — 사진 압축 · S3 업로드 · 생성 요청 구간.
+ * 위 단계들과 달리 이건 추정이 아니라 코드가 실제로 아는 상태다.
+ */
+export const FIGURINE_UPLOAD_COPY = {
+  line: '사진을 올리고 있어요',
+  hint: '잠시만 기다려 주세요',
+} as const;
+
 const TICK_MS = 1000;
 
 const stageIndexFor = (elapsedSec: number) => {

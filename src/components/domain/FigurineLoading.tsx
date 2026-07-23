@@ -1,13 +1,15 @@
 'use client';
 
 import { KeycapIcon } from '@/components/layout/icons';
-import { useFigurineStageCopy } from '@/hooks/useFigurineStageCopy';
+import { FIGURINE_UPLOAD_COPY, useFigurineStageCopy } from '@/hooks/useFigurineStageCopy';
 
 interface FigurineLoadingProps {
   /** 업로드한 원본 사진의 objectURL. 새로고침 등으로 없으면 플레이스홀더로 폴백한다. */
   previewUrl: string | null;
-  /** 생성 요청 시각 (ms epoch) */
+  /** AI 작업 시작 시각 (ms epoch). 업로드가 끝난 뒤 기준이라 단계 카피가 0초부터 흐른다. */
   startedAt: number;
+  /** 아직 사진을 올리는 중이면 true — 경과 시간 대신 업로드 카피를 보여준다. */
+  preparing?: boolean;
 }
 
 /**
@@ -17,8 +19,18 @@ interface FigurineLoadingProps {
  * after 레이어는 "완성된 키캡"이 아니라 같은 사진의 컬러 버전이다. 완성본을 암시하면
  * 실제 AI 결과가 그 프리뷰와 다를 때 애니메이션이 만든 기대가 그대로 실망이 되기 때문이다.
  */
-export default function FigurineLoading({ previewUrl, startedAt }: FigurineLoadingProps) {
-  const { stage, line, hint } = useFigurineStageCopy(startedAt);
+export default function FigurineLoading({
+  previewUrl,
+  startedAt,
+  preparing = false,
+}: FigurineLoadingProps) {
+  const elapsed = useFigurineStageCopy(startedAt);
+
+  // 업로드 구간은 경과 시간과 무관하다. 여기서 AI 단계 카피를 쓰면 아직 시작도 안 한
+  // 작업을 진행 중이라 말하게 되고, 업로드에 쓴 시간만큼 단계가 앞질러 간다.
+  const { stage, line, hint } = preparing
+    ? { stage: 'uploading' as const, ...FIGURINE_UPLOAD_COPY }
+    : elapsed;
 
   return (
     <section className="flex flex-col items-center mt-10 text-center">
