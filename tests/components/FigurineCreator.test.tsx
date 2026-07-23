@@ -93,8 +93,21 @@ describe('FigurineCreator', () => {
 
     expect(input).not.toBeNull();
     expect(input!.className).not.toMatch(/(^|\s)hidden(\s|$)/);
-    expect(input!.className).toContain('absolute');
     expect(input!.className).toContain('opacity-0');
+  });
+
+  it('파일 입력이 뷰포트 정중앙에 고정돼 시트가 항상 같은 자리에 뜬다', () => {
+    // absolute 면 선택 영역 기준이라 스크롤 위치·박스 크기에 따라 화면상 좌표가
+    // 달라진다. fixed + left-1/2 top-1/2 여야 언제나 화면 한가운데가 된다.
+    const { container } = render(<FigurineCreator />);
+    const input = container.querySelector<HTMLInputElement>('input[type="file"]');
+
+    expect(input!.className).toContain('fixed');
+    expect(input!.className).not.toMatch(/(^|\s)absolute(\s|$)/);
+    expect(input!.className).toContain('left-1/2');
+    expect(input!.className).toContain('top-1/2');
+    expect(input!.className).toContain('-translate-x-1/2');
+    expect(input!.className).toContain('-translate-y-1/2');
   });
 
   it('선택 영역 전체가 라벨이라 어디를 눌러도 같은 입력이 열린다', () => {
