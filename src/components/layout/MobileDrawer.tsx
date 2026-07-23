@@ -20,7 +20,8 @@ const navItems: NavItem[] = [
   { label: '자유게시판', href: '/board', icon: (f) => <NoteIcon filled={f} /> },
   { label: '오픈채팅', href: '/chat', icon: (f) => <OpenChatIcon filled={f} /> },
   { label: 'DM', href: '/dm', icon: (f) => <PaperAirplaneIcon filled={f} />, requiresAuth: true },
-  { label: 'AI 키캡 만들기', href: '/figurines/new', icon: (f) => <KeycapIcon filled={f} />, requiresAuth: true },
+  // 진입은 항상 열어 두고, 실제 이용 시점(/figurines/new)에서 로그인 모달로 유도한다
+  { label: 'AI 키캡 만들기', href: '/figurines/new', icon: (f) => <KeycapIcon filled={f} /> },
 ];
 
 interface MobileDrawerProps {

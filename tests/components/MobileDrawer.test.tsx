@@ -73,7 +73,7 @@ describe('MobileDrawer', () => {
     expect(container.querySelector('a[href="/chat"]')).not.toBeNull();
   });
 
-  it('로그인 상태에서만 AI 키캡 메뉴를 렌더한다', () => {
+  it('로그인 상태에서 AI 키캡 메뉴를 렌더한다', () => {
     authMock.user = sampleUser;
     const { container } = render(<MobileDrawer isOpen={true} onClose={vi.fn()} />);
     expect(screen.getByText('AI 키캡 만들기')).toBeInTheDocument();
@@ -88,9 +88,11 @@ describe('MobileDrawer', () => {
     expect(link?.querySelector('[data-testid="keycap-icon"]')).not.toBeNull();
   });
 
-  it('비로그인 상태에서는 AI 키캡 메뉴를 렌더하지 않는다', () => {
+  it('비로그인 상태에서도 AI 키캡 메뉴를 렌더한다', () => {
+    // 진입 자체는 열어 두고, 실제 이용 시점(/figurines/new)에서 로그인 모달로 유도한다.
     authMock.user = null;
-    render(<MobileDrawer isOpen={true} onClose={vi.fn()} />);
-    expect(screen.queryByText('AI 키캡 만들기')).not.toBeInTheDocument();
+    const { container } = render(<MobileDrawer isOpen={true} onClose={vi.fn()} />);
+    expect(screen.getByText('AI 키캡 만들기')).toBeInTheDocument();
+    expect(container.querySelector('a[href="/figurines/new"]')).not.toBeNull();
   });
 });

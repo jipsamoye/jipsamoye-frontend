@@ -24,6 +24,7 @@ vi.mock('@/components/layout/icons', () => ({
   NoteIcon: () => <svg />,
   OpenChatIcon: () => <svg />,
   PaperAirplaneIcon: () => <svg />,
+  KeycapIcon: () => <svg data-testid="keycap-icon" />,
 }));
 
 import Sidebar from '@/components/layout/Sidebar';
@@ -70,5 +71,26 @@ describe('Sidebar', () => {
     expect(container.querySelector('a[href="/ranking"]')).not.toBeNull();
     expect(container.querySelector('a[href="/board"]')).not.toBeNull();
     expect(container.querySelector('a[href="/chat"]')).not.toBeNull();
+  });
+
+  it('비로그인 상태에서도 AI 키캡 만들기 메뉴를 렌더한다', () => {
+    authMock.user = null;
+    const { container } = render(<Sidebar />);
+    expect(screen.getByText('AI 키캡 만들기')).toBeInTheDocument();
+    expect(container.querySelector('a[href="/figurines/new"]')).not.toBeNull();
+  });
+
+  it('로그인 상태에서도 AI 키캡 만들기 메뉴를 렌더한다', () => {
+    authMock.user = sampleUser;
+    const { container } = render(<Sidebar />);
+    expect(container.querySelector('a[href="/figurines/new"]')).not.toBeNull();
+  });
+
+  it('AI 키캡 메뉴는 헤더·모바일 드로어와 같은 키캡 아이콘을 쓴다', () => {
+    // 같은 기능이 진입점마다 다른 아이콘을 쓰면 같은 기능으로 인식되지 않는다.
+    authMock.user = null;
+    const { container } = render(<Sidebar />);
+    const link = container.querySelector('a[href="/figurines/new"]');
+    expect(link?.querySelector('[data-testid="keycap-icon"]')).not.toBeNull();
   });
 });

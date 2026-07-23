@@ -6,6 +6,7 @@ import { useAuthContext } from '@/components/providers/AuthProvider';
 import { useFigurineJob } from '@/hooks/useFigurineJob';
 import { buildFigurineShareUrl } from '@/lib/figurineShare';
 import { uploadPostImage } from '@/lib/uploadImage';
+import { openLoginModal } from '@/lib/loginModal';
 import { showToast } from '@/components/common/Toast';
 import { preloadImage } from '@/lib/preloadImage';
 import FigurineLoading from '@/components/domain/FigurineLoading';
@@ -78,7 +79,7 @@ export default function FigurineCreator() {
   const handleGenerate = async () => {
     if (!file || uploading) return;
     if (!user) {
-      showToast('로그인하고 이용해 주세요');
+      openLoginModal();
       return;
     }
     setUploading(true);
@@ -162,7 +163,16 @@ export default function FigurineCreator() {
                 className="absolute inset-0 w-full h-full object-contain"
               />
             )}
-            <label className="relative z-10 inline-flex items-center px-5 py-3 rounded-xl border border-gray-200 bg-white/95 text-sm font-medium text-gray-700 shadow-sm cursor-pointer hover:border-amber-400 hover:text-amber-600 focus-within:border-amber-400 focus-within:ring-2 focus-within:ring-amber-200 transition-colors">
+            <label
+              className="relative z-10 inline-flex items-center px-5 py-3 rounded-xl border border-gray-200 bg-white/95 text-sm font-medium text-gray-700 shadow-sm cursor-pointer hover:border-amber-400 hover:text-amber-600 focus-within:border-amber-400 focus-within:ring-2 focus-within:ring-amber-200 transition-colors"
+              onClick={(e) => {
+                // 비로그인이면 파일 선택창 대신 로그인 모달로 유도
+                if (!user) {
+                  e.preventDefault();
+                  openLoginModal();
+                }
+              }}
+            >
               {previewUrl ? '다른 사진 선택' : '사진 선택'}
               <input
                 ref={fileInputRef}
