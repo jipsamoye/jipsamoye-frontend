@@ -124,30 +124,34 @@ export default function FigurineCreator() {
       {phase === 'idle' && !preparing && (
         <section className="mt-6">
           {/*
-            버튼 + display:none 입력 조합을 쓰지 않는다. iOS Safari 는 파일 선택
-            시트를 input 요소 위치에 붙이는데, display:none 이면 붙일 좌표가 없어
-            탭한 지점으로 폴백해 누르는 곳마다 시트 위치가 달라진다.
+            iOS Safari 는 파일 선택 시트를 "탭한 좌표"에 띄운다. input 위치를
+            CSS 로 지정해도 무시하므로, 시트 위치를 고정하려면 탭 지점 자체를
+            한 곳으로 좁혀야 한다. 그래서 영역 전체가 아니라 중앙 버튼만 트리거다.
 
-            라벨이 영역 전체를 덮어 탭 영역은 그대로 두고, 입력은 fixed 로 뷰포트
-            정중앙에 1px 로 숨어 있다. absolute(=선택 영역 기준)면 스크롤 위치나
-            박스 크기에 따라 화면상 좌표가 달라지므로 fixed 여야 항상 한가운데다.
+            입력은 sr-only(clip:rect(0,0,0,0))로 숨긴다. opacity:0 으로 두면
+            Safari 가 그 자리에 하이라이트를 그려 시트 뒤로 동그란 잔상이 비친다.
           */}
-          <label className="relative flex items-center justify-center w-full aspect-square max-h-96 border-2 border-dashed border-gray-300 rounded-2xl text-gray-500 hover:border-amber-400 hover:text-amber-600 focus-within:border-amber-400 focus-within:ring-2 focus-within:ring-amber-200 transition-colors overflow-hidden cursor-pointer">
-            {previewUrl ? (
+          <div className="relative flex items-center justify-center w-full aspect-square max-h-96 border-2 border-dashed border-gray-300 rounded-2xl overflow-hidden">
+            {previewUrl && (
               /* eslint-disable-next-line @next/next/no-img-element -- 로컬 blob 미리보기 */
-              <img src={previewUrl} alt="선택한 사진 미리보기" className="w-full h-full object-cover" />
-            ) : (
-              <span>사진을 선택해 주세요</span>
+              <img
+                src={previewUrl}
+                alt="선택한 사진 미리보기"
+                className="absolute inset-0 w-full h-full object-cover"
+              />
             )}
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/jpeg,image/png,image/webp"
-              aria-label="사진 선택"
-              onChange={handleFileChange}
-              className="fixed left-1/2 top-1/2 w-px h-px -translate-x-1/2 -translate-y-1/2 opacity-0"
-            />
-          </label>
+            <label className="relative z-10 inline-flex items-center px-5 py-3 rounded-xl border border-gray-200 bg-white/95 text-sm font-medium text-gray-700 shadow-sm cursor-pointer hover:border-amber-400 hover:text-amber-600 focus-within:border-amber-400 focus-within:ring-2 focus-within:ring-amber-200 transition-colors">
+              {previewUrl ? '다른 사진 선택' : '사진 선택'}
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                aria-label="사진 선택"
+                onChange={handleFileChange}
+                className="sr-only"
+              />
+            </label>
+          </div>
           <button
             type="button"
             className={`${PRIMARY_BUTTON} mt-4`}

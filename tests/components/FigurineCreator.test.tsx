@@ -84,40 +84,43 @@ describe('FigurineCreator', () => {
     expect(preview.className).not.toContain('object-contain');
   });
 
-  it('파일 입력은 display:none 이 아니라 영역 안에 고정 배치된다', () => {
-    // iOS Safari 는 파일 선택 시트를 input 요소 위치에 붙인다.
-    // display:none 이면 붙일 좌표가 없어 탭한 지점으로 폴백해, 누르는 곳마다
-    // 시트 위치가 달라진다. 좌표를 갖도록 실제 배치해 앵커를 고정한다.
+  it('파일 입력은 clip 으로 완전히 숨긴다 (opacity 로 남기지 않는다)', () => {
+    // iOS Safari 는 opacity:0 인 파일 입력 자리에 하이라이트를 그려, 시트 뒤로
+    // 동그란 잔상이 비쳤다. sr-only(clip:rect(0,0,0,0))는 페인트 자체를 없앤다.
     const { container } = render(<FigurineCreator />);
     const input = container.querySelector<HTMLInputElement>('input[type="file"]');
 
     expect(input).not.toBeNull();
-    expect(input!.className).not.toMatch(/(^|\s)hidden(\s|$)/);
-    expect(input!.className).toContain('opacity-0');
+    expect(input!.className).toContain('sr-only');
+    expect(input!.className).not.toContain('opacity-0');
+    expect(input!.className).not.toMatch(/(^|\s)fixed(\s|$)/);
   });
 
-  it('파일 입력이 뷰포트 정중앙에 고정돼 시트가 항상 같은 자리에 뜬다', () => {
-    // absolute 면 선택 영역 기준이라 스크롤 위치·박스 크기에 따라 화면상 좌표가
-    // 달라진다. fixed + left-1/2 top-1/2 여야 언제나 화면 한가운데가 된다.
-    const { container } = render(<FigurineCreator />);
-    const input = container.querySelector<HTMLInputElement>('input[type="file"]');
-
-    expect(input!.className).toContain('fixed');
-    expect(input!.className).not.toMatch(/(^|\s)absolute(\s|$)/);
-    expect(input!.className).toContain('left-1/2');
-    expect(input!.className).toContain('top-1/2');
-    expect(input!.className).toContain('-translate-x-1/2');
-    expect(input!.className).toContain('-translate-y-1/2');
-  });
-
-  it('선택 영역 전체가 라벨이라 어디를 눌러도 같은 입력이 열린다', () => {
+  it('파일 선택 트리거는 영역 전체가 아니라 중앙 버튼이다', () => {
+    // iOS 는 시트를 "탭한 좌표"에 띄운다. 앵커를 CSS 로 지정할 수 없으므로
+    // 탭 지점 자체를 중앙 한 곳으로 좁혀야 시트 위치가 고정된다.
     const { container } = render(<FigurineCreator />);
     const label = container.querySelector('label');
     const input = container.querySelector('input[type="file"]');
+    const dropzone = container.querySelector('.aspect-square');
 
     expect(label).not.toBeNull();
-    // 입력이 라벨 안에 있어야 라벨 어디를 눌러도 활성화된다
     expect(label!.contains(input!)).toBe(true);
+    // 드롭존은 라벨이 아니다 — 라벨이 영역을 덮으면 탭 지점이 다시 흩어진다
+    expect(dropzone).not.toBeNull();
+    expect(dropzone!.tagName).not.toBe('LABEL');
+    expect(label!.className).not.toContain('aspect-square');
+    expect(label!.className).not.toContain('w-full');
+    // 버튼은 드롭존 안에 있다
+    expect(dropzone!.contains(label!)).toBe(true);
+  });
+
+  it('사진 선택 전후로 버튼 문구가 바뀐다', () => {
+    const { container } = render(<FigurineCreator />);
+    expect(screen.getByText('사진 선택')).toBeInTheDocument();
+
+    selectFile(container, new File(['x'], 'cat.jpg', { type: 'image/jpeg' }));
+    expect(screen.getByText('다른 사진 선택')).toBeInTheDocument();
   });
 
   it('허용되지 않은 확장자는 토스트 안내 후 무시한다', () => {
