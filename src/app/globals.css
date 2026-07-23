@@ -200,6 +200,12 @@ textarea:focus::-webkit-scrollbar-thumb {
   to { opacity: 1; }
 }
 
+/* 사이드바 "신규" 뱃지 둥둥 — 진폭 3px, 눈에 띄되 산만하지 않은 속도 */
+@keyframes badgeFloat {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-3px); }
+}
+
 /* ==========================================================================
    AI 키캡 피규어 생성 대기 — 스캔 현상 애니메이션 (C안)
    서버가 진행률을 주지 않으므로 퍼센트는 쓰지 않는다. 스캔 빔이 사진을 훑고

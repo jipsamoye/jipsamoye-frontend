@@ -56,4 +56,14 @@ describe('AiKeycapBadge', () => {
     expect(badge.className).toContain('text-[10px]');
     expect(badge.className).not.toContain('md:text-sm');
   });
+
+  it('floating이면 둥둥 뜨는 애니메이션을 단다 (모션 축소 설정 사용자는 제외)', () => {
+    const { getByText } = render(<AiKeycapBadge label="신규" floating />);
+    expect(getByText('신규').className).toContain('motion-safe:animate-[badgeFloat');
+  });
+
+  it('floating 미지정이면 애니메이션이 없다 — 카드/상세 뱃지는 정적', () => {
+    const { getByText } = render(<AiKeycapBadge label="신규" />);
+    expect(getByText('신규').className).not.toContain('animate-');
+  });
 });
