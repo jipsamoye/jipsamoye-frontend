@@ -199,3 +199,63 @@ textarea:focus::-webkit-scrollbar-thumb {
   from { opacity: 0; }
   to { opacity: 1; }
 }
+
+/* ==========================================================================
+   AI 키캡 피규어 생성 대기 — 스캔 현상 애니메이션 (C안)
+   서버가 진행률을 주지 않으므로 퍼센트는 쓰지 않는다. 스캔 빔이 사진을 훑고
+   지나가며 컬러 레이어가 드러나는 4.5초 루프로 "살아 있음"만 전달한다.
+   after 레이어는 결과물이 아니라 같은 원본 사진의 컬러 버전이다 — 완성본을
+   암시하면 실제 결과와 어긋났을 때 기대가 그대로 실망이 된다.
+   ========================================================================== */
+/*
+ * inset()은 top/right/bottom/left 순이다. 빔이 위→아래로 내려가므로 컬러 레이어도
+ * 위에서부터 드러나야 한다 = bottom inset을 100%→0으로 줄인다.
+ * top inset을 줄이면 아래에서 위로 차올라 빔과 반대 방향이 된다.
+ */
+@keyframes figurineScanReveal {
+  0%        { clip-path: inset(0 0 100% 0); }
+  70%, 88%  { clip-path: inset(0 0 0 0); }
+  100%      { clip-path: inset(0 0 100% 0); }
+}
+
+/* 빔 높이는 컨테이너의 20% — translateY(500%)가 정확히 컨테이너 한 바퀴다 */
+@keyframes figurineScanBeam {
+  0%        { transform: translateY(-100%); opacity: 1; }
+  70%       { transform: translateY(500%); opacity: 1; }
+  72%, 100% { transform: translateY(500%); opacity: 0; }
+}
+
+@keyframes figurineScanSlide {
+  0%   { transform: translateX(-110%); }
+  100% { transform: translateX(360%); }
+}
+
+.figurine-scan-after {
+  clip-path: inset(0 0 100% 0);
+  animation: figurineScanReveal 4.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+.figurine-scan-beam {
+  animation: figurineScanBeam 4.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+.figurine-scan-bar {
+  animation: figurineScanSlide 1.6s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+}
+
+/* 움직임을 줄이면 정지 프레임만 남긴다. 단계 카피 전환은 실제 진행 신호이므로 유지한다. */
+@media (prefers-reduced-motion: reduce) {
+  .figurine-scan-after {
+    animation: none;
+    clip-path: inset(0 0 38% 0);
+  }
+  .figurine-scan-beam {
+    display: none;
+  }
+  .figurine-scan-bar {
+    animation: none;
+    transform: none;
+    width: 100%;
+    background: var(--color-gray-300);
+  }
+}

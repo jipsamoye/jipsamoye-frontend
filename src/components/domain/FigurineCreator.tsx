@@ -7,6 +7,7 @@ import { useFigurineJob } from '@/hooks/useFigurineJob';
 import { uploadPostImage } from '@/lib/uploadImage';
 import { showToast } from '@/components/common/Toast';
 import { preloadImage } from '@/lib/preloadImage';
+import FigurineLoading from '@/components/domain/FigurineLoading';
 import { ALLOWED_IMAGE_EXTS, POST_CONFIG } from '@/lib/constants';
 import type { ApiResponse } from '@/types/api';
 
@@ -24,6 +25,9 @@ export default function FigurineCreator() {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [revealReady, setRevealReady] = useState(false);
+  // 대기 화면 단계 카피의 기준 시각. 버튼을 누른 순간부터 세야 사용자 체감과 맞는다.
+  // 마운트 시각으로 초기화해, 어떤 경로로든 값이 비어 경과가 폭주하는 일이 없게 한다.
+  const [startedAt, setStartedAt] = useState(() => Date.now());
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // 결과 이미지가 캐시에 준비된 뒤에만 결과 화면으로 전환 — 빈 화면·점진 렌더 방지
@@ -77,6 +81,7 @@ export default function FigurineCreator() {
       return;
     }
     setUploading(true);
+    setStartedAt(Date.now());
     try {
       const sourceImageUrl = await uploadPostImage(file);
       await start(sourceImageUrl);
@@ -148,20 +153,7 @@ export default function FigurineCreator() {
       )}
 
       {(phase === 'generating' || (phase === 'completed' && !revealReady)) && (
-        <section className="flex flex-col items-center mt-10 text-center">
-          {previewUrl && (
-            /* eslint-disable-next-line @next/next/no-img-element -- 로컬 blob 미리보기 */
-            <img src={previewUrl} alt="원본 사진" className="w-40 h-40 rounded-2xl object-cover opacity-60" />
-          )}
-          <div
-            className="mt-6 w-10 h-10 border-4 border-amber-200 border-t-amber-500 rounded-full animate-spin"
-            aria-hidden="true"
-          />
-          <p className="mt-4 text-base font-medium text-gray-900">키캡 피규어를 만들고 있어요…</p>
-          <p className="mt-1 text-sm text-gray-500">
-            보통 1분 안에 완성돼요. 이 화면을 벗어나면 진행 상황을 볼 수 없어요.
-          </p>
-        </section>
+        <FigurineLoading previewUrl={previewUrl} startedAt={startedAt} />
       )}
 
       {(phase === 'posting' || phase === 'posted' || (phase === 'completed' && revealReady)) && job?.resultImageUrl && (

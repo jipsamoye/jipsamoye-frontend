@@ -121,10 +121,12 @@ describe('FigurineCreator', () => {
     expect(hookState.start).not.toHaveBeenCalled();
   });
 
-  it('generating: 진행 안내 문구를 렌더한다', () => {
+  it('generating: 스캔 현상 대기 화면(FigurineLoading)을 렌더한다', () => {
     hookState.phase = 'generating';
-    render(<FigurineCreator />);
-    expect(screen.getByText('키캡 피규어를 만들고 있어요…')).toBeInTheDocument();
+    const { container } = render(<FigurineCreator />);
+    expect(screen.getByRole('status')).toHaveTextContent('사진에서 우리 애를 찾고 있어요');
+    expect(container.querySelector('[data-testid="figurine-scan-stage"]')).not.toBeNull();
+    expect(screen.getByText(/이 화면을 벗어나면 진행 상황을 볼 수 없어요/)).toBeInTheDocument();
   });
 
   it('completed: 프리로드 완료 후 결과 이미지 + 게시/다시 만들기 버튼을 렌더한다', async () => {
@@ -144,7 +146,7 @@ describe('FigurineCreator', () => {
     hookState.job = completedJob();
     render(<FigurineCreator />);
 
-    expect(screen.getByText('키캡 피규어를 만들고 있어요…')).toBeInTheDocument();
+    expect(screen.getByRole('status')).toHaveTextContent('사진에서 우리 애를 찾고 있어요');
     expect(screen.queryByAltText('완성된 AI 키캡 피규어')).not.toBeInTheDocument();
   });
 
@@ -160,7 +162,7 @@ describe('FigurineCreator', () => {
 
     resolvePreload();
     expect(await screen.findByAltText('완성된 AI 키캡 피규어')).toBeInTheDocument();
-    expect(screen.queryByText('키캡 피규어를 만들고 있어요…')).not.toBeInTheDocument();
+    expect(screen.queryByRole('status')).not.toBeInTheDocument();
   });
 
   it('게시 클릭: publish 성공 시 게시글로 이동한다', async () => {
