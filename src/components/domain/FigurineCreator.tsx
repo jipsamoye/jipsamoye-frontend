@@ -78,13 +78,10 @@ export default function FigurineCreator() {
     if (!applyFile(selected)) e.target.value = '';
   };
 
-  const openFilePicker = () => {
-    // 비로그인이면 파일 선택창 대신 로그인 모달로 유도
-    if (!user) {
-      openLoginModal();
-      return;
-    }
-    fileInputRef.current?.click();
+  const clearFile = () => {
+    setFile(null);
+    setPreviewUrl(null);
+    if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
   const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
@@ -167,40 +164,61 @@ export default function FigurineCreator() {
 
       {phase === 'idle' && !preparing && (
         <section className="mt-6">
-          {/* 자랑하기(PostEditor) 업로드와 동일한 드롭존 패턴 — 화면 간 일관성을
-              iOS 시트 위치 고정(중앙 버튼 트리거)보다 우선한 결정 */}
+          {/*
+            자랑하기(PostEditor)와 같은 드롭존 룩이지만, 클릭 트리거는 중앙 라벨로
+            좁힌다. iOS Safari 는 파일 시트를 "탭한 좌표"에 띄우고 input 위치를
+            CSS 로 지정해도 무시하므로, 탭 지점을 중앙 한 곳으로 좁혀야 시트가
+            항상 같은 자리에 뜬다. 드래그&드롭은 영역 전체에서 받는다.
+
+            입력은 sr-only(clip:rect(0,0,0,0))로 숨긴다. opacity:0 으로 두면
+            Safari 가 그 자리에 하이라이트를 그려 시트 뒤로 동그란 잔상이 비친다.
+          */}
           <div
-            onClick={openFilePicker}
             onDragOver={(e) => e.preventDefault()}
             onDrop={handleDrop}
-            className="border-2 border-dashed border-gray-300 rounded-2xl p-8 text-center cursor-pointer hover:border-amber-400 transition-all duration-200"
+            className="border-2 border-dashed border-gray-300 rounded-2xl p-8 text-center hover:border-amber-400 transition-all duration-200"
           >
             {previewUrl ? (
-              <>
+              <div className="relative inline-block">
                 {/* eslint-disable-next-line @next/next/no-img-element -- 로컬 blob 미리보기 */}
                 <img
                   src={previewUrl}
                   alt="선택한 사진 미리보기"
-                  className="mx-auto max-h-80 rounded-xl object-contain"
+                  className="max-h-80 rounded-xl object-contain"
                 />
-                <p className="mt-3 text-xs text-gray-400">클릭해서 다른 사진 선택</p>
-              </>
+                <button
+                  type="button"
+                  aria-label="선택한 사진 지우기"
+                  onClick={clearFile}
+                  className="absolute top-1 right-1 w-6 h-6 bg-black/60 rounded-full flex items-center justify-center text-white text-xs hover:bg-black/80 transition-colors"
+                >
+                  ✕
+                </button>
+              </div>
             ) : (
-              <>
-                <div className="text-4xl mb-2">+</div>
-                <p className="text-sm text-gray-500">JPG / PNG / WEBP</p>
-                <p className="text-xs text-gray-400">10MB 이내 · 1장</p>
-              </>
+              <label
+                className="inline-flex flex-col items-center cursor-pointer"
+                onClick={(e) => {
+                  // 비로그인이면 파일 선택창 대신 로그인 모달로 유도
+                  if (!user) {
+                    e.preventDefault();
+                    openLoginModal();
+                  }
+                }}
+              >
+                <span className="text-4xl mb-2">+</span>
+                <span className="text-sm text-gray-500">JPG / PNG / WEBP</span>
+                <span className="text-xs text-gray-400">10MB 이내 · 1장</span>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  aria-label="사진 선택"
+                  onChange={handleFileChange}
+                  className="sr-only"
+                />
+              </label>
             )}
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/jpeg,image/png,image/webp"
-              aria-label="사진 선택"
-              onChange={handleFileChange}
-              onClick={(e) => e.stopPropagation()}
-              className="hidden"
-            />
           </div>
           <button
             type="button"

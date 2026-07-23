@@ -86,26 +86,36 @@ describe('FigurineCreator', () => {
     expect(preview.className).not.toContain('object-cover');
   });
 
-  it('파일 입력은 hidden 으로 완전히 숨긴다 (자랑하기 업로드와 동일)', () => {
-    // display:none 은 아예 페인트되지 않아 iOS 하이라이트 잔상이 생기지 않는다.
+  it('파일 입력은 clip 으로 완전히 숨긴다 (opacity 로 남기지 않는다)', () => {
+    // iOS Safari 는 opacity:0 인 파일 입력 자리에 하이라이트를 그려, 시트 뒤로
+    // 동그란 잔상이 비쳤다. sr-only(clip:rect(0,0,0,0))는 페인트 자체를 없앤다.
     const { container } = render(<FigurineCreator />);
     const input = container.querySelector<HTMLInputElement>('input[type="file"]');
 
     expect(input).not.toBeNull();
-    expect(input!.className).toContain('hidden');
+    expect(input!.className).toContain('sr-only');
     expect(input!.className).not.toContain('opacity-0');
     expect(input!.multiple).toBe(false);
   });
 
-  it('점선 영역 전체가 파일 선택 트리거다 (자랑하기 업로드와 동일)', () => {
+  it('파일 선택 트리거는 영역 전체가 아니라 중앙 라벨이다 (iOS 시트 중앙 고정)', () => {
+    // iOS 는 시트를 "탭한 좌표"에 띄운다. 앵커를 CSS 로 지정할 수 없으므로
+    // 탭 지점 자체를 중앙 한 곳으로 좁혀야 시트 위치가 고정된다.
     const { container } = render(<FigurineCreator />);
-    const dropzone = screen.getByText('JPG / PNG / WEBP').closest('div[class*="border-dashed"]');
+    const label = container.querySelector('label');
     const input = container.querySelector<HTMLInputElement>('input[type="file"]');
+    const dropzone = screen.getByText('JPG / PNG / WEBP').closest('div[class*="border-dashed"]');
     const clickSpy = vi.spyOn(input!, 'click');
 
+    expect(label).not.toBeNull();
+    expect(label!.contains(input!)).toBe(true);
+    // 드롭존은 라벨이 아니다 — 라벨이 영역을 덮으면 탭 지점이 다시 흩어진다
     expect(dropzone).not.toBeNull();
+    expect(dropzone!.tagName).not.toBe('LABEL');
+    expect(label!.className).not.toContain('w-full');
+    // 드롭존 바깥 영역 클릭으로는 파일 선택창이 열리지 않는다
     fireEvent.click(dropzone!);
-    expect(clickSpy).toHaveBeenCalledTimes(1);
+    expect(clickSpy).not.toHaveBeenCalled();
   });
 
   it('업로드 영역에 + 아이콘과 형식/용량 안내 문구를 보여준다', () => {
@@ -115,13 +125,50 @@ describe('FigurineCreator', () => {
     expect(screen.getByText('10MB 이내 · 1장')).toBeInTheDocument();
   });
 
-  it('사진 선택 후에는 안내 문구 대신 미리보기와 교체 안내를 보여준다', () => {
+  it('사진 선택 후에는 안내 문구 대신 미리보기와 지우기(X) 버튼을 보여준다', () => {
     const { container } = render(<FigurineCreator />);
     selectFile(container, new File(['x'], 'cat.jpg', { type: 'image/jpeg' }));
 
     expect(screen.getByAltText('선택한 사진 미리보기')).toBeInTheDocument();
     expect(screen.queryByText('JPG / PNG / WEBP')).not.toBeInTheDocument();
-    expect(screen.getByText('클릭해서 다른 사진 선택')).toBeInTheDocument();
+    expect(screen.getByLabelText('선택한 사진 지우기')).toBeInTheDocument();
+  });
+
+  it('X 버튼은 사진 오른쪽 상단에 겹쳐서 뜬다', () => {
+    const { container } = render(<FigurineCreator />);
+    selectFile(container, new File(['x'], 'cat.jpg', { type: 'image/jpeg' }));
+
+    const removeButton = screen.getByLabelText('선택한 사진 지우기');
+    expect(removeButton.className).toContain('absolute');
+    expect(removeButton.className).toContain('top-');
+    expect(removeButton.className).toContain('right-');
+    // 사진과 같은 relative 컨테이너 안에 있어야 사진 기준으로 겹친다
+    const wrapper = screen.getByAltText('선택한 사진 미리보기').parentElement;
+    expect(wrapper?.className).toContain('relative');
+    expect(wrapper?.contains(removeButton)).toBe(true);
+  });
+
+  it('X 클릭 시 선택이 해제되고 빈 업로드 안내로 돌아간다', () => {
+    const { container } = render(<FigurineCreator />);
+    selectFile(container, new File(['x'], 'cat.jpg', { type: 'image/jpeg' }));
+
+    fireEvent.click(screen.getByLabelText('선택한 사진 지우기'));
+
+    expect(screen.queryByAltText('선택한 사진 미리보기')).not.toBeInTheDocument();
+    expect(screen.getByText('JPG / PNG / WEBP')).toBeInTheDocument();
+    expect(screen.getByText('키캡 피규어 만들기')).toBeDisabled();
+  });
+
+  it('X 로 지운 뒤 같은 파일을 다시 선택할 수 있다', () => {
+    const { container } = render(<FigurineCreator />);
+    const file = new File(['x'], 'cat.jpg', { type: 'image/jpeg' });
+    selectFile(container, file);
+    fireEvent.click(screen.getByLabelText('선택한 사진 지우기'));
+
+    selectFile(container, file);
+
+    expect(screen.getByAltText('선택한 사진 미리보기')).toBeInTheDocument();
+    expect(screen.getByText('키캡 피규어 만들기')).toBeEnabled();
   });
 
   it('드래그&드롭으로 사진을 올릴 수 있다', () => {
@@ -133,7 +180,7 @@ describe('FigurineCreator', () => {
 
     expect(screen.getByAltText('선택한 사진 미리보기')).toBeInTheDocument();
     expect(screen.getByText('키캡 피규어 만들기')).toBeEnabled();
-    expect(container.querySelector('input[type="file"]')).not.toBeNull();
+    expect(screen.getByLabelText('선택한 사진 지우기')).toBeInTheDocument();
   });
 
   it('드래그&드롭도 확장자 검증을 거친다', () => {
@@ -334,29 +381,26 @@ describe('FigurineCreator', () => {
     expect(uploadMock.uploadPostImage).not.toHaveBeenCalled();
   });
 
-  it('비로그인 상태에서 업로드 영역 클릭 시 파일 선택창 대신 로그인 모달을 띄운다', () => {
+  it('비로그인 상태에서 업로드 라벨 클릭 시 파일 선택창 대신 로그인 모달을 띄운다', () => {
     authMock.user = null;
     const { container } = render(<FigurineCreator />);
-    const dropzone = screen.getByText('JPG / PNG / WEBP').closest('div[class*="border-dashed"]');
-    const input = container.querySelector<HTMLInputElement>('input[type="file"]');
-    const clickSpy = vi.spyOn(input!, 'click');
+    const label = container.querySelector('label');
 
-    fireEvent.click(dropzone!);
+    // fireEvent는 preventDefault가 호출되면 false를 반환한다 — 파일 선택창 차단 확인
+    const defaultNotPrevented = fireEvent.click(label!);
 
-    expect(clickSpy).not.toHaveBeenCalled();
+    expect(defaultNotPrevented).toBe(false);
     expect(loginModalMock.openLoginModal).toHaveBeenCalledTimes(1);
   });
 
-  it('로그인 상태에서 업로드 영역 클릭 시 로그인 모달을 띄우지 않는다', () => {
+  it('로그인 상태에서 업로드 라벨 클릭 시 로그인 모달을 띄우지 않는다', () => {
     authMock.user = sampleUser;
     const { container } = render(<FigurineCreator />);
-    const dropzone = screen.getByText('JPG / PNG / WEBP').closest('div[class*="border-dashed"]');
-    const input = container.querySelector<HTMLInputElement>('input[type="file"]');
-    const clickSpy = vi.spyOn(input!, 'click');
+    const label = container.querySelector('label');
 
-    fireEvent.click(dropzone!);
+    const defaultNotPrevented = fireEvent.click(label!);
 
-    expect(clickSpy).toHaveBeenCalledTimes(1);
+    expect(defaultNotPrevented).toBe(true);
     expect(loginModalMock.openLoginModal).not.toHaveBeenCalled();
   });
 
