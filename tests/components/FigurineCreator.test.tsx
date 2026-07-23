@@ -63,6 +63,16 @@ describe('FigurineCreator', () => {
     });
   });
 
+  it('모바일에서 제목 상단 여백을 줄여 생성 버튼이 한 화면에 들어가게 한다 (데스크톱은 유지)', () => {
+    // 미리보기(max-h-80)가 들어오면 세로가 길어져 모바일에서 버튼이 폴드 아래로 밀린다.
+    const { container } = render(<FigurineCreator />);
+    const root = container.firstElementChild as HTMLElement;
+    expect(root.className).not.toContain('py-10');
+    expect(root.className).toContain('pt-2');
+    expect(root.className).toContain('md:pt-10');
+    expect(root.className).toContain('pb-10');
+  });
+
   it('idle: 파일 미선택 시 생성 버튼이 비활성화된다', () => {
     render(<FigurineCreator />);
     expect(screen.getByText('키캡 피규어 만들기')).toBeDisabled();
