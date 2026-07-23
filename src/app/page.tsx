@@ -167,13 +167,13 @@ function HomeContent() {
         <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-50 px-5 py-4 md:px-7 md:py-5 shadow-sm border border-amber-100/50">
           <div className="relative z-10">
             <span className="inline-block px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-700 text-[11px] font-semibold mb-1.5">
-              반려동물 커뮤니티
+              반려동물 자랑 커뮤니티
             </span>
             <h1 className="text-base md:text-lg font-bold text-gray-900 mb-0.5">
-              우리 애 자랑하러 오세요!
+              반려동물 자랑하러 오세요!
             </h1>
             <p className="text-xs md:text-sm text-gray-500">
-              강아지, 고양이와 함께하는 일상을 공유해 보세요.
+              사진 한 장이면 세상에 하나뿐인 <span className="font-semibold text-amber-600">키캡 피규어</span>로 만들어 드려요.
             </p>
           </div>
           <div className="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 text-4xl md:text-5xl opacity-10 select-none">🐾</div>

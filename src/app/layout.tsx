@@ -12,7 +12,7 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   title: "집사모여 — 반려동물 자랑 커뮤니티",
-  description: "강아지, 고양이와 함께하는 일상을 공유하고 다른 집사들과 소통해보세요. 반려동물 사진 공유, 오픈채팅, DM까지!",
+  description: "사진 한 장이면 세상에 하나뿐인 키캡 피규어로! 반려동물과 함께하는 일상을 공유하고 다른 집사들과 소통해보세요. AI 키캡 피규어, 사진 공유, 오픈채팅, DM까지!",
   icons: {
     icon: '/favicon.svg',
   },
