@@ -87,7 +87,7 @@ export default function MobileDrawer({ isOpen, onClose }: MobileDrawerProps) {
               >
                 <span className="inline-flex items-center justify-center w-6 h-6 text-amber-500">{item.icon(true)}</span>
                 {item.label}
-                {item.isNew && <AiKeycapBadge size="xs" label="신규" />}
+                {item.isNew && <AiKeycapBadge size="xs" label="신규" floating />}
               </Link>
             );
           })}

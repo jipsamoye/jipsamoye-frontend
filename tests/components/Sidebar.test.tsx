@@ -114,4 +114,14 @@ describe('Sidebar', () => {
       expect(link?.textContent).not.toContain('신규');
     }
   });
+
+  it('"신규" 뱃지는 둥둥 뜨는 애니메이션을 가진다', () => {
+    authMock.user = null;
+    const { container } = render(<Sidebar />);
+    const link = container.querySelector('a[href="/figurines/new"]');
+    const badge = Array.from(link?.querySelectorAll('span') ?? []).find(
+      (el) => el.textContent === '신규',
+    );
+    expect(badge?.className).toContain('badgeFloat');
+  });
 });

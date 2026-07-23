@@ -5,6 +5,8 @@ interface AiKeycapBadgeProps {
   size?: 'xs' | 'sm' | 'md';
   /** 뱃지 텍스트 (기본 "AI 키캡") */
   label?: string;
+  /** true면 위아래로 둥둥 떠다니는 애니메이션 (사이드바 "신규" 뱃지용) */
+  floating?: boolean;
 }
 
 const SIZE_CLASSES = {
@@ -14,10 +16,10 @@ const SIZE_CLASSES = {
 } as const;
 
 /** AI 키캡 생성 이미지 위에 올리는 그라데이션 라벨 */
-export default function AiKeycapBadge({ className = '', size = 'md', label = 'AI 키캡' }: AiKeycapBadgeProps) {
+export default function AiKeycapBadge({ className = '', size = 'md', label = 'AI 키캡', floating = false }: AiKeycapBadgeProps) {
   return (
     <span
-      className={`inline-flex items-center ${SIZE_CLASSES[size]} font-extrabold rounded-full bg-gradient-to-r from-amber-500 to-[#ff5c8a] text-white shadow-[0_3px_10px_rgba(255,92,138,0.45)] ${className}`}
+      className={`inline-flex items-center ${SIZE_CLASSES[size]} font-extrabold rounded-full bg-gradient-to-r from-amber-500 to-[#ff5c8a] text-white shadow-[0_3px_10px_rgba(255,92,138,0.45)] ${floating ? 'motion-safe:animate-[badgeFloat_2s_ease-in-out_infinite]' : ''} ${className}`}
     >
       {label}
     </span>

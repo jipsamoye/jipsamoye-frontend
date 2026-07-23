@@ -50,7 +50,7 @@ export default function Sidebar() {
                 {item.icon(isActive)}
               </span>
               <span className="leading-none">{item.label}</span>
-              {item.isNew && <AiKeycapBadge size="xs" label="신규" />}
+              {item.isNew && <AiKeycapBadge size="xs" label="신규" floating />}
             </Link>
           );
         })}
