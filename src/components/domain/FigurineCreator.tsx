@@ -25,7 +25,7 @@ export default function FigurineCreator() {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [revealReady, setRevealReady] = useState(false);
-  // 대기 화면 단계 카피의 기준 시각. 버튼을 누른 순간부터 세야 사용자 체감과 맞는다.
+  // AI 단계 카피의 기준 시각. 업로드가 끝나고 생성 요청을 보내는 시점에 잡는다.
   // 마운트 시각으로 초기화해, 어떤 경로로든 값이 비어 경과가 폭주하는 일이 없게 한다.
   const [startedAt, setStartedAt] = useState(() => Date.now());
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -81,9 +81,11 @@ export default function FigurineCreator() {
       return;
     }
     setUploading(true);
-    setStartedAt(Date.now());
     try {
       const sourceImageUrl = await uploadPostImage(file);
+      // 업로드가 끝난 시점부터 센다. 버튼 누른 시각으로 재면 업로드에 걸린 만큼
+      // 단계가 앞질러 가서, AI가 막 시작했는데 "레진 붓는 중"이 뜬다.
+      setStartedAt(Date.now());
       await start(sourceImageUrl);
     } catch (err) {
       // 401은 api 래퍼가 전역 처리(토스트+모달)하므로 중복 안내 금지
@@ -109,7 +111,8 @@ export default function FigurineCreator() {
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
-  const busy = uploading || phase === 'creating';
+  // 사진 압축 · S3 업로드 · 생성 요청 구간. AI 작업은 아직 시작 전이다.
+  const preparing = uploading || phase === 'creating';
 
   return (
     <div className="max-w-xl mx-auto py-10">
@@ -118,7 +121,7 @@ export default function FigurineCreator() {
         우리 애 사진을 올리면 아티산 키캡 위 미니 피규어로 만들어 드려요.
       </p>
 
-      {(phase === 'idle' || phase === 'creating') && (
+      {phase === 'idle' && !preparing && (
         <section className="mt-6">
           <input
             ref={fileInputRef}
@@ -131,7 +134,6 @@ export default function FigurineCreator() {
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
-            disabled={busy}
             className="flex items-center justify-center w-full aspect-square max-h-96 border-2 border-dashed border-gray-300 rounded-2xl text-gray-500 hover:border-amber-400 hover:text-amber-600 transition-colors overflow-hidden"
           >
             {previewUrl ? (
@@ -144,16 +146,17 @@ export default function FigurineCreator() {
           <button
             type="button"
             className={`${PRIMARY_BUTTON} mt-4`}
-            disabled={!file || busy}
+            disabled={!file}
             onClick={handleGenerate}
           >
-            {busy ? '요청 중…' : '키캡 피규어 만들기'}
+            키캡 피규어 만들기
           </button>
         </section>
       )}
 
-      {(phase === 'generating' || (phase === 'completed' && !revealReady)) && (
-        <FigurineLoading previewUrl={previewUrl} startedAt={startedAt} />
+      {/* 버튼을 누른 즉시 여기로 전환된다 — 업로드가 끝나기를 기다리지 않는다 */}
+      {(preparing || phase === 'generating' || (phase === 'completed' && !revealReady)) && (
+        <FigurineLoading previewUrl={previewUrl} startedAt={startedAt} preparing={preparing} />
       )}
 
       {(phase === 'posting' || phase === 'posted' || (phase === 'completed' && revealReady)) && job?.resultImageUrl && (

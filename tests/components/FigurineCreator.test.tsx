@@ -108,6 +108,58 @@ describe('FigurineCreator', () => {
     });
   });
 
+  it('생성 클릭 즉시 대기 화면으로 전환된다 (업로드가 끝나기를 기다리지 않음)', async () => {
+    // 업로드를 붙잡아 둔다 — 이 구간에서 화면이 안 바뀌면 "누르고 멍한" 체감이 된다
+    let finishUpload!: (url: string) => void;
+    uploadMock.uploadPostImage.mockImplementationOnce(
+      () => new Promise<string>((resolve) => { finishUpload = resolve; }),
+    );
+    const { container } = render(<FigurineCreator />);
+    selectFile(container, new File(['x'], 'cat.jpg', { type: 'image/jpeg' }));
+
+    fireEvent.click(screen.getByText('키캡 피규어 만들기'));
+
+    // 업로드가 아직 진행 중인데도 대기 화면이 떠 있어야 한다
+    await waitFor(() => {
+      expect(screen.getByRole('status')).toHaveTextContent('사진을 올리고 있어요');
+    });
+    expect(container.querySelector('[data-testid="figurine-scan-stage"]')).not.toBeNull();
+    // 업로드 화면은 사라진다
+    expect(screen.queryByText('키캡 피규어 만들기')).not.toBeInTheDocument();
+
+    finishUpload('https://cdn/posts/1/a.webp');
+    await waitFor(() => expect(hookState.start).toHaveBeenCalled());
+  });
+
+  it('업로드 중에는 AI 단계 카피가 아니라 업로드 카피를 보여준다', async () => {
+    uploadMock.uploadPostImage.mockImplementationOnce(() => new Promise<string>(() => {}));
+    const { container } = render(<FigurineCreator />);
+    selectFile(container, new File(['x'], 'cat.jpg', { type: 'image/jpeg' }));
+
+    fireEvent.click(screen.getByText('키캡 피규어 만들기'));
+
+    await waitFor(() => {
+      const status = screen.getByRole('status');
+      expect(status).toHaveTextContent('사진을 올리고 있어요');
+      expect(status).not.toHaveTextContent('사진에서 우리 애를 찾고 있어요');
+      expect(status).not.toHaveTextContent('키캡 안에 레진을 붓고 있어요');
+    });
+  });
+
+  it('업로드 실패 시 대기 화면을 걷고 업로드 화면으로 돌아간다', async () => {
+    uploadMock.uploadPostImage.mockRejectedValueOnce(new Error('S3 업로드 실패 (500)'));
+    const { container } = render(<FigurineCreator />);
+    selectFile(container, new File(['x'], 'cat.jpg', { type: 'image/jpeg' }));
+
+    fireEvent.click(screen.getByText('키캡 피규어 만들기'));
+
+    await waitFor(() => {
+      expect(screen.getByText('키캡 피규어 만들기')).toBeInTheDocument();
+    });
+    expect(screen.queryByRole('status')).not.toBeInTheDocument();
+    expect(container.querySelector('[data-testid="figurine-scan-stage"]')).toBeNull();
+  });
+
   it('업로드 실패 시 토스트 안내 (start 미호출)', async () => {
     uploadMock.uploadPostImage.mockRejectedValueOnce(new Error('S3 업로드 실패 (500)'));
     const { container } = render(<FigurineCreator />);
