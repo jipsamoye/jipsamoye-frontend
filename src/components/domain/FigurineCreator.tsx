@@ -127,8 +127,10 @@ export default function FigurineCreator() {
             버튼 + display:none 입력 조합을 쓰지 않는다. iOS Safari 는 파일 선택
             시트를 input 요소 위치에 붙이는데, display:none 이면 붙일 좌표가 없어
             탭한 지점으로 폴백해 누르는 곳마다 시트 위치가 달라진다.
-            라벨이 영역 전체를 덮고, 입력은 중앙에 실제 좌표를 갖고 숨어 있어
-            어디를 눌러도 시트가 같은 자리에 뜬다.
+
+            라벨이 영역 전체를 덮어 탭 영역은 그대로 두고, 입력은 fixed 로 뷰포트
+            정중앙에 1px 로 숨어 있다. absolute(=선택 영역 기준)면 스크롤 위치나
+            박스 크기에 따라 화면상 좌표가 달라지므로 fixed 여야 항상 한가운데다.
           */}
           <label className="relative flex items-center justify-center w-full aspect-square max-h-96 border-2 border-dashed border-gray-300 rounded-2xl text-gray-500 hover:border-amber-400 hover:text-amber-600 focus-within:border-amber-400 focus-within:ring-2 focus-within:ring-amber-200 transition-colors overflow-hidden cursor-pointer">
             {previewUrl ? (
@@ -143,7 +145,7 @@ export default function FigurineCreator() {
               accept="image/jpeg,image/png,image/webp"
               aria-label="사진 선택"
               onChange={handleFileChange}
-              className="absolute left-1/2 top-1/2 w-px h-px -translate-x-1/2 -translate-y-1/2 opacity-0"
+              className="fixed left-1/2 top-1/2 w-px h-px -translate-x-1/2 -translate-y-1/2 opacity-0"
             />
           </label>
           <button
