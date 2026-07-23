@@ -78,6 +78,15 @@ export default function FigurineCreator() {
     if (!applyFile(selected)) e.target.value = '';
   };
 
+  const openFilePicker = () => {
+    // 비로그인이면 파일 선택창 대신 로그인 모달로 유도
+    if (!user) {
+      openLoginModal();
+      return;
+    }
+    fileInputRef.current?.click();
+  };
+
   const clearFile = () => {
     setFile(null);
     setPreviewUrl(null);
@@ -165,18 +174,18 @@ export default function FigurineCreator() {
       {phase === 'idle' && !preparing && (
         <section className="mt-6">
           {/*
-            자랑하기(PostEditor)와 같은 드롭존 룩이지만, 클릭 트리거는 중앙 라벨로
-            좁힌다. iOS Safari 는 파일 시트를 "탭한 좌표"에 띄우고 input 위치를
-            CSS 로 지정해도 무시하므로, 탭 지점을 중앙 한 곳으로 좁혀야 시트가
-            항상 같은 자리에 뜬다. 드래그&드롭은 영역 전체에서 받는다.
-
-            입력은 sr-only(clip:rect(0,0,0,0))로 숨긴다. opacity:0 으로 두면
-            Safari 가 그 자리에 하이라이트를 그려 시트 뒤로 동그란 잔상이 비친다.
+            영역 전체가 트리거이면서 iOS 파일 시트는 항상 중앙에 떠야 한다.
+            iOS 는 시트를 input 요소의 위치에 앵커하는데, display:none/sr-only 로
+            박스를 없애면 앵커가 사라져 탭 좌표를 따라간다(중구난방). 그래서
+            input 을 투명한 실제 박스로 드롭존 정중앙에 남긴다.
+            pointer-events-none 이라 직접 탭은 못 받고(하이라이트 잔상 없음),
+            영역 클릭 → 프로그램 click() 경유로만 열린다.
           */}
           <div
+            onClick={previewUrl ? undefined : openFilePicker}
             onDragOver={(e) => e.preventDefault()}
             onDrop={handleDrop}
-            className="border-2 border-dashed border-gray-300 rounded-2xl p-8 text-center hover:border-amber-400 transition-all duration-200"
+            className={`relative border-2 border-dashed border-gray-300 rounded-2xl p-8 text-center hover:border-amber-400 transition-all duration-200 ${previewUrl ? '' : 'cursor-pointer'}`}
           >
             {previewUrl ? (
               <div className="relative inline-block">
@@ -196,28 +205,20 @@ export default function FigurineCreator() {
                 </button>
               </div>
             ) : (
-              <label
-                className="inline-flex flex-col items-center cursor-pointer"
-                onClick={(e) => {
-                  // 비로그인이면 파일 선택창 대신 로그인 모달로 유도
-                  if (!user) {
-                    e.preventDefault();
-                    openLoginModal();
-                  }
-                }}
-              >
-                <span className="text-4xl mb-2">+</span>
-                <span className="text-sm text-gray-500">JPG / PNG / WEBP</span>
-                <span className="text-xs text-gray-400">10MB 이내 · 1장</span>
+              <>
+                <div className="text-4xl mb-2">+</div>
+                <p className="text-sm text-gray-500">JPG / PNG / WEBP</p>
+                <p className="text-xs text-gray-400">10MB 이내 · 1장</p>
                 <input
                   ref={fileInputRef}
                   type="file"
                   accept="image/jpeg,image/png,image/webp"
                   aria-label="사진 선택"
                   onChange={handleFileChange}
-                  className="sr-only"
+                  onClick={(e) => e.stopPropagation()}
+                  className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-4 h-4 opacity-0 pointer-events-none"
                 />
-              </label>
+              </>
             )}
           </div>
           <button
