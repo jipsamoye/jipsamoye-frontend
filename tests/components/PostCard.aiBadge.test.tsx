@@ -48,4 +48,15 @@ describe('PostCard — AI 키캡 배지', () => {
     );
     expect(getByText('AI 키캡')).toBeInTheDocument();
   });
+
+  it('카드 배지는 모바일 축소 사이즈(size="sm")로 렌더된다', () => {
+    const { getByText } = render(
+      <PostCard post={{ ...samplePost, aiGenerated: true }} />
+    );
+    const badge = getByText('AI 키캡');
+    expect(badge.className).toContain('text-xs');
+    expect(badge.className).toContain('md:text-sm');
+    expect(badge.className).toContain('top-2');
+    expect(badge.className).toContain('md:top-3');
+  });
 });

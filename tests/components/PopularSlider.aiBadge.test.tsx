@@ -54,6 +54,17 @@ describe('PopularSlider — AI 키캡 배지', () => {
     expect(getByText('AI 키캡')).toBeInTheDocument();
   });
 
+  it('슬라이더 배지는 모바일 축소 사이즈(size="sm")로 렌더된다', () => {
+    const { getByText } = render(
+      <PopularSlider items={[{ ...baseItem, aiGenerated: true }]} />
+    );
+    const badge = getByText('AI 키캡');
+    expect(badge.className).toContain('text-xs');
+    expect(badge.className).toContain('md:text-sm');
+    expect(badge.className).toContain('top-2');
+    expect(badge.className).toContain('md:top-3');
+  });
+
   it('홈(page.tsx)의 popularSliderItems 매핑이 aiGenerated를 전달한다', () => {
     const source = readFileSync(
       resolve(__dirname, '../../src/app/page.tsx'),
