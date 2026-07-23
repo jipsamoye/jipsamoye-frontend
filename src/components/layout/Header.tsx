@@ -84,9 +84,10 @@ export default function Header({ isLoggedIn = false, onLoginClick, onLogout, onM
           <Link
             href="/figurines/new"
             aria-label="AI 키캡 만들기"
-            className="lg:hidden p-2 text-amber-500 hover:text-amber-600"
+            className="lg:hidden flex flex-col items-center px-2 py-1 text-amber-500 hover:text-amber-600"
           >
             <KeycapIcon filled className="w-6 h-6" />
+            <span className="text-[10px] font-medium leading-none">AI 키캡</span>
           </Link>
           {isLoggedIn ? (
             <>
