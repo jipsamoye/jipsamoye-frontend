@@ -35,4 +35,25 @@ describe('AiKeycapBadge', () => {
     expect(badge.className).toContain('px-2.5');
     expect(badge.className).toContain('md:px-4');
   });
+
+  it('label을 전달하면 해당 텍스트를 렌더한다 — 사이드바 "신규" 뱃지용', () => {
+    const { getByText, queryByText } = render(<AiKeycapBadge label="신규" />);
+    expect(getByText('신규')).toBeInTheDocument();
+    expect(queryByText('AI 키캡')).not.toBeInTheDocument();
+  });
+
+  it('label을 바꿔도 그라데이션 디자인은 동일하게 유지된다', () => {
+    const { getByText } = render(<AiKeycapBadge label="신규" />);
+    const badge = getByText('신규');
+    expect(badge.className).toContain('rounded-full');
+    expect(badge.className).toContain('from-amber-500');
+    expect(badge.className).toContain('font-extrabold');
+  });
+
+  it('size="xs"이면 메뉴 텍스트 옆에 어울리는 고정 소형 크기를 쓴다 — 사이드바용', () => {
+    const { getByText } = render(<AiKeycapBadge size="xs" label="신규" />);
+    const badge = getByText('신규');
+    expect(badge.className).toContain('text-[10px]');
+    expect(badge.className).not.toContain('md:text-sm');
+  });
 });
