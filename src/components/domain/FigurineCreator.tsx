@@ -151,7 +151,8 @@ export default function FigurineCreator() {
   const preparing = uploading || phase === 'creating';
 
   return (
-    <div className="max-w-xl mx-auto py-10">
+    // 모바일은 상단 여백을 줄여 미리보기 + 생성 버튼이 스크롤 없이 한 화면에 들어가게 한다
+    <div className="max-w-xl mx-auto pt-2 pb-10 md:pt-10">
       <h1 className="text-2xl font-bold text-gray-900">AI 키캡 피규어</h1>
       <p className="mt-2 text-sm text-gray-600">
         반려동물 사진을 올리면 <span className="font-semibold text-amber-600">아티산 키캡 위 미니 피규어</span>로 만들어 드려요!
