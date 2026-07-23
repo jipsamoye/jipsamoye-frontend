@@ -72,27 +72,29 @@ export default function Header({ isLoggedIn = false, onLoginClick, onLogout, onM
         </button>
 
         <div className="flex items-center gap-1 lg:gap-3">
+          {/* AI 키캡 진입점은 로그인 여부와 무관하게 항상 노출한다.
+              실제 이용 시점(/figurines/new)에서 로그인 모달로 유도한다 (Sidebar와 동일 정책) */}
+          <Link
+            href="/figurines/new"
+            className="hidden lg:flex items-center gap-1.5 px-4 py-2 border border-amber-400 text-amber-600 rounded-xl text-base font-medium hover:bg-amber-50 transition-all duration-200"
+          >
+            <KeycapIcon filled className="w-6 h-6" />
+            AI 키캡
+          </Link>
+          <Link
+            href="/figurines/new"
+            aria-label="AI 키캡 만들기"
+            className="lg:hidden p-2 text-amber-500 hover:text-amber-600"
+          >
+            <KeycapIcon filled className="w-6 h-6" />
+          </Link>
           {isLoggedIn ? (
             <>
-              <Link
-                href="/figurines/new"
-                className="hidden lg:flex items-center gap-1.5 px-4 py-2 border border-amber-400 text-amber-600 rounded-xl text-base font-medium hover:bg-amber-50 transition-all duration-200"
-              >
-                <KeycapIcon filled className="w-6 h-6" />
-                AI 키캡
-              </Link>
               <Link
                 href={pathname.startsWith('/board') ? '/board/new' : '/posts/new'}
                 className="hidden lg:flex items-center px-6 py-2 bg-amber-500 text-white rounded-xl text-base font-medium hover:bg-amber-600 transition-all duration-200"
               >
                 {pathname.startsWith('/board') ? '글쓰기' : '자랑하기'}
-              </Link>
-              <Link
-                href="/figurines/new"
-                aria-label="AI 키캡 만들기"
-                className="lg:hidden p-2 text-amber-500 hover:text-amber-600"
-              >
-                <KeycapIcon filled className="w-6 h-6" />
               </Link>
               <Link href="/search" className="p-2 lg:p-2.5 text-gray-800 hover:text-gray-900">
                 <MagnifyingGlassIcon className="w-6 h-6" />

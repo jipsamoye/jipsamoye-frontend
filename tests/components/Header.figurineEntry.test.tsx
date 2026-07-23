@@ -43,9 +43,13 @@ describe('Header AI 키캡 진입 버튼', () => {
     expect(container.querySelector('a[href="/figurines/new"]')).not.toBeNull();
   });
 
-  it('비로그인 상태에서는 렌더하지 않는다', () => {
+  it('비로그인 상태에서도 데스크톱/모바일 진입점을 모두 렌더한다', () => {
+    // 진입은 항상 열어 두고, 실제 이용 시점(/figurines/new)에서 로그인 모달로 유도한다 (PR #54 정책)
     const { container } = render(<Header />);
-    expect(container.querySelector('a[href="/figurines/new"]')).toBeNull();
+    const links = Array.from(container.querySelectorAll('a[href="/figurines/new"]'));
+    expect(links).toHaveLength(2);
+    expect(links.filter((el) => el.className.includes('lg:hidden'))).toHaveLength(1);
+    expect(links.filter((el) => el.className.includes('hidden') && el.className.includes('lg:flex'))).toHaveLength(1);
   });
 
   it('로그인 상태에서 모바일용 아이콘 버튼을 렌더한다', () => {
@@ -72,9 +76,11 @@ describe('Header AI 키캡 진입 버튼', () => {
     expect(mobile[0]).not.toBe(desktop[0]);
   });
 
-  it('비로그인 상태에서는 모바일 아이콘 버튼도 렌더하지 않는다', () => {
+  it('비로그인 상태에서도 모바일 아이콘 버튼을 렌더한다', () => {
     render(<Header />);
-    expect(screen.queryByRole('link', { name: 'AI 키캡 만들기' })).toBeNull();
+    const mobileLink = screen.getByRole('link', { name: 'AI 키캡 만들기' });
+    expect(mobileLink).toHaveAttribute('href', '/figurines/new');
+    expect(mobileLink.querySelector('[data-testid="keycap-icon"]')).not.toBeNull();
   });
 
   it('모바일 버튼은 반짝이가 아니라 키캡 아이콘을 쓴다', () => {
