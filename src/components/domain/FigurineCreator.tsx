@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useAuthContext } from '@/components/providers/AuthProvider';
 import { useFigurineJob } from '@/hooks/useFigurineJob';
 import { buildFigurineShareUrl } from '@/lib/figurineShare';
+import { shareOrCopyLink } from '@/lib/share';
 import { uploadPostImage } from '@/lib/uploadImage';
 import { openLoginModal } from '@/lib/loginModal';
 import { showToast } from '@/components/common/Toast';
@@ -136,22 +137,7 @@ export default function FigurineCreator() {
   const handleShare = async () => {
     if (!job?.resultImageUrl) return;
     const shareUrl = buildFigurineShareUrl(job.resultImageUrl, window.location.origin);
-
-    if (navigator.share) {
-      try {
-        await navigator.share({ title: 'AI 키캡 피규어 — 집사모여', url: shareUrl });
-      } catch {
-        // 공유 시트를 닫은 경우(AbortError) — 안내 불필요
-      }
-      return;
-    }
-
-    try {
-      await navigator.clipboard.writeText(shareUrl);
-      showToast('링크가 복사됐어요!');
-    } catch {
-      showToast('링크 복사에 실패했어요.');
-    }
+    await shareOrCopyLink({ title: 'AI 키캡 피규어 — 집사모여', url: shareUrl });
   };
 
   const handleRetry = () => {
