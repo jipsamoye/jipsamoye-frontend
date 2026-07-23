@@ -154,7 +154,7 @@ export default function FigurineCreator() {
     <div className="max-w-xl mx-auto py-10">
       <h1 className="text-2xl font-bold text-gray-900">AI 키캡 피규어</h1>
       <p className="mt-2 text-sm text-gray-600">
-        우리 애 사진을 올리면 아티산 키캡 위 미니 피규어로 만들어 드려요.
+        반려동물 사진을 올리면 <span className="font-semibold text-amber-600">아티산 키캡 위 미니 피규어</span>로 만들어 드려요!
       </p>
 
       {phase === 'idle' && !preparing && (
