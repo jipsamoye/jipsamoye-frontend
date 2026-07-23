@@ -74,6 +74,39 @@ describe('FigurineCreator', () => {
     expect(screen.getByText('키캡 피규어 만들기')).toBeEnabled();
   });
 
+  it('미리보기 이미지가 선택 영역을 가득 채운다', () => {
+    const { container } = render(<FigurineCreator />);
+    selectFile(container, new File(['x'], 'cat.jpg', { type: 'image/jpeg' }));
+
+    const preview = screen.getByAltText('선택한 사진 미리보기');
+    expect(preview.className).toContain('object-cover');
+    // object-contain 이면 세로/가로 사진에서 좌우 여백이 남는다
+    expect(preview.className).not.toContain('object-contain');
+  });
+
+  it('파일 입력은 display:none 이 아니라 영역 안에 고정 배치된다', () => {
+    // iOS Safari 는 파일 선택 시트를 input 요소 위치에 붙인다.
+    // display:none 이면 붙일 좌표가 없어 탭한 지점으로 폴백해, 누르는 곳마다
+    // 시트 위치가 달라진다. 좌표를 갖도록 실제 배치해 앵커를 고정한다.
+    const { container } = render(<FigurineCreator />);
+    const input = container.querySelector<HTMLInputElement>('input[type="file"]');
+
+    expect(input).not.toBeNull();
+    expect(input!.className).not.toMatch(/(^|\s)hidden(\s|$)/);
+    expect(input!.className).toContain('absolute');
+    expect(input!.className).toContain('opacity-0');
+  });
+
+  it('선택 영역 전체가 라벨이라 어디를 눌러도 같은 입력이 열린다', () => {
+    const { container } = render(<FigurineCreator />);
+    const label = container.querySelector('label');
+    const input = container.querySelector('input[type="file"]');
+
+    expect(label).not.toBeNull();
+    // 입력이 라벨 안에 있어야 라벨 어디를 눌러도 활성화된다
+    expect(label!.contains(input!)).toBe(true);
+  });
+
   it('허용되지 않은 확장자는 토스트 안내 후 무시한다', () => {
     const { container } = render(<FigurineCreator />);
     selectFile(container, new File(['x'], 'cat.gif', { type: 'image/gif' }));

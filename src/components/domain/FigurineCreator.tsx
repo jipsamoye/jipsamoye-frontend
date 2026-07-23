@@ -123,26 +123,29 @@ export default function FigurineCreator() {
 
       {phase === 'idle' && !preparing && (
         <section className="mt-6">
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/jpeg,image/png,image/webp"
-            className="hidden"
-            aria-label="사진 선택"
-            onChange={handleFileChange}
-          />
-          <button
-            type="button"
-            onClick={() => fileInputRef.current?.click()}
-            className="flex items-center justify-center w-full aspect-square max-h-96 border-2 border-dashed border-gray-300 rounded-2xl text-gray-500 hover:border-amber-400 hover:text-amber-600 transition-colors overflow-hidden"
-          >
+          {/*
+            버튼 + display:none 입력 조합을 쓰지 않는다. iOS Safari 는 파일 선택
+            시트를 input 요소 위치에 붙이는데, display:none 이면 붙일 좌표가 없어
+            탭한 지점으로 폴백해 누르는 곳마다 시트 위치가 달라진다.
+            라벨이 영역 전체를 덮고, 입력은 중앙에 실제 좌표를 갖고 숨어 있어
+            어디를 눌러도 시트가 같은 자리에 뜬다.
+          */}
+          <label className="relative flex items-center justify-center w-full aspect-square max-h-96 border-2 border-dashed border-gray-300 rounded-2xl text-gray-500 hover:border-amber-400 hover:text-amber-600 focus-within:border-amber-400 focus-within:ring-2 focus-within:ring-amber-200 transition-colors overflow-hidden cursor-pointer">
             {previewUrl ? (
               /* eslint-disable-next-line @next/next/no-img-element -- 로컬 blob 미리보기 */
-              <img src={previewUrl} alt="선택한 사진 미리보기" className="w-full h-full object-contain" />
+              <img src={previewUrl} alt="선택한 사진 미리보기" className="w-full h-full object-cover" />
             ) : (
               <span>사진을 선택해 주세요</span>
             )}
-          </button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              aria-label="사진 선택"
+              onChange={handleFileChange}
+              className="absolute left-1/2 top-1/2 w-px h-px -translate-x-1/2 -translate-y-1/2 opacity-0"
+            />
+          </label>
           <button
             type="button"
             className={`${PRIMARY_BUTTON} mt-4`}
