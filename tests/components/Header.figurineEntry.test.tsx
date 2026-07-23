@@ -17,7 +17,9 @@ vi.mock('@/components/providers/HomeRefreshProvider', () => ({
 vi.mock('@/components/layout/icons', () => ({
   MagnifyingGlassIcon: () => <svg data-testid="search-icon" />,
   BellIcon: () => <svg data-testid="bell-icon" />,
-  KeycapIcon: () => <svg data-testid="keycap-icon" />,
+  KeycapIcon: ({ className }: { className?: string }) => (
+    <svg data-testid="keycap-icon" className={className} />
+  ),
   SparklesIcon: () => <svg data-testid="sparkles-icon" />,
 }));
 vi.mock('@/components/providers/NotificationProvider', () => ({
@@ -81,6 +83,26 @@ describe('Header AI 키캡 진입 버튼', () => {
     const mobileLink = screen.getByRole('link', { name: 'AI 키캡 만들기' });
     expect(mobileLink.querySelector('[data-testid="keycap-icon"]')).not.toBeNull();
     expect(mobileLink.querySelector('[data-testid="sparkles-icon"]')).toBeNull();
+  });
+
+  it('데스크톱 버튼은 키캡 아이콘이 텍스트 앞에 온다', () => {
+    const { container } = render(<Header isLoggedIn nickname="tester" profileImageUrl={null} />);
+    const desktop = Array.from(container.querySelectorAll('a[href="/figurines/new"]'))
+      .find((el) => el.className.includes('lg:flex'));
+
+    expect(desktop).toBeDefined();
+    // 첫 자식이 아이콘이어야 "아이콘 → 텍스트" 순서다 (텍스트가 먼저면 첫 자식은 텍스트 노드)
+    expect(desktop!.firstChild).toBe(desktop!.querySelector('[data-testid="keycap-icon"]'));
+  });
+
+  it('데스크톱 버튼의 키캡 아이콘은 w-6 h-6 크기다', () => {
+    const { container } = render(<Header isLoggedIn nickname="tester" profileImageUrl={null} />);
+    const desktop = Array.from(container.querySelectorAll('a[href="/figurines/new"]'))
+      .find((el) => el.className.includes('lg:flex'));
+    const icon = desktop!.querySelector('[data-testid="keycap-icon"]');
+
+    expect(icon?.getAttribute('class')).toContain('w-6');
+    expect(icon?.getAttribute('class')).toContain('h-6');
   });
 
   it('로고가 모바일에서 축소되어 320px에서도 줄바꿈되지 않는다', () => {
