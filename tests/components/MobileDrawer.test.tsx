@@ -95,4 +95,25 @@ describe('MobileDrawer', () => {
     expect(screen.getByText('AI 키캡 만들기')).toBeInTheDocument();
     expect(container.querySelector('a[href="/figurines/new"]')).not.toBeNull();
   });
+
+  it('AI 키캡 만들기 메뉴 옆에 "신규" 뱃지를 AI 키캡 뱃지와 같은 디자인으로 렌더한다', () => {
+    authMock.user = null;
+    const { container } = render(<MobileDrawer isOpen={true} onClose={vi.fn()} />);
+    const link = container.querySelector('a[href="/figurines/new"]');
+    const badge = Array.from(link?.querySelectorAll('span') ?? []).find(
+      (el) => el.textContent === '신규',
+    );
+    expect(badge).toBeDefined();
+    expect(badge?.className).toContain('from-amber-500');
+    expect(badge?.className).toContain('rounded-full');
+  });
+
+  it('"신규" 뱃지는 AI 키캡 만들기 메뉴에만 붙는다', () => {
+    authMock.user = sampleUser;
+    const { container } = render(<MobileDrawer isOpen={true} onClose={vi.fn()} />);
+    for (const href of ['/', '/ranking', '/board', '/chat', '/dm']) {
+      const link = container.querySelector(`a[href="${href}"]`);
+      expect(link?.textContent).not.toContain('신규');
+    }
+  });
 });

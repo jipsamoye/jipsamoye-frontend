@@ -6,12 +6,14 @@ import { usePathname } from 'next/navigation';
 import { HomeIcon, TrophyIcon, NoteIcon, OpenChatIcon, PaperAirplaneIcon, KeycapIcon } from './icons';
 import { useNavigationGuard } from '@/components/providers/NavigationGuard';
 import { useAuthContext } from '@/components/providers/AuthProvider';
+import AiKeycapBadge from '@/components/common/AiKeycapBadge';
 
 interface NavItem {
   label: string;
   href: string;
   icon: (filled: boolean) => React.ReactNode;
   requiresAuth?: boolean;
+  isNew?: boolean;
 }
 
 const navItems: NavItem[] = [
@@ -21,7 +23,7 @@ const navItems: NavItem[] = [
   { label: '오픈채팅', href: '/chat', icon: (f) => <OpenChatIcon filled={f} /> },
   { label: 'DM', href: '/dm', icon: (f) => <PaperAirplaneIcon filled={f} />, requiresAuth: true },
   // 진입은 항상 열어 두고, 실제 이용 시점(/figurines/new)에서 로그인 모달로 유도한다
-  { label: 'AI 키캡 만들기', href: '/figurines/new', icon: (f) => <KeycapIcon filled={f} /> },
+  { label: 'AI 키캡 만들기', href: '/figurines/new', icon: (f) => <KeycapIcon filled={f} />, isNew: true },
 ];
 
 interface MobileDrawerProps {
@@ -85,6 +87,7 @@ export default function MobileDrawer({ isOpen, onClose }: MobileDrawerProps) {
               >
                 <span className="inline-flex items-center justify-center w-6 h-6 text-amber-500">{item.icon(true)}</span>
                 {item.label}
+                {item.isNew && <AiKeycapBadge size="xs" label="신규" />}
               </Link>
             );
           })}
