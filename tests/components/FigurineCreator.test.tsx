@@ -74,14 +74,14 @@ describe('FigurineCreator', () => {
     expect(screen.getByText('키캡 피규어 만들기')).toBeEnabled();
   });
 
-  it('미리보기 이미지가 선택 영역을 가득 채운다', () => {
+  it('미리보기 이미지는 잘리지 않고 전체가 선택 영역 안에 들어간다', () => {
     const { container } = render(<FigurineCreator />);
     selectFile(container, new File(['x'], 'cat.jpg', { type: 'image/jpeg' }));
 
     const preview = screen.getByAltText('선택한 사진 미리보기');
-    expect(preview.className).toContain('object-cover');
-    // object-contain 이면 세로/가로 사진에서 좌우 여백이 남는다
-    expect(preview.className).not.toContain('object-contain');
+    expect(preview.className).toContain('object-contain');
+    // object-cover 는 정사각형 칸과 비율이 다른 사진의 위아래/좌우를 잘라낸다
+    expect(preview.className).not.toContain('object-cover');
   });
 
   it('파일 입력은 clip 으로 완전히 숨긴다 (opacity 로 남기지 않는다)', () => {

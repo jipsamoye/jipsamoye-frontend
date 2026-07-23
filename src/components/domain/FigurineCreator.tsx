@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthContext } from '@/components/providers/AuthProvider';
 import { useFigurineJob } from '@/hooks/useFigurineJob';
+import { buildFigurineShareUrl } from '@/lib/figurineShare';
 import { uploadPostImage } from '@/lib/uploadImage';
 import { showToast } from '@/components/common/Toast';
 import { preloadImage } from '@/lib/preloadImage';
@@ -104,6 +105,27 @@ export default function FigurineCreator() {
     }
   };
 
+  const handleShare = async () => {
+    if (!job?.resultImageUrl) return;
+    const shareUrl = buildFigurineShareUrl(job.resultImageUrl, window.location.origin);
+
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: 'AI 키캡 피규어 — 집사모여', url: shareUrl });
+      } catch {
+        // 공유 시트를 닫은 경우(AbortError) — 안내 불필요
+      }
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      showToast('링크가 복사됐어요!');
+    } catch {
+      showToast('링크 복사에 실패했어요.');
+    }
+  };
+
   const handleRetry = () => {
     reset();
     setFile(null);
@@ -137,7 +159,7 @@ export default function FigurineCreator() {
               <img
                 src={previewUrl}
                 alt="선택한 사진 미리보기"
-                className="absolute inset-0 w-full h-full object-cover"
+                className="absolute inset-0 w-full h-full object-contain"
               />
             )}
             <label className="relative z-10 inline-flex items-center px-5 py-3 rounded-xl border border-gray-200 bg-white/95 text-sm font-medium text-gray-700 shadow-sm cursor-pointer hover:border-amber-400 hover:text-amber-600 focus-within:border-amber-400 focus-within:ring-2 focus-within:ring-amber-200 transition-colors">
@@ -184,6 +206,14 @@ export default function FigurineCreator() {
             onClick={handlePublish}
           >
             {phase === 'posting' ? '게시 중…' : phase === 'posted' ? '게시 완료' : '자랑 피드에 게시하기'}
+          </button>
+          <button
+            type="button"
+            className={`${OUTLINE_BUTTON} mt-2`}
+            disabled={phase === 'posting'}
+            onClick={handleShare}
+          >
+            링크로 공유하기
           </button>
           <button
             type="button"
