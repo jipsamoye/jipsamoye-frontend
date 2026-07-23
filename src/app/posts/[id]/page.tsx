@@ -10,13 +10,12 @@ import Avatar from '@/components/common/Avatar';
 import DetailImage from '@/components/common/DetailImage';
 import AiKeycapBadge from '@/components/common/AiKeycapBadge';
 import { isAiKeycapPost } from '@/lib/aiPost';
-import Modal from '@/components/common/Modal';
 import PostCard from '@/components/domain/PostCard';
 import CommentSection from '@/components/domain/CommentSection';
-import { LinkIcon } from '@/components/layout/icons';
 import PostActions from '@/components/domain/PostActions';
-import { showToast, showLoginRequiredToast } from '@/components/common/Toast';
+import { showLoginRequiredToast } from '@/components/common/Toast';
 import { formatDateTime } from '@/lib/utils';
+import { shareOrCopyLink } from '@/lib/share';
 
 export default function PostDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -28,7 +27,6 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
   const [liked, setLiked] = useState(false);
   const [commentCount, setCommentCount] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [showShareModal, setShowShareModal] = useState(false);
   const [showPostMenu, setShowPostMenu] = useState(false);
   const postMenuRef = useRef<HTMLDivElement>(null);
 
@@ -84,16 +82,6 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
       await api.delete(`/api/posts/${id}`);
       router.push('/');
     } catch { /* ignore */ }
-  };
-
-  const handleCopyLink = async () => {
-    try {
-      await navigator.clipboard.writeText(window.location.href);
-      showToast('링크가 복사됐어요!');
-      setShowShareModal(false);
-    } catch {
-      showToast('링크 복사에 실패했어요.');
-    }
   };
 
   if (loading) return <div className="flex justify-center py-20 text-gray-400">불러오는 중...</div>;
@@ -216,7 +204,9 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
         likeCount={post.likeCount}
         liked={liked}
         onLike={handleLike}
-        onShare={() => setShowShareModal(true)}
+        onShare={() => {
+          void shareOrCopyLink({ title: `${post.title} — 집사모여`, url: window.location.href });
+        }}
       />
 
       {/* 댓글 섹션 */}
@@ -241,22 +231,6 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
           </div>
         </section>
       )}
-
-      {/* 공유 모달 */}
-      <Modal isOpen={showShareModal} onClose={() => setShowShareModal(false)} title="공유">
-        <div className="flex flex-col items-center gap-5 py-4">
-          <p className="text-sm text-gray-600 text-center">
-            집사모여의 게시글을 공유해보세요!
-          </p>
-          <button
-            onClick={handleCopyLink}
-            className="flex items-center gap-2 px-6 py-3 bg-amber-400 hover:bg-amber-500 text-white font-medium rounded-xl transition-all duration-200 w-full justify-center"
-          >
-            <LinkIcon />
-            링크 복사하기
-          </button>
-        </div>
-      </Modal>
     </div>
   );
 }
