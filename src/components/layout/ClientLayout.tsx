@@ -1,12 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Header from './Header';
 import Sidebar from './Sidebar';
 import MobileDrawer from './MobileDrawer';
 import FloatingWriteButton from './FloatingWriteButton';
 import LoginModal from '@/components/domain/LoginModal';
 import { useAuthContext } from '@/components/providers/AuthProvider';
+import { setLoginModalHandler } from '@/lib/loginModal';
 import ToastContainer from '@/components/common/Toast';
 import AppProviders from '@/components/providers/AppProviders';
 import HomeRefreshProvider, { useHomeRefresh } from '@/components/providers/HomeRefreshProvider';
@@ -16,6 +17,12 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
   const { refreshKey } = useHomeRefresh();
   const [showLogin, setShowLogin] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
+
+  // 헤더 밖(예: FigurineCreator)에서도 openLoginModal()로 이 모달을 열 수 있게 등록
+  useEffect(() => {
+    setLoginModalHandler(() => setShowLogin(true));
+    return () => setLoginModalHandler(null);
+  }, []);
 
   return (
     <>

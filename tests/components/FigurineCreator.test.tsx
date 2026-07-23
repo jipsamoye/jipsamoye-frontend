@@ -3,7 +3,7 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import type { FigurineJob, User } from '@/types/api';
 import type { FigurinePhase } from '@/hooks/useFigurineJob';
 
-const { hookState, routerMock, authMock, uploadMock, toastMock, preloadMock } = vi.hoisted(() => ({
+const { hookState, routerMock, authMock, uploadMock, toastMock, preloadMock, loginModalMock } = vi.hoisted(() => ({
   hookState: {
     job: null as FigurineJob | null,
     phase: 'idle' as FigurinePhase,
@@ -17,6 +17,7 @@ const { hookState, routerMock, authMock, uploadMock, toastMock, preloadMock } = 
   uploadMock: { uploadPostImage: vi.fn() },
   toastMock: { showToast: vi.fn() },
   preloadMock: { preloadImage: vi.fn() },
+  loginModalMock: { openLoginModal: vi.fn() },
 }));
 
 vi.mock('next/navigation', () => ({ useRouter: () => routerMock }));
@@ -25,6 +26,7 @@ vi.mock('@/hooks/useFigurineJob', () => ({ useFigurineJob: () => hookState }));
 vi.mock('@/lib/uploadImage', () => uploadMock);
 vi.mock('@/components/common/Toast', () => ({ showToast: toastMock.showToast }));
 vi.mock('@/lib/preloadImage', () => ({ preloadImage: preloadMock.preloadImage }));
+vi.mock('@/lib/loginModal', () => ({ openLoginModal: loginModalMock.openLoginModal }));
 
 import FigurineCreator from '@/components/domain/FigurineCreator';
 
@@ -298,14 +300,35 @@ describe('FigurineCreator', () => {
     expect(hookState.reset).toHaveBeenCalled();
   });
 
-  it('비로그인 상태에서 생성 클릭 시 로그인 안내 토스트 (업로드 미시도)', () => {
+  it('비로그인 상태에서 생성 클릭 시 로그인 모달을 띄운다 (업로드 미시도)', () => {
     authMock.user = null;
     const { container } = render(<FigurineCreator />);
     selectFile(container, new File(['x'], 'cat.jpg', { type: 'image/jpeg' }));
 
     fireEvent.click(screen.getByText('키캡 피규어 만들기'));
 
-    expect(toastMock.showToast).toHaveBeenCalledWith('로그인하고 이용해 주세요');
+    expect(loginModalMock.openLoginModal).toHaveBeenCalledTimes(1);
     expect(uploadMock.uploadPostImage).not.toHaveBeenCalled();
+  });
+
+  it('비로그인 상태에서 사진 선택 클릭 시 파일 선택창 대신 로그인 모달을 띄운다', () => {
+    authMock.user = null;
+    render(<FigurineCreator />);
+
+    // fireEvent는 preventDefault가 호출되면 false를 반환한다 — 파일 선택창 차단 확인
+    const defaultNotPrevented = fireEvent.click(screen.getByText('사진 선택'));
+
+    expect(defaultNotPrevented).toBe(false);
+    expect(loginModalMock.openLoginModal).toHaveBeenCalledTimes(1);
+  });
+
+  it('로그인 상태에서 사진 선택 클릭 시 로그인 모달을 띄우지 않는다', () => {
+    authMock.user = sampleUser;
+    render(<FigurineCreator />);
+
+    const defaultNotPrevented = fireEvent.click(screen.getByText('사진 선택'));
+
+    expect(defaultNotPrevented).toBe(true);
+    expect(loginModalMock.openLoginModal).not.toHaveBeenCalled();
   });
 });
