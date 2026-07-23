@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 
 vi.mock('next/navigation', () => ({
   notFound: vi.fn(() => {
@@ -16,14 +16,25 @@ const props = (img?: string | string[]) => ({
 });
 
 describe('FigurineSharePage', () => {
-  it('유효한 img: 결과 이미지와 "나도 만들어보기" CTA를 렌더한다', async () => {
+  it('유효한 img: 800 썸네일 이미지와 "나도 만들어보기" CTA를 렌더한다', async () => {
     render(await FigurineSharePage(props(VALID_IMG)));
 
     const image = screen.getByAltText('AI 키캡 피규어');
-    expect(image).toHaveAttribute('src', VALID_IMG);
+    expect(image).toHaveAttribute(
+      'src',
+      'https://images.jipsamoye.com/posts/8/thumbnails/result_800.webp',
+    );
 
     const cta = screen.getByRole('link', { name: '나도 만들어보기' });
     expect(cta).toHaveAttribute('href', '/figurines/new');
+  });
+
+  it('썸네일 로드 실패 시 원본 이미지로 폴백한다', async () => {
+    render(await FigurineSharePage(props(VALID_IMG)));
+
+    fireEvent.error(screen.getByAltText('AI 키캡 피규어'));
+
+    expect(screen.getByAltText('AI 키캡 피규어')).toHaveAttribute('src', VALID_IMG);
   });
 
   it('img 없음: notFound', async () => {
