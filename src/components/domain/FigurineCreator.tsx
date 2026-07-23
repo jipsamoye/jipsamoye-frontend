@@ -137,7 +137,7 @@ export default function FigurineCreator() {
               <img
                 src={previewUrl}
                 alt="선택한 사진 미리보기"
-                className="absolute inset-0 w-full h-full object-cover"
+                className="absolute inset-0 w-full h-full object-contain"
               />
             )}
             <label className="relative z-10 inline-flex items-center px-5 py-3 rounded-xl border border-gray-200 bg-white/95 text-sm font-medium text-gray-700 shadow-sm cursor-pointer hover:border-amber-400 hover:text-amber-600 focus-within:border-amber-400 focus-within:ring-2 focus-within:ring-amber-200 transition-colors">
