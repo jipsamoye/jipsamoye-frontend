@@ -176,7 +176,6 @@ function HomeContent() {
               사진 한 장이면 세상에 하나뿐인 <span className="font-semibold text-amber-600">키캡 피규어</span>로 만들어 드려요.
             </p>
           </div>
-          <div className="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 text-4xl md:text-5xl opacity-10 select-none">🐾</div>
         </div>
       </section>
 
