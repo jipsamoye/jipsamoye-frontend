@@ -21,6 +21,7 @@ export default function ProfileEditModal({ isOpen, onClose, profile, onSaved }: 
   const [editLinks, setEditLinks] = useState<SocialLink[]>(profile.socialLinks || []);
   const [saving, setSaving] = useState(false);
   const [nicknameStatus, setNicknameStatus] = useState<'idle' | 'checking' | 'available' | 'taken' | 'invalid'>('idle');
+  const [nicknameError, setNicknameError] = useState('');
   const nicknameTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Reset state when modal opens
@@ -43,9 +44,17 @@ export default function ProfileEditModal({ isOpen, onClose, profile, onSaved }: 
       return;
     }
 
+    // 공백(앞뒤·중간·탭 등) 포함 시 invalid — 중복 체크 API 호출 전에 차단
+    if (/\s/.test(editNickname)) {
+      setNicknameStatus('invalid');
+      setNicknameError('닉네임에 공백을 포함할 수 없어요');
+      return;
+    }
+
     // 2자 미만이면 invalid
     if (editNickname.trim().length < 2) {
       setNicknameStatus('invalid');
+      setNicknameError('2자 이상 입력해 주세요');
       return;
     }
 
@@ -136,7 +145,7 @@ export default function ProfileEditModal({ isOpen, onClose, profile, onSaved }: 
             <p className="text-xs text-red-500 mt-1.5">이미 사용 중인 닉네임이에요</p>
           )}
           {nicknameStatus === 'invalid' && (
-            <p className="text-xs text-red-500 mt-1.5">2자 이상 입력해 주세요</p>
+            <p className="text-xs text-red-500 mt-1.5">{nicknameError}</p>
           )}
         </div>
 
