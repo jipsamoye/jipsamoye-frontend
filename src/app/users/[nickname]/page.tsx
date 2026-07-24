@@ -3,15 +3,14 @@
 import { use, useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { api } from '@/lib/api';
-import { User, PetPostListItem, PageResponse, PresignedUrlResponse } from '@/types/api';
+import { User, PetPostListItem, PageResponse } from '@/types/api';
 import { useAuthContext } from '@/components/providers/AuthProvider';
 import { useOpenDm } from '@/hooks/useOpenDm';
+import { useProfileImageUpload } from '@/hooks/useProfileImageUpload';
 import Avatar from '@/components/common/Avatar';
 import PostCard from '@/components/domain/PostCard';
 import ProfileEditModal from '@/components/domain/ProfileEditModal';
-import { showLoginRequiredToast } from '@/components/common/Toast';
-import { ALLOWED_IMAGE_EXTS, POST_CONFIG } from '@/lib/constants';
-import { compressImage, extFromMimeType } from '@/lib/imageCompress';
+import { showLoginRequiredToast, showToast } from '@/components/common/Toast';
 
 export default function ProfilePage({ params }: { params: Promise<{ nickname: string }> }) {
   const { nickname } = use(params);
@@ -40,7 +39,7 @@ export default function ProfilePage({ params }: { params: Promise<{ nickname: st
     api.get<PageResponse<PetPostListItem>>(`/api/users/${decodedNickname}/posts?page=0&size=20`)
       .then((res) => setPosts(res.data.content))
       .catch(() => {});
-  }, [decodedNickname, router]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [decodedNickname, router]);
 
   const handleFollow = async () => {
     if (!user) {
@@ -57,39 +56,20 @@ export default function ProfilePage({ params }: { params: Promise<{ nickname: st
     } catch { /* ignore */ }
   };
 
-  const uploadImage = async (file: File, dirName: string, preset: 'profile' | 'cover'): Promise<string | null> => {
-    if (!user) return null;
-    const ext = file.name.split('.').pop()?.toLowerCase() || 'jpg';
-    if (!ALLOWED_IMAGE_EXTS.includes(ext)) return null;
-    if (file.size > POST_CONFIG.MAX_IMAGE_SIZE) return null;
-
-    try {
-      const compressed = await compressImage(file, preset);
-      const res = await api.post<PresignedUrlResponse>(`/api/images/presigned-url`, {
-        dirName,
-        ext: extFromMimeType(compressed.type),
-      });
-      await fetch(res.data.presignedUrl, {
-        method: 'PUT',
-        headers: { 'Content-Type': compressed.type },
-        body: compressed,
-      });
-      return res.data.imageUrl;
-    } catch {
-      return null;
-    }
-  };
+  const { previewUrl, uploading, upload: uploadProfileImage } = useProfileImageUpload();
 
   const handleProfileImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
+    e.target.value = ''; // 같은 파일 재선택 허용
     if (!file || !user || !profile) return;
-    const imageUrl = await uploadImage(file, 'profiles', 'profile');
-    if (!imageUrl) return;
     try {
-      const res = await api.patch<User>(`/api/users/me`, { profileImageUrl: imageUrl });
-      setProfile(res.data);
-      updateUser(res.data);
-    } catch { /* ignore */ }
+      const updated = await uploadProfileImage(file);
+      setProfile(updated);
+      updateUser(updated);
+    } catch (err) {
+      // 검증 실패(확장자·용량)는 훅이 한국어 메시지를 담아 던짐. API 에러는 일반 문구.
+      showToast(err instanceof Error ? err.message : '프로필 이미지 변경에 실패했어요');
+    }
   };
 
   if (loading) return <div className="flex justify-center py-20 text-gray-400">불러오는 중...</div>;
@@ -105,12 +85,18 @@ export default function ProfilePage({ params }: { params: Promise<{ nickname: st
           {/* 좌측: 큰 원형 이미지 + 닉네임 */}
           <div className="flex flex-col items-center order-1 md:flex-shrink-0 md:w-44">
             <div className="relative">
-              <Avatar src={profile.profileImageUrl} size="2xl" />
+              <Avatar src={previewUrl ?? profile.profileImageUrl} size="2xl" />
+              {uploading && (
+                <div className="absolute inset-0 w-40 h-40 rounded-full bg-black/30 flex items-center justify-center" aria-label="프로필 이미지 업로드 중">
+                  <div className="w-8 h-8 rounded-full border-[3px] border-white/40 border-t-white animate-spin" />
+                </div>
+              )}
               {isMe && (
                 <>
                   <button
                     onClick={() => profileInputRef.current?.click()}
-                    className="absolute bottom-1 right-1 w-9 h-9 bg-white border border-gray-200 rounded-full flex items-center justify-center shadow-sm hover:bg-gray-50"
+                    disabled={uploading}
+                    className="absolute bottom-1 right-1 w-9 h-9 bg-white border border-gray-200 rounded-full flex items-center justify-center shadow-sm hover:bg-gray-50 disabled:opacity-50"
                     aria-label="프로필 이미지 변경"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4 text-gray-600">
