@@ -21,6 +21,12 @@ describe('favicon — 발바닥 대신 집사모여 글씨', () => {
     expect(svg).toContain('모여');
   });
 
+  it('배경색이 메인 브랜드 컬러(#ff734c)다 — 기본 amber(#f59e0b)로 되돌아가지 않는다', () => {
+    // globals.css의 --color-primary / --color-amber-500 와 동일한 코랄색
+    expect(svg.toLowerCase()).toContain('#ff734c');
+    expect(svg.toLowerCase()).not.toContain('#f59e0b');
+  });
+
   it('레거시 발바닥 favicon.ico가 제거되어 SVG 하나로 통일됐다', () => {
     expect(existsSync(path.join(root, 'src/app/favicon.ico'))).toBe(false);
   });
