@@ -17,7 +17,7 @@ interface StageDef {
  * "지금 무슨 작업 중인지"를 설명한다. 이건 거짓 진행률이 아니라 작업 설명이다.
  */
 export const FIGURINE_STAGES: readonly StageDef[] = [
-  { at: 0, stage: 'analyzing', line: '사진에서 우리 애를 찾고 있어요' },
+  { at: 0, stage: 'analyzing', line: '사진에서 반려동물을 찾고 있어요' },
   { at: 8, stage: 'sculpting', line: '이목구비를 피규어로 다듬는 중이에요' },
   { at: 22, stage: 'casting', line: '키캡 안에 레진을 붓고 있어요' },
   { at: 40, stage: 'polishing', line: '표면을 반짝반짝 광내는 중이에요' },
