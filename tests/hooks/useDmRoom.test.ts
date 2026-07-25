@@ -498,7 +498,6 @@ describe('useDmRoom', () => {
     const { result } = renderHook(() =>
       useDmRoom({
         roomId: null,
-        targetNickname: '상대방',
         userNickname: '나',
         onMessageSent: undefined,
         onUnread: undefined,
@@ -509,29 +508,40 @@ describe('useDmRoom', () => {
     expect(result.current.messages).toHaveLength(0);
   });
 
-  it('draft에서 sendMessage 시 roomId=null + targetNickname 포함 payload를 전송한다', () => {
+  it('roomId가 null이면 sendMessage는 no-op (전송·낙관적 추가 없음)', () => {
     const { result } = renderHook(() =>
-      useDmRoom({
-        roomId: null,
-        targetNickname: '상대방',
-        userNickname: '나',
-        onMessageSent: undefined,
-        onUnread: undefined,
-      })
+      useDmRoom({ roomId: null, userNickname: '나' })
     );
 
-    act(() => result.current.sendMessage('첫 메시지'));
+    act(() => {
+      result.current.sendMessage('안녕하세요');
+    });
 
-    // 낙관적 버블 추가
-    expect(result.current.messages).toHaveLength(1);
-    expect(result.current.messages[0].status).toBe('sending');
+    expect(wsMock.send).not.toHaveBeenCalled();
+    expect(result.current.messages).toHaveLength(0);
+  });
 
-    expect(wsMock.send).toHaveBeenCalledWith('/pub/dm/send', {
-      roomId: null,
-      targetNickname: '상대방',
-      content: '첫 메시지',
-      imageUrl: null,
-      clientMessageId: 'mock-uuid-1',
+  it('sendMessage는 항상 실제 roomId + targetNickname=null payload로 전송한다', () => {
+    apiMock.get.mockResolvedValueOnce(makePageRes([]));
+    const { result } = renderHook(() =>
+      useDmRoom({ roomId: 7, userNickname: '나' })
+    );
+
+    act(() => {
+      result.current.sendMessage('안녕하세요');
+    });
+
+    expect(wsMock.send).toHaveBeenCalledWith(
+      '/pub/dm/send',
+      expect.objectContaining({
+        roomId: 7,
+        targetNickname: null,
+        content: '안녕하세요',
+      })
+    );
+    expect(result.current.messages[0]).toMatchObject({
+      content: '안녕하세요',
+      status: 'sending',
     });
   });
 
@@ -540,7 +550,6 @@ describe('useDmRoom', () => {
     const { result } = renderHook(() =>
       useDmRoom({
         roomId: 5,
-        targetNickname: null,
         userNickname: '나',
         onMessageSent: undefined,
         onUnread: undefined,
