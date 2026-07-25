@@ -126,12 +126,12 @@ describe('FigurineCreator', () => {
     expect(clickSpy).toHaveBeenCalledTimes(1);
   });
 
-  it('상단 설명이 아티산 키캡 문구로 노출되고 핵심 구절은 amber로 강조된다', () => {
+  it('상단 설명이 키캡 문구로 노출되고 핵심 구절은 amber로 강조된다', () => {
     render(<FigurineCreator />);
-    const highlight = screen.getByText('아티산 키캡 위 미니 피규어');
+    const highlight = screen.getByText('키캡 위 미니 피규어');
     expect(highlight).toHaveClass('text-amber-600', 'font-semibold');
     expect(highlight.closest('p')).toHaveTextContent(
-      '반려동물 사진을 올리면 아티산 키캡 위 미니 피규어로 만들어 드려요!',
+      '반려동물 사진을 올리면 키캡 위 미니 피규어로 만들어 드려요!',
     );
   });
 
