@@ -14,8 +14,8 @@ import { useDmRoom } from '@/hooks/useDmRoom';
 import NewMessageModalContent, { type NewMessageTarget } from '@/components/domain/NewMessageModalContent';
 import type { DmRoom, DmRoomResolve, FollowUser, PageResponse } from '@/types/api';
 
-/** draft(아직 방이 생성되지 않은) 대화 상대 정보 */
-interface DraftPartner {
+/** 선택된 방이 아직 목록에 없을 때(빈 방은 목록에서 숨김) 헤더에 쓸 상대 정보 */
+interface PendingPartner {
   nickname: string;
   profileImageUrl: string | null;
 }
@@ -53,8 +53,8 @@ function DmPageInner() {
   const { user, loading } = useAuthContext();
 
   const [selectedRoomId, setSelectedRoomId] = useState<number | null>(null);
-  // draft 대화: 아직 방이 없는 상대(roomId=null). 첫 메시지 전송 시 백엔드가 방 생성.
-  const [draftPartner, setDraftPartner] = useState<DraftPartner | null>(null);
+  // 선택된 방이 아직 목록에 없을 때(빈 방은 목록에서 숨김) 헤더에 쓸 상대 정보
+  const [pendingPartner, setPendingPartner] = useState<PendingPartner | null>(null);
   const [mobileView, setMobileView] = useState<'list' | 'chat'>('list');
   const [searchQuery, setSearchQuery] = useState('');
   const [showNewMessageModal, setShowNewMessageModal] = useState(false);
@@ -69,7 +69,6 @@ function DmPageInner() {
   const { messages, hasOlderMessages, loadingOlder, loadOlderMessages, scrollAnchorRef, sendMessage, retryMessage } =
     useDmRoom({
       roomId: selectedRoomId,
-      targetNickname: draftPartner?.nickname ?? null,
       userNickname: user?.nickname ?? null,
       onMessageSent: (roomId, content, createdAt) => {
         applyServerLastMessage(roomId, content, createdAt);
@@ -81,72 +80,49 @@ function DmPageInner() {
 
   const selectedRoom: DmRoom | null = rooms.find((r) => r.roomId === selectedRoomId) ?? null;
 
-  // 대화창에 표시할 상대 정보 — 실제 방(selectedRoom) 또는 draft 상대.
-  // 채팅 패널은 이 값이 있을 때 렌더된다(draft도 빈 채팅창을 연다).
+  // 대화창에 표시할 상대 정보 — 실제 방(selectedRoom) 우선, 없으면 pendingPartner.
+  // 채팅 패널은 이 값이 있을 때 렌더된다.
   const activePartner: { nickname: string; profileImageUrl: string | null } | null =
     selectedRoom
       ? {
           nickname: selectedRoom.otherUserNickname,
           profileImageUrl: selectedRoom.otherUserProfileImageUrl,
         }
-      : draftPartner
-        ? { nickname: draftPartner.nickname, profileImageUrl: draftPartner.profileImageUrl }
+      : pendingPartner
+        ? { nickname: pendingPartner.nickname, profileImageUrl: pendingPartner.profileImageUrl }
         : null;
 
   // dm-rooms 핸들러에서 stale closure 없이 최신 열림 상태를 참조하기 위한 ref
   const selectedRoomIdRef = useRef<number | null>(selectedRoomId);
-  const draftPartnerRef = useRef<DraftPartner | null>(draftPartner);
   useEffect(() => {
     selectedRoomIdRef.current = selectedRoomId;
-    draftPartnerRef.current = draftPartner;
-  }, [selectedRoomId, draftPartner]);
+  }, [selectedRoomId]);
 
-  // ─── 사용자별 DM 방 채널 구독 (버그②: 목록 화면 실시간 반영, 버그①: draft→실제 방 전환) ──
+  // ─── 사용자별 DM 방 채널 구독 (목록 화면 실시간 반영) ─────────────────────
   useEffect(() => {
     if (!user) return;
     const unsubscribe = wsService.on('dm-rooms', (data: unknown) => {
       const payload = data as DmRoom;
       if (payload == null || typeof payload.roomId !== 'number') return;
 
-      // draft 상태에서 첫 메시지를 보낸 상대의 방이 막 생성된 경우 → 실제 roomId로 전환.
-      // NOTE: 백엔드가 발신자에게도 이 채널로 push하도록 보장됨. 만약 push가 누락되면
-      //       draft가 실제 방으로 전환되지 않아 첫 메시지가 목록에 안 뜰 수 있음(설계상 의존성).
-      // NOTE: 닉네임 단일 매칭의 한계 — 방은 pair(두 사용자)당 유일하므로 닉네임이 일치하는
-      //       전환 대상 방은 항상 정확하다. 닉네임 변경/재사용 같은 희귀 엣지에서만 오매칭 여지.
-      const draft = draftPartnerRef.current;
-      if (draft && payload.otherUserNickname === draft.nickname) {
-        setSelectedRoomId(payload.roomId);
-        setDraftPartner(null);
-        // 전환된 방은 지금 열려 있으므로 unread 0으로 반영
-        applyRoomUpdate(payload, payload.roomId);
-        return;
-      }
-
       applyRoomUpdate(payload, selectedRoomIdRef.current);
     });
     return unsubscribe;
   }, [user, applyRoomUpdate]);
 
-  // ─── 딥링크: ?room= 으로 기존 방 선택 / ?draft= 으로 draft 대화 열기 ──────
+  // ─── 딥링크: ?room= 으로 방 선택 (+ ?nick=&img= 로 목록에 없는 새 방의 헤더 정보) ──
   useEffect(() => {
     const roomParam = searchParams.get('room');
-    const draftParam = searchParams.get('draft');
-    if (roomParam) {
-      const roomId = parseInt(roomParam, 10);
-      if (!isNaN(roomId)) {
-        setSelectedRoomId(roomId);
-        setDraftPartner(null);
-        setMobileView('chat');
-      }
-    } else if (draftParam) {
-      // 아직 방이 없는 상대와의 draft 대화. 진입부(프로필/호버카드)가 ?img= 로 넘긴
-      // 프로필 이미지를 헤더 아바타에 즉시 반영. 없으면 dm-rooms 갱신/방 전환 시 채워짐.
+    if (!roomParam) return;
+    const roomId = parseInt(roomParam, 10);
+    if (!isNaN(roomId)) {
+      const nickParam = searchParams.get('nick');
       const imgParam = searchParams.get('img');
-      setDraftPartner({ nickname: draftParam, profileImageUrl: imgParam || null });
-      setSelectedRoomId(null);
+      setSelectedRoomId(roomId);
+      setPendingPartner(
+        nickParam ? { nickname: nickParam, profileImageUrl: imgParam || null } : null
+      );
       setMobileView('chat');
-    } else {
-      return;
     }
     // URL에서 쿼리 파라미터 제거 (뒤로가기 시 깔끔하게)
     router.replace('/dm', { scroll: false });
@@ -181,14 +157,14 @@ function DmPageInner() {
 
   const handleSelectRoom = useCallback((roomId: number) => {
     setSelectedRoomId(roomId);
-    setDraftPartner(null);
+    setPendingPartner(null);
     setMobileView('chat');
   }, []);
 
   const handleBackToList = useCallback(() => {
     setMobileView('list');
     setSelectedRoomId(null);
-    setDraftPartner(null);
+    setPendingPartner(null);
   }, []);
 
   const handleSend = useCallback(() => {
@@ -196,8 +172,6 @@ function DmPageInner() {
     const content = inputValue.trim();
     setInputValue('');
     sendMessage(content);
-    // draft(roomId 없음)일 땐 목록 낙관적 갱신을 건너뜀.
-    // 첫 메시지 후 /user/sub/dm/rooms 푸시로 새 방이 목록에 반영된다.
     if (selectedRoomId != null) {
       updateLastMessage(selectedRoomId, content);
     }
@@ -225,32 +199,31 @@ function DmPageInner() {
   const handleCreateRoom = useCallback(
     async (target: NewMessageTarget) => {
       if (!user) return;
-      // resolve: 메시지가 오간 기존 방이면 roomId 포함, 없으면 draft 응답(roomId=null).
-      // 방을 즉시 만들지 않고, 메시지가 없으면 draft 상태로만 연다(버그①).
+      // create=true: 방이 없으면 즉시 생성(선생성). 실제 roomId로 구독을 먼저
+      // 성립시켜 첫 메시지 에코 유실을 막는다. 빈 방은 목록에 노출되지 않으므로(EXISTS 필터)
+      // 헤더 표시는 pendingPartner로 해결한다.
       try {
         const res = await api.post<DmRoomResolve>(
-          `/api/dm/rooms?targetNickname=${encodeURIComponent(target.nickname)}`
+          `/api/dm/rooms?targetNickname=${encodeURIComponent(target.nickname)}&create=true`
         );
         const resolved = res.data;
         if (resolved && resolved.roomId != null) {
-          // 기존 방 → 목록에 없으면 합치고 선택
           const roomId = resolved.roomId;
-          setRooms((prev) =>
-            prev.some((r) => r.roomId === roomId)
-              ? prev
-              : [{ ...resolved, roomId }, ...prev]
-          );
+          // 대화 이력이 있는 방인데 목록에 아직 없으면 합친다 (빈 방은 목록에 넣지 않음)
+          if (resolved.lastMessage != null) {
+            setRooms((prev) =>
+              prev.some((r) => r.roomId === roomId)
+                ? prev
+                : [{ ...resolved, roomId }, ...prev]
+            );
+          }
           setSelectedRoomId(roomId);
-          setDraftPartner(null);
-        } else {
-          // 아직 방 없음 → draft 상태로 빈 채팅창 열기
-          setDraftPartner({
+          setPendingPartner({
             nickname: target.nickname,
-            profileImageUrl: resolved?.otherUserProfileImageUrl ?? target.profileImageUrl ?? null,
+            profileImageUrl: resolved.otherUserProfileImageUrl ?? target.profileImageUrl ?? null,
           });
-          setSelectedRoomId(null);
+          setMobileView('chat');
         }
-        setMobileView('chat');
       } catch {
         // ignore
       }
