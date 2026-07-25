@@ -25,7 +25,7 @@ describe('FigurineLoading — 스캔 현상 대기 화면', () => {
   it('현재 단계 카피를 role=status 영역에 담는다', () => {
     render(<FigurineLoading previewUrl="blob:preview" startedAt={T0} />);
     const status = screen.getByRole('status');
-    expect(status).toHaveTextContent('사진에서 우리 애를 찾고 있어요');
+    expect(status).toHaveTextContent('사진에서 반려동물을 찾고 있어요');
     expect(status.getAttribute('aria-live')).toBe('polite');
   });
 
@@ -58,7 +58,7 @@ describe('FigurineLoading — 스캔 현상 대기 화면', () => {
     );
     // 업로드 완료 — 호출부가 startedAt을 지금으로 갱신한다
     rerender(<FigurineLoading previewUrl="blob:preview" startedAt={Date.now()} />);
-    expect(screen.getByRole('status')).toHaveTextContent('사진에서 우리 애를 찾고 있어요');
+    expect(screen.getByRole('status')).toHaveTextContent('사진에서 반려동물을 찾고 있어요');
   });
 
   it('preparing 중에도 스캔 스테이지와 진행바는 그대로 보인다', () => {

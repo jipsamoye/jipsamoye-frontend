@@ -14,7 +14,7 @@ interface FigurineSharePageProps {
 }
 
 const PAGE_TITLE = 'AI 키캡 피규어 — 집사모여';
-const PAGE_DESCRIPTION = '우리 애 사진으로 만든 아티산 키캡 피규어를 구경해 보세요!';
+const PAGE_DESCRIPTION = '반려동물 사진으로 만든 키캡 피규어를 구경해 보세요!';
 
 export async function generateMetadata({ searchParams }: FigurineSharePageProps): Promise<Metadata> {
   const { img } = await searchParams;
@@ -46,7 +46,7 @@ export default async function FigurineSharePage({ searchParams }: FigurineShareP
     <div className="max-w-xl mx-auto py-10">
       <h1 className="text-2xl font-bold text-gray-900">AI 키캡 피규어</h1>
       <p className="mt-2 text-sm text-gray-600">
-        우리 애 사진을 올리면 아티산 키캡 위 미니 피규어로 만들어 드려요.
+        반려동물 사진을 올리면 키캡 위 미니 피규어로 만들어 드려요.
       </p>
       {/* 원본(1024 PNG, ~1.3MB) 대신 800 웹피 썸네일(~35KB) 우선 — 생성 직후 썸네일이 없으면 DetailImage가 원본으로 폴백 */}
       <DetailImage src={imageUrl} alt="AI 키캡 피규어" loading="eager" className="mt-6 w-full rounded-2xl" />

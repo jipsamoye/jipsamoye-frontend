@@ -279,7 +279,7 @@ describe('FigurineCreator', () => {
     await waitFor(() => {
       const status = screen.getByRole('status');
       expect(status).toHaveTextContent('사진을 올리고 있어요');
-      expect(status).not.toHaveTextContent('사진에서 우리 애를 찾고 있어요');
+      expect(status).not.toHaveTextContent('사진에서 반려동물을 찾고 있어요');
       expect(status).not.toHaveTextContent('키캡 안에 레진을 붓고 있어요');
     });
   });
@@ -314,7 +314,7 @@ describe('FigurineCreator', () => {
   it('generating: 스캔 현상 대기 화면(FigurineLoading)을 렌더한다', () => {
     hookState.phase = 'generating';
     const { container } = render(<FigurineCreator />);
-    expect(screen.getByRole('status')).toHaveTextContent('사진에서 우리 애를 찾고 있어요');
+    expect(screen.getByRole('status')).toHaveTextContent('사진에서 반려동물을 찾고 있어요');
     expect(container.querySelector('[data-testid="figurine-scan-stage"]')).not.toBeNull();
     expect(screen.getByText(/이 화면을 벗어나면 진행 상황을 볼 수 없어요/)).toBeInTheDocument();
   });
@@ -336,7 +336,7 @@ describe('FigurineCreator', () => {
     hookState.job = completedJob();
     render(<FigurineCreator />);
 
-    expect(screen.getByRole('status')).toHaveTextContent('사진에서 우리 애를 찾고 있어요');
+    expect(screen.getByRole('status')).toHaveTextContent('사진에서 반려동물을 찾고 있어요');
     expect(screen.queryByAltText('완성된 AI 키캡 피규어')).not.toBeInTheDocument();
   });
 

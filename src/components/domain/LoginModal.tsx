@@ -15,7 +15,7 @@ export default function LoginModal({ isOpen, onClose, onGuestLogin }: LoginModal
       <div className="text-center">
         <h2 className="text-xl font-bold mb-2">집사모여</h2>
         <p className="text-sm text-gray-500 mb-6">
-          우리 애 자랑하러 오세요!
+          반려동물 자랑하러 오세요!
         </p>
 
         <div className="flex flex-col gap-3">

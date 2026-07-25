@@ -28,7 +28,7 @@ describe('useFigurineStageCopy — 경과 시간 기반 단계 카피', () => {
   it('시작 직후엔 analyzing 단계다', () => {
     const { result } = renderHook(() => useFigurineStageCopy(T0));
     expect(result.current.stage).toBe('analyzing');
-    expect(result.current.line).toBe('사진에서 우리 애를 찾고 있어요');
+    expect(result.current.line).toBe('사진에서 반려동물을 찾고 있어요');
   });
 
   it('8/22/40/60초 경계에서 각 단계로 전환된다', () => {
