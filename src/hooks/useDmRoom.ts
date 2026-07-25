@@ -6,8 +6,6 @@ import type { DmMessage, DmRoomEvent, PageResponse } from '@/types/api';
 
 interface UseDmRoomOptions {
   roomId: number | null;
-  /** draft(roomId=null) 상태에서 첫 메시지를 보낼 상대 닉네임 */
-  targetNickname?: string | null;
   userNickname: string | null;
   onMessageSent?: (roomId: number, content: string, createdAt: string) => void;
   onUnread?: (roomId: number) => void;
@@ -27,7 +25,6 @@ interface UseDmRoomResult {
 
 export function useDmRoom({
   roomId,
-  targetNickname,
   userNickname,
   onMessageSent,
   onUnread,
@@ -177,11 +174,10 @@ export function useDmRoom({
     }
   }, [roomId, hasOlderMessages, loadingOlder, currentPage]);
 
-  /** 메시지 전송 (낙관적 UI) */
+  /** 메시지 전송 (낙관적 UI) — 방은 항상 선생성되어 있으므로 roomId 필수 */
   const sendMessage = useCallback(
     (content: string) => {
-      // 실제 방(roomId) 또는 draft(targetNickname) 둘 중 하나는 있어야 전송 가능.
-      if (!content.trim() || !userNickname || (!roomId && !targetNickname)) return;
+      if (!content.trim() || !userNickname || !roomId) return;
 
       const clientMessageId = crypto.randomUUID();
       const optimistic: DmMessage = {
@@ -198,11 +194,9 @@ export function useDmRoom({
 
       setMessages((prev) => [...prev, optimistic]);
 
-      // draft면 roomId=null + targetNickname으로 전송(백엔드가 방 생성).
-      // 첫 메시지 후 /user/sub/dm/rooms로 새 roomId가 오면 page에서 draft→실제 방 전환.
       const sent = wsService.send('/pub/dm/send', {
-        roomId: roomId ?? null,
-        targetNickname: roomId ? null : (targetNickname ?? null),
+        roomId,
+        targetNickname: null,
         content: content.trim(),
         imageUrl: null,
         clientMessageId,
@@ -216,20 +210,20 @@ export function useDmRoom({
         );
       }
     },
-    [roomId, targetNickname, userNickname]
+    [roomId, userNickname]
   );
 
   /** 실패한 메시지 재전송 */
   const retryMessage = useCallback(
     (clientMessageId: string) => {
-      if (!userNickname || (!roomId && !targetNickname)) return;
+      if (!userNickname || !roomId) return;
       setMessages((prev) => {
         const target = prev.find((m) => m.clientMessageId === clientMessageId);
         if (!target) return prev;
 
         const sent = wsService.send('/pub/dm/send', {
-          roomId: roomId ?? null,
-          targetNickname: roomId ? null : (targetNickname ?? null),
+          roomId,
+          targetNickname: null,
           content: target.content,
           imageUrl: null,
           clientMessageId,
@@ -242,7 +236,7 @@ export function useDmRoom({
         );
       });
     },
-    [roomId, targetNickname, userNickname]
+    [roomId, userNickname]
   );
 
   return {

@@ -276,9 +276,9 @@ export interface DmRoom {
 }
 
 /**
- * POST /api/dm/rooms?targetNickname= 응답 (resolve).
- * - 메시지가 오간 기존 방이면 roomId 포함(DmRoom).
- * - 아직 방이 없으면 roomId=null + 상대 정보만 내려오는 draft 응답.
+ * POST /api/dm/rooms 응답.
+ * create=true(현재 클라이언트)로 호출하면 방을 선생성하므로 roomId가 항상 non-null.
+ * null은 구 백엔드(create 미지원)에 대한 방어적 타입으로만 남긴다.
  */
 export type DmRoomResolve = Omit<DmRoom, 'roomId'> & { roomId: number | null };
 
