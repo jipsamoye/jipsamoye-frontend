@@ -192,8 +192,10 @@ describe('NotificationProvider — 재연결 재동기화', () => {
     });
 
     // ─── 로그인 상태에서 시작 ───
-    const { rerender } = renderHook(() => useNotification(), { wrapper });
+    const { result, rerender } = renderHook(() => useNotification(), { wrapper });
     await waitFor(() => expect(wsMock.connect).toHaveBeenCalledWith('테스터'));
+    await waitFor(() => expect(result.current.notifications).toHaveLength(1));
+    expect(result.current.unreadCount).toBe(1);
     expect(wsMock.on).toHaveBeenCalledTimes(1);
     expect(wsMock.onReconnect).toHaveBeenCalledTimes(1);
 
@@ -205,6 +207,9 @@ describe('NotificationProvider — 재연결 재동기화', () => {
       expect(wsOnUnsubscribe).toHaveBeenCalled();
       expect(reconnectUnsubscribe).toHaveBeenCalled();
       expect(wsMock.disconnect).toHaveBeenCalled();
+      // 상태 리셋 검증
+      expect(result.current.notifications).toEqual([]);
+      expect(result.current.unreadCount).toBe(0);
     });
 
     // ─── 다시 로그인: null → user ───
