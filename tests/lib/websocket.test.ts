@@ -516,6 +516,70 @@ describe('wsService', () => {
     });
   });
 
+  describe('connect() 재호출 가드 — 재시도 중(connected=false) 상태', () => {
+    it('재시도 중(connected=false) 같은 닉네임으로 connect 재호출 시 클라이언트를 파괴하지 않는다', () => {
+      wsService.connect('테스터');
+      const client = clientInstances[0];
+      client.config.onConnect();
+      // 비정상 절단 — stompjs가 내부적으로 재시도 중인 상태(connected=false)
+      client.config.onWebSocketClose?.();
+      expect(wsService.isConnected()).toBe(false);
+
+      // 재시도 창 사이에 같은 닉네임으로 connect()가 다시 호출됨 (예: 리렌더)
+      wsService.connect('테스터');
+
+      // 새 클라이언트가 만들어지지 않아야 함 — 재연결 상태(hasConnectedOnce, pendingDmRooms) 보존
+      expect(clientInstances).toHaveLength(1);
+
+      // stompjs의 자동 재시도가 성공해 다시 CONNECTED — 재연결 상태가 살아있다면 onReconnect가 발화해야 함
+      const reconnectHandler = vi.fn();
+      wsService.onReconnect(reconnectHandler);
+      client.config.onConnect();
+
+      expect(reconnectHandler).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('세션 프로브 — stale 응답 무시', () => {
+    it('프로브 응답이 도착하기 전에 새 클라이언트로 교체되면 401 결과를 무시한다', async () => {
+      let rejectProbe: ((err: unknown) => void) | null = null;
+      apiMock.get.mockImplementation(
+        () =>
+          new Promise((_resolve, reject) => {
+            rejectProbe = reject;
+          })
+      );
+
+      wsService.connect('테스터');
+      const oldClient = clientInstances[0];
+      for (let i = 0; i < 5; i += 1) oldClient.config.onWebSocketClose?.();
+
+      await vi.waitFor(() => {
+        expect(apiMock.get).toHaveBeenCalledWith('/api/notifications/unread-count', {
+          silent: true,
+        });
+      });
+
+      // 프로브 응답이 오기 전에 로그아웃 후 재로그인 — 새 클라이언트로 교체
+      wsService.disconnect();
+      wsService.connect('테스터');
+      const newClient = clientInstances[1];
+      expect(newClient).not.toBe(oldClient);
+
+      // 이제서야 stale 401 응답 도착
+      rejectProbe?.({ status: 401, code: 'UNAUTHORIZED', message: '', data: null });
+
+      await vi.waitFor(() => {
+        // stale 응답이 새 클라이언트에 영향을 주지 않았는지 확인하기 위해 약간의 시간을 둔다
+        expect(apiMock.get).toHaveBeenCalledTimes(1);
+      });
+
+      expect(showToastMock).not.toHaveBeenCalled();
+      expect(wsService.isAuthRejected()).toBe(false);
+      expect(newClient.deactivate).not.toHaveBeenCalled();
+    });
+  });
+
   describe('재연결 백오프 + heartbeat worker 옵션', () => {
     it('지수 백오프: 3초 시작, 최대 60초, EXPONENTIAL 모드', () => {
       wsService.connect('테스터');

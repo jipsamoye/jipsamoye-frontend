@@ -28,7 +28,12 @@ class WebSocketService {
   private probing = false;
 
   connect(userNickname: string): void {
-    if (this.connected && this.userNickname === userNickname) return;
+    // client 존재 여부로 키를 잡는다(connected 아님) — onWebSocketClose는 재시도
+    // 구간마다 connected를 false로 내리므로, 그 창에 같은 닉네임으로 재호출되면
+    // (예: 리렌더로 인한 identity 변경) connected 기준 가드는 뚫려 disconnect()가
+    // hasConnectedOnce/pendingDmRooms 같은 재연결 상태를 파괴한다. stompjs 클라이언트는
+    // 이미 자체적으로 재시도 중이므로 client 존재만으로 충분하다.
+    if (this.client && this.userNickname === userNickname) return;
 
     this.disconnect();
     this.userNickname = userNickname;
@@ -175,6 +180,10 @@ class WebSocketService {
     } catch (err) {
       const status = (err as { status?: number }).status;
       if (status === 401 || status === 403) {
+        // 프로브 응답 대기 중 로그아웃→재로그인 등으로 client가 교체됐다면
+        // 이 401/403은 이미 버려진 client에 대한 stale 응답 — 새 client에는
+        // 무관하므로 무시(토스트/disconnect 금지)
+        if (this.client !== client) return;
         this.authRejected = true;
         showToast('로그인하고 이용해 주세요');
         this.disconnect();
