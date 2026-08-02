@@ -98,7 +98,6 @@ export default function NotificationProvider({ children }: NotificationProviderP
     wsService.connect(user.nickname);
     // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchNotifications();
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchUnreadCount();
 
     const unsubscribe = wsService.on('notification', (data) => {
@@ -128,7 +127,6 @@ export default function NotificationProvider({ children }: NotificationProviderP
     wsService.disconnect();
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setNotifications([]);
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setUnreadCount(0);
   }, [user]);
 

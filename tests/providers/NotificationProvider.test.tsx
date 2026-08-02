@@ -17,8 +17,11 @@ const { wsMock } = vi.hoisted(() => ({
 }));
 vi.mock('@/lib/websocket', () => ({ wsService: wsMock }));
 
+const { authContextRef } = vi.hoisted(() => ({
+  authContextRef: { current: { user: { nickname: '테스터' }, loading: false } },
+}));
 vi.mock('@/components/providers/AuthProvider', () => ({
-  useAuthContext: () => ({ user: { nickname: '테스터' } }),
+  useAuthContext: () => authContextRef.current,
 }));
 
 import NotificationProvider, { useNotification } from '@/components/providers/NotificationProvider';
@@ -168,6 +171,55 @@ describe('NotificationProvider — 재연결 재동기화', () => {
 
     await waitFor(() => {
       expect(result.current.notifications.map((n) => n.id)).toEqual([9, 2, 1]);
+    });
+  });
+
+  it('로그인 → 로그아웃 → 로그인 전환 시 재연결 핸들러와 상태를 올바르게 정리하고 재등록한다', async () => {
+    routeApiGet([makeNotification({ id: 1 })], 1);
+
+    let wsOnUnsubscribe: (() => void) | null = null;
+    wsMock.on.mockImplementation((_channel: string, _handler: (data: unknown) => void) => {
+      const unsub = vi.fn();
+      wsOnUnsubscribe = unsub;
+      return unsub;
+    });
+
+    let reconnectUnsubscribe: (() => void) | null = null;
+    wsMock.onReconnect.mockImplementation((_handler: () => void) => {
+      const unsub = vi.fn();
+      reconnectUnsubscribe = unsub;
+      return unsub;
+    });
+
+    // ─── 로그인 상태에서 시작 ───
+    const { rerender } = renderHook(() => useNotification(), { wrapper });
+    await waitFor(() => expect(wsMock.connect).toHaveBeenCalledWith('테스터'));
+    expect(wsMock.on).toHaveBeenCalledTimes(1);
+    expect(wsMock.onReconnect).toHaveBeenCalledTimes(1);
+
+    // ─── 로그아웃: user → null ───
+    authContextRef.current = { user: null, loading: false };
+    rerender();
+
+    await waitFor(() => {
+      expect(wsOnUnsubscribe).toHaveBeenCalled();
+      expect(reconnectUnsubscribe).toHaveBeenCalled();
+      expect(wsMock.disconnect).toHaveBeenCalled();
+    });
+
+    // ─── 다시 로그인: null → user ───
+    const previousConnectCalls = wsMock.connect.mock.calls.length;
+    const previousOnCalls = wsMock.on.mock.calls.length;
+    const previousOnReconnectCalls = wsMock.onReconnect.mock.calls.length;
+
+    authContextRef.current = { user: { nickname: '테스터2' }, loading: false };
+    rerender();
+
+    await waitFor(() => {
+      expect(wsMock.connect.mock.calls).toHaveLength(previousConnectCalls + 1);
+      expect(wsMock.on.mock.calls).toHaveLength(previousOnCalls + 1);
+      expect(wsMock.onReconnect.mock.calls).toHaveLength(previousOnReconnectCalls + 1);
+      expect(wsMock.connect).toHaveBeenCalledWith('테스터2');
     });
   });
 });
