@@ -403,4 +403,32 @@ describe('wsService', () => {
       expect(handler).not.toHaveBeenCalled();
     });
   });
+
+  describe('onWebSocketClose — 비정상 절단 정리', () => {
+    it('비정상 절단(onWebSocketClose) 시 connected=false → send가 false를 반환한다', () => {
+      wsService.connect('테스터');
+      const client = clientInstances[0];
+      client.config.onConnect();
+      expect(wsService.send('/pub/dm/send', { roomId: 1, content: '안녕' })).toBe(true);
+
+      client.config.onWebSocketClose?.();
+
+      expect(wsService.isConnected()).toBe(false);
+      expect(wsService.send('/pub/dm/send', { roomId: 1, content: '안녕' })).toBe(false);
+    });
+
+    it('비정상 절단 후 재연결(onConnect) 시 DM 방이 재구독된다', () => {
+      wsService.connect('테스터');
+      const client = clientInstances[0];
+      client.config.onConnect();
+      wsService.onDmRoom(42, vi.fn());
+
+      client.config.onWebSocketClose?.();
+      client.subscribe.mockClear();
+      client.config.onConnect();
+
+      const destinations = client.subscribe.mock.calls.map((call) => call[0] as string);
+      expect(destinations).toContain('/sub/dm/room/42');
+    });
+  });
 });

@@ -60,6 +60,12 @@ class WebSocketService {
         // 구독 참조 초기화 (재연결 시 onConnect에서 재구독)
         this.subscriptions.clear();
       },
+      onWebSocketClose: () => {
+        // onDisconnect는 정상 종료(DISCONNECT 프레임)에만 발화 —
+        // heartbeat 강제 종료·네트워크 순단 등 모든 소켓 절단은 여기서 정리
+        this.connected = false;
+        this.subscriptions.clear();
+      },
       onStompError: (frame) => {
         const message = frame.headers['message'] ?? '';
         if (/unauthori[sz]ed|forbidden|401|403/i.test(message)) {
