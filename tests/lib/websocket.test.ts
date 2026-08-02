@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { ReconnectionTimeMode, TickerStrategy } from '@stomp/stompjs';
 
 const showToastMock = vi.fn();
 vi.mock('@/components/common/Toast', () => ({
@@ -512,6 +513,24 @@ describe('wsService', () => {
       closeTimes(client, 4);
 
       expect(apiMock.get).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('재연결 백오프 + heartbeat worker 옵션', () => {
+    it('지수 백오프: 3초 시작, 최대 60초, EXPONENTIAL 모드', () => {
+      wsService.connect('테스터');
+      const cfg = clientInstances[0].config;
+
+      expect(cfg.reconnectDelay).toBe(3000);
+      expect(cfg.maxReconnectDelay).toBe(60000);
+      expect(cfg.reconnectTimeMode).toBe(ReconnectionTimeMode.EXPONENTIAL);
+    });
+
+    it('백그라운드 탭 스로틀링 대응: heartbeat를 Web Worker로 발행', () => {
+      wsService.connect('테스터');
+      const cfg = clientInstances[0].config;
+
+      expect(cfg.heartbeatStrategy).toBe(TickerStrategy.Worker);
     });
   });
 });

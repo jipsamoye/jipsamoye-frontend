@@ -1,5 +1,5 @@
 import SockJS from 'sockjs-client';
-import { Client, IMessage } from '@stomp/stompjs';
+import { Client, IMessage, ReconnectionTimeMode, TickerStrategy } from '@stomp/stompjs';
 import { showToast } from '@/components/common/Toast';
 import { api } from '@/lib/api';
 import type { DmMessage, DmRoomEvent } from '@/types/api';
@@ -45,7 +45,13 @@ class WebSocketService {
             'xhr-polling': { withCredentials: true },
           },
         } as ConstructorParameters<typeof SockJS>[2]),
+      // 지수 백오프: 3s → 6s → 12s → ... 최대 60s (thundering herd 완화)
       reconnectDelay: 3000,
+      maxReconnectDelay: 60000,
+      reconnectTimeMode: ReconnectionTimeMode.EXPONENTIAL,
+      // Chrome 백그라운드 탭 타이머 스로틀링(분당 1회) 대응 — heartbeat를
+      // Web Worker 타이머로 발행. 미지원 환경은 라이브러리가 interval 폴백.
+      heartbeatStrategy: TickerStrategy.Worker,
       onConnect: () => {
         this.connected = true;
         this.consecutiveFailures = 0;
