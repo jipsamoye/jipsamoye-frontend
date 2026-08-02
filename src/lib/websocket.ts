@@ -17,6 +17,9 @@ class WebSocketService {
   private userNickname: string | null = null;
   private connected = false;
   private authRejected = false;
+  /** 최초 연결과 재연결 구분 — 명시적 disconnect 시 리셋 */
+  private hasConnectedOnce = false;
+  private reconnectHandlers: Set<() => void> = new Set();
 
   connect(userNickname: string): void {
     if (this.connected && this.userNickname === userNickname) return;
@@ -46,6 +49,11 @@ class WebSocketService {
         this.pendingDmRooms.forEach((handler, roomId) => {
           this.subscribeDmRoomNow(roomId, handler);
         });
+        // 재연결이면(최초 연결 제외) 재구독 완료 후 재동기화 이벤트 발화
+        if (this.hasConnectedOnce) {
+          this.reconnectHandlers.forEach((handler) => handler());
+        }
+        this.hasConnectedOnce = true;
       },
       onDisconnect: () => {
         this.connected = false;
@@ -126,6 +134,7 @@ class WebSocketService {
   disconnect(): void {
     this.userNickname = null;
     this.connected = false;
+    this.hasConnectedOnce = false;
     this.subscriptions.clear();
     this.pendingDmRooms.clear();
     if (this.client) {
@@ -152,6 +161,18 @@ class WebSocketService {
           this.channelHandlers.delete(channel);
         }
       }
+    };
+  }
+
+  /**
+   * 재연결(두 번째 이후 CONNECTED) 시에만 발화하는 이벤트 등록.
+   * 발화 시점은 채널 재구독 완료 후 — 핸들러에서 REST 재동기화를 수행해도
+   * 이후 WS 수신과 병합 가능. 반환값은 해제 함수.
+   */
+  onReconnect(handler: () => void): () => void {
+    this.reconnectHandlers.add(handler);
+    return () => {
+      this.reconnectHandlers.delete(handler);
     };
   }
 

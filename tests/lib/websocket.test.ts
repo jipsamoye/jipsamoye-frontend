@@ -5,12 +5,34 @@ vi.mock('@/components/common/Toast', () => ({
   showToast: (text: string) => showToastMock(text),
 }));
 
+const { apiMock } = vi.hoisted(() => ({
+  apiMock: { get: vi.fn(), post: vi.fn(), patch: vi.fn(), delete: vi.fn() },
+}));
+vi.mock('@/lib/api', () => ({ api: apiMock }));
+
+interface MockClientConfig {
+  webSocketFactory: () => unknown;
+  reconnectDelay: number;
+  maxReconnectDelay?: number;
+  reconnectTimeMode?: unknown;
+  heartbeatStrategy?: unknown;
+  onConnect: () => void;
+  onDisconnect: () => void;
+  onWebSocketClose?: () => void;
+  onStompError: (frame: { headers: Record<string, string> }) => void;
+}
+
 const { clientInstances, sockJsInstances } = vi.hoisted(() => ({
   clientInstances: [] as Array<{
     config: {
       webSocketFactory: () => unknown;
+      reconnectDelay: number;
+      maxReconnectDelay?: number;
+      reconnectTimeMode?: unknown;
+      heartbeatStrategy?: unknown;
       onConnect: () => void;
       onDisconnect: () => void;
+      onWebSocketClose?: () => void;
       onStompError: (frame: { headers: Record<string, string> }) => void;
     };
     activate: ReturnType<typeof vi.fn>;
@@ -21,24 +43,28 @@ const { clientInstances, sockJsInstances } = vi.hoisted(() => ({
   sockJsInstances: [] as Array<{ url: string; options: unknown }>,
 }));
 
-vi.mock('@stomp/stompjs', () => ({
-  Client: class {
-    activate = vi.fn();
-    deactivate = vi.fn();
-    publish = vi.fn();
-    subscribe = vi.fn(() => ({ unsubscribe: vi.fn() }));
-    constructor(config: unknown) {
-      const instance = {
-        config: config as ConstructorParameters<typeof import('@stomp/stompjs').Client>[0],
-        activate: this.activate,
-        deactivate: this.deactivate,
-        publish: this.publish,
-        subscribe: this.subscribe,
-      };
-      clientInstances.push(instance as unknown as (typeof clientInstances)[number]);
-    }
-  },
-}));
+vi.mock('@stomp/stompjs', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@stomp/stompjs')>();
+  return {
+    ...actual,
+    Client: class {
+      activate = vi.fn();
+      deactivate = vi.fn();
+      publish = vi.fn();
+      subscribe = vi.fn(() => ({ unsubscribe: vi.fn() }));
+      constructor(config: unknown) {
+        const instance = {
+          config: config as MockClientConfig,
+          activate: this.activate,
+          deactivate: this.deactivate,
+          publish: this.publish,
+          subscribe: this.subscribe,
+        };
+        clientInstances.push(instance as unknown as (typeof clientInstances)[number]);
+      }
+    },
+  };
+});
 
 vi.mock('sockjs-client', () => ({
   default: class {
@@ -56,6 +82,7 @@ describe('wsService', () => {
     clientInstances.length = 0;
     sockJsInstances.length = 0;
     showToastMock.mockClear();
+    apiMock.get.mockReset();
   });
 
   it('SockJS transportOptions 에 withCredentials: true 를 포함해서 연결한다', () => {
@@ -305,6 +332,75 @@ describe('wsService', () => {
       wsService.disconnect();
       const result = wsService.send('/pub/dm/send', { roomId: 1, content: '안녕', imageUrl: null });
       expect(result).toBe(false);
+    });
+  });
+
+  describe('onReconnect — 재연결 전용 이벤트', () => {
+    it('최초 연결(첫 onConnect) 시에는 발화하지 않는다', () => {
+      wsService.connect('테스터');
+      const handler = vi.fn();
+      wsService.onReconnect(handler);
+
+      clientInstances[0].config.onConnect();
+
+      expect(handler).not.toHaveBeenCalled();
+    });
+
+    it('재연결(두 번째 onConnect) 시 1회 발화한다', () => {
+      wsService.connect('테스터');
+      const handler = vi.fn();
+      wsService.onReconnect(handler);
+      const client = clientInstances[0];
+
+      client.config.onConnect();
+      client.config.onDisconnect();
+      client.config.onConnect();
+
+      expect(handler).toHaveBeenCalledTimes(1);
+    });
+
+    it('재연결 발화 시점은 채널 재구독이 끝난 뒤다', () => {
+      wsService.connect('테스터');
+      const client = clientInstances[0];
+      let subscribedAtFire: string[] = [];
+      wsService.onReconnect(() => {
+        subscribedAtFire = client.subscribe.mock.calls.map((call) => call[0] as string);
+      });
+
+      client.config.onConnect();
+      client.config.onDisconnect();
+      client.subscribe.mockClear();
+      client.config.onConnect();
+
+      expect(subscribedAtFire).toContain('/user/sub/notifications');
+      expect(subscribedAtFire).toContain('/user/sub/dm/rooms');
+    });
+
+    it('명시적 disconnect 후 새 connect의 첫 onConnect는 최초 연결로 취급한다', () => {
+      wsService.connect('테스터');
+      const handler = vi.fn();
+      wsService.onReconnect(handler);
+      clientInstances[0].config.onConnect();
+
+      wsService.disconnect();
+      wsService.connect('테스터');
+      clientInstances[1].config.onConnect();
+
+      expect(handler).not.toHaveBeenCalled();
+    });
+
+    it('해제 함수 호출 후에는 발화하지 않는다', () => {
+      wsService.connect('테스터');
+      const handler = vi.fn();
+      const off = wsService.onReconnect(handler);
+      const client = clientInstances[0];
+
+      client.config.onConnect();
+      off();
+      client.config.onDisconnect();
+      client.config.onConnect();
+
+      expect(handler).not.toHaveBeenCalled();
     });
   });
 });
