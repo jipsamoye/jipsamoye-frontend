@@ -431,4 +431,87 @@ describe('wsService', () => {
       expect(destinations).toContain('/sub/dm/room/42');
     });
   });
+
+  describe('세션 프로브 — 핸드셰이크 연속 실패', () => {
+    const closeTimes = (client: (typeof clientInstances)[number], n: number) => {
+      for (let i = 0; i < n; i += 1) client.config.onWebSocketClose?.();
+    };
+
+    it('연속 5회 실패 시 deactivate 후 unread-count로 세션 프로브한다', async () => {
+      apiMock.get.mockResolvedValue({ status: 200, code: 'SUCCESS', message: '', data: 0 });
+      wsService.connect('테스터');
+      const client = clientInstances[0];
+
+      closeTimes(client, 5);
+
+      await vi.waitFor(() => {
+        expect(apiMock.get).toHaveBeenCalledWith('/api/notifications/unread-count', { silent: true });
+      });
+      expect(client.deactivate).toHaveBeenCalled();
+    });
+
+    it('프로브 성공(세션 유효) 시 카운터 리셋 후 재시도를 재개한다', async () => {
+      apiMock.get.mockResolvedValue({ status: 200, code: 'SUCCESS', message: '', data: 0 });
+      wsService.connect('테스터');
+      const client = clientInstances[0];
+
+      closeTimes(client, 5);
+
+      // connect() 시 1회 + 프로브 후 재개 1회
+      await vi.waitFor(() => expect(client.activate).toHaveBeenCalledTimes(2));
+      expect(showToastMock).not.toHaveBeenCalled();
+      expect(wsService.isAuthRejected()).toBe(false);
+    });
+
+    it('프로브 401 시 토스트 + authRejected + 재시도 중단', async () => {
+      apiMock.get.mockRejectedValue({ status: 401, code: 'UNAUTHORIZED', message: '', data: null });
+      wsService.connect('테스터');
+      const client = clientInstances[0];
+
+      closeTimes(client, 5);
+
+      await vi.waitFor(() => {
+        expect(showToastMock).toHaveBeenCalledWith('로그인하고 이용해 주세요');
+      });
+      expect(wsService.isAuthRejected()).toBe(true);
+      // 재개(activate 2회째) 없음
+      expect(client.activate).toHaveBeenCalledTimes(1);
+    });
+
+    it('프로브 403 시에도 만료로 확정한다', async () => {
+      apiMock.get.mockRejectedValue({ status: 403, code: 'FORBIDDEN', message: '', data: null });
+      wsService.connect('테스터');
+      const client = clientInstances[0];
+
+      closeTimes(client, 5);
+
+      await vi.waitFor(() => {
+        expect(showToastMock).toHaveBeenCalledWith('로그인하고 이용해 주세요');
+      });
+      expect(wsService.isAuthRejected()).toBe(true);
+    });
+
+    it('프로브 네트워크 오류(서버 다운) 시 만료로 취급하지 않고 재시도를 재개한다', async () => {
+      apiMock.get.mockRejectedValue({ status: 503, code: 'HTTP_ERROR', message: '', data: null });
+      wsService.connect('테스터');
+      const client = clientInstances[0];
+
+      closeTimes(client, 5);
+
+      await vi.waitFor(() => expect(client.activate).toHaveBeenCalledTimes(2));
+      expect(showToastMock).not.toHaveBeenCalled();
+      expect(wsService.isAuthRejected()).toBe(false);
+    });
+
+    it('onConnect가 카운터를 리셋한다 — 4회 실패 후 연결되면 프로브하지 않는다', () => {
+      wsService.connect('테스터');
+      const client = clientInstances[0];
+
+      closeTimes(client, 4);
+      client.config.onConnect();
+      closeTimes(client, 4);
+
+      expect(apiMock.get).not.toHaveBeenCalled();
+    });
+  });
 });
