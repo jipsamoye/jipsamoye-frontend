@@ -409,7 +409,7 @@ describe('useDmRoom', () => {
   it('방 열릴 때 onUnread 콜백 호출', async () => {
     apiMock.get.mockResolvedValueOnce(makePageRes([]));
     const onUnread = vi.fn();
-    const { result } = renderHook(() =>
+    renderHook(() =>
       useDmRoom({ roomId: 1, userNickname: '나', onMessageSent: undefined, onUnread })
     );
     await waitFor(() => expect(apiMock.get).toHaveBeenCalled());

@@ -93,15 +93,12 @@ export default function NotificationProvider({ children }: NotificationProviderP
 
   // Connect WebSocket and subscribe to notifications when user logs in
   useEffect(() => {
-    if (!user) {
-      wsService.disconnect();
-      setNotifications([]);
-      setUnreadCount(0);
-      return;
-    }
+    if (!user) return;
 
     wsService.connect(user.nickname);
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchNotifications();
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchUnreadCount();
 
     const unsubscribe = wsService.on('notification', (data) => {
@@ -123,6 +120,17 @@ export default function NotificationProvider({ children }: NotificationProviderP
       unsubscribeReconnect();
     };
   }, [user, fetchNotifications, fetchUnreadCount]);
+
+  // Handle logout: disconnect and clear state
+  useEffect(() => {
+    if (user) return;
+
+    wsService.disconnect();
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setNotifications([]);
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setUnreadCount(0);
+  }, [user]);
 
   const value: NotificationContextValue = {
     notifications,

@@ -10,6 +10,7 @@ const { apiMock, wsMock, authMock, searchParamsRef, replaceMock, routerRef } = v
     wsMock: {
       on: vi.fn(() => () => {}),
       onDmRoom: vi.fn(() => () => {}),
+      onReconnect: vi.fn(() => () => {}),
       send: vi.fn(() => true),
       isConnected: vi.fn(() => true),
     },

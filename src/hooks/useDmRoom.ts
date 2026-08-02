@@ -36,8 +36,6 @@ export function useDmRoom({
   /** prepend(과거 메시지 로드) 직후 한 렌더 사이클 동안 true — 자동 스크롤 억제용 */
   const [isPrepending, setIsPrepending] = useState(false);
   const scrollAnchorRef = useRef<HTMLDivElement | null>(null);
-  /** 무한스크롤 스크롤 위치 보존용 컨테이너 ref */
-  const scrollContainerRef = useRef<HTMLDivElement | null>(null);
 
   // 방 변경 시 메시지 초기화 + REST 로드
   useEffect(() => {
