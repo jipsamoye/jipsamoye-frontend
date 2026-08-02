@@ -17,6 +17,7 @@ vi.mock('@/lib/api', () => ({ api: apiMock }));
 const { wsMock } = vi.hoisted(() => {
   const wsMock = {
     onDmRoom: vi.fn(() => () => {}),
+    onReconnect: vi.fn(() => () => {}),
     send: vi.fn(() => true),
     isConnected: vi.fn(() => true),
   };
@@ -69,6 +70,8 @@ describe('useDmRoom', () => {
     wsMock.send.mockReset();
     wsMock.onDmRoom.mockReturnValue(() => {});
     wsMock.send.mockReturnValue(true);
+    wsMock.onReconnect.mockReset();
+    wsMock.onReconnect.mockReturnValue(() => {});
     uuidCounter = 0;
   });
 
@@ -616,5 +619,92 @@ describe('useDmRoom', () => {
     });
 
     expect(wsMock.send).not.toHaveBeenCalledWith('/pub/dm/read', { roomId: 3 });
+  });
+
+  // ─── 재연결 재동기화 ──────────────────────────────────────────────────────
+
+  describe('재연결 시 열린 방 메시지 재동기화', () => {
+    const captureReconnect = () => {
+      let handler: (() => void) | null = null;
+      wsMock.onReconnect.mockImplementation((h: () => void) => {
+        handler = h;
+        return () => {};
+      });
+      return () => handler;
+    };
+
+    it('재연결 시 page 0을 재조회해 놓친 메시지를 뒤에 병합한다', async () => {
+      const getHandler = captureReconnect();
+      const m1 = makeMsg({ id: 1, createdAt: '2026-08-02T10:00:00.000Z' });
+      apiMock.get.mockResolvedValueOnce(makePageRes([m1]));
+
+      const { result } = renderHook(() =>
+        useDmRoom({ roomId: 7, userNickname: '나' })
+      );
+      await waitFor(() => expect(result.current.messages).toHaveLength(1));
+
+      // 끊김 사이 상대가 보낸 id 2, 3이 스냅샷에 포함됨 (id 1은 중복)
+      const m2 = makeMsg({ id: 2, createdAt: '2026-08-02T10:01:00.000Z' });
+      const m3 = makeMsg({ id: 3, createdAt: '2026-08-02T10:02:00.000Z' });
+      apiMock.get.mockResolvedValueOnce(makePageRes([m3, m2, m1]));
+
+      act(() => getHandler()?.());
+
+      await waitFor(() => {
+        expect(result.current.messages.map((m) => m.id)).toEqual([1, 2, 3]);
+      });
+      expect(apiMock.get).toHaveBeenLastCalledWith('/api/dm/rooms/7/messages?page=0&size=50');
+    });
+
+    it('재조회 스냅샷의 clientMessageId 일치 메시지는 낙관적 메시지를 치환한다', async () => {
+      const getHandler = captureReconnect();
+      apiMock.get.mockResolvedValueOnce(makePageRes([]));
+
+      const { result } = renderHook(() =>
+        useDmRoom({ roomId: 7, userNickname: '나' })
+      );
+      await waitFor(() => expect(apiMock.get).toHaveBeenCalled());
+
+      // 전송 → 에코를 못 받고 끊긴 상황 (낙관적 메시지가 'sending'으로 남음)
+      act(() => result.current.sendMessage('안녕'));
+      expect(result.current.messages).toHaveLength(1);
+      expect(result.current.messages[0].status).toBe('sending');
+
+      const echoed = makeMsg({
+        id: 10,
+        senderNickname: '나',
+        content: '안녕',
+        clientMessageId: 'mock-uuid-1',
+        createdAt: '2026-08-02T10:00:01.000Z',
+      });
+      apiMock.get.mockResolvedValueOnce(makePageRes([echoed]));
+
+      act(() => getHandler()?.());
+
+      await waitFor(() => {
+        expect(result.current.messages).toHaveLength(1);
+        expect(result.current.messages[0].id).toBe(10);
+        expect(result.current.messages[0].status).toBe('sent');
+      });
+    });
+
+    it('roomId가 없으면 onReconnect를 등록하지 않는다', () => {
+      renderHook(() => useDmRoom({ roomId: null, userNickname: '나' }));
+      expect(wsMock.onReconnect).not.toHaveBeenCalled();
+    });
+
+    it('언마운트 시 onReconnect 등록을 해제한다', async () => {
+      const off = vi.fn();
+      wsMock.onReconnect.mockReturnValue(off);
+      apiMock.get.mockResolvedValue(makePageRes([]));
+
+      const { unmount } = renderHook(() =>
+        useDmRoom({ roomId: 7, userNickname: '나' })
+      );
+      await waitFor(() => expect(wsMock.onReconnect).toHaveBeenCalled());
+
+      unmount();
+      expect(off).toHaveBeenCalled();
+    });
   });
 });

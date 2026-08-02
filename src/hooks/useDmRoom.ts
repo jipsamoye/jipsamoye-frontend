@@ -122,6 +122,52 @@ export function useDmRoom({
     return unsubscribe;
   }, [roomId, userNickname]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // 재연결 시 열린 방의 놓친 메시지 재동기화 (최신 페이지 재조회 + 병합)
+  useEffect(() => {
+    if (!roomId || !userNickname) return;
+
+    const unsubscribe = wsService.onReconnect(() => {
+      api
+        .get<PageResponse<DmMessage>>(
+          `/api/dm/rooms/${roomId}/messages?page=0&size=50`
+        )
+        .then((res) => {
+          const content = res.data?.content ?? [];
+          setMessages((prev) => {
+            const next = [...prev];
+            const fresh: DmMessage[] = [];
+            for (const incoming of content) {
+              // 낙관적 메시지 치환 (에코를 못 받고 끊긴 경우)
+              if (incoming.clientMessageId) {
+                const idx = next.findIndex(
+                  (m) => m.clientMessageId === incoming.clientMessageId
+                );
+                if (idx !== -1) {
+                  next[idx] = { ...incoming, status: 'sent' };
+                  continue;
+                }
+              }
+              if (next.some((m) => m.id === incoming.id)) continue;
+              fresh.push({ ...incoming, status: 'sent' });
+            }
+            // 신규(끊김 동안 놓친 메시지)만 시간순으로 뒤에 붙인다.
+            // 전체 재정렬은 낙관적 메시지의 KST-naive 시각과 섞여 순서가 튈 수 있어 안 함.
+            fresh.sort(
+              (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+            );
+            return [...next, ...fresh];
+          });
+          // 이 GET으로 백엔드가 미읽음을 읽음 처리하므로 방 목록 배지도 정리
+          onUnread?.(roomId);
+        })
+        .catch(() => {
+          // 재조회 실패 — 다음 재연결 때 다시 시도
+        });
+    });
+
+    return unsubscribe;
+  }, [roomId, userNickname]); // eslint-disable-line react-hooks/exhaustive-deps
+
   // NOTE: 읽음 처리는 두 경로로 트리거된다.
   //  1) 방 입장 시 GET /messages — 백엔드가 조회 시점에 미읽음 메시지를 읽음 처리(보완용).
   //  2) 방에 머무는 동안 상대 메시지를 실시간 수신할 때 — 위 MESSAGE 핸들러에서
