@@ -1,6 +1,6 @@
 'use client';
 
-import { Suspense, useState, useEffect, useRef, useCallback } from 'react';
+import { Suspense, useState, useEffect, useRef, useCallback, startTransition } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useAuthContext } from '@/components/providers/AuthProvider';
 import { api } from '@/lib/api';
@@ -127,11 +127,13 @@ function DmPageInner() {
     if (!isNaN(roomId)) {
       const nickParam = searchParams.get('nick');
       const imgParam = searchParams.get('img');
-      setSelectedRoomId(roomId);
-      setPendingPartner(
-        nickParam ? { nickname: nickParam, profileImageUrl: imgParam || null } : null
-      );
-      setMobileView('chat');
+      startTransition(() => {
+        setSelectedRoomId(roomId);
+        setPendingPartner(
+          nickParam ? { nickname: nickParam, profileImageUrl: imgParam || null } : null
+        );
+        setMobileView('chat');
+      });
     }
     // URL에서 쿼리 파라미터 제거 (뒤로가기 시 깔끔하게)
     router.replace('/dm', { scroll: false });
@@ -534,7 +536,7 @@ function DmPageInner() {
               })}
               <div ref={(el) => {
                 messagesEndRef.current = el;
-                (scrollAnchorRef as React.MutableRefObject<HTMLDivElement | null>).current = el;
+                scrollAnchorRef.current = el;
               }} />
             </div>
 

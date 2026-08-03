@@ -18,7 +18,7 @@ interface UseDmRoomResult {
   loadOlderMessages: () => Promise<void>;
   /** prepend(과거 메시지 로드) 직후 true — 자동 스크롤 억제용 */
   isPrepending: boolean;
-  scrollAnchorRef: React.RefObject<HTMLDivElement | null>;
+  scrollAnchorRef: React.MutableRefObject<HTMLDivElement | null>;
   sendMessage: (content: string) => void;
   retryMessage: (clientMessageId: string) => void;
 }
