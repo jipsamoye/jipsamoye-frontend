@@ -63,7 +63,7 @@ function DmPageInner() {
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const [inputValue, setInputValue] = useState('');
 
-  const { rooms, setRooms, resetUnread, updateLastMessage, applyServerLastMessage, applyRoomUpdate } =
+  const { rooms, setRooms, resetUnread, updateLastMessage, applyServerLastMessage, applyRoomUpdate, refreshRooms } =
     useDmRooms(user?.nickname ?? null);
 
   const { messages, hasOlderMessages, loadingOlder, loadOlderMessages, scrollAnchorRef, sendMessage, retryMessage } =
@@ -109,6 +109,15 @@ function DmPageInner() {
     });
     return unsubscribe;
   }, [user, applyRoomUpdate]);
+
+  // ─── 재연결 시 방 목록 재동기화 (끊김 동안의 새 방/배지 반영) ─────────────
+  useEffect(() => {
+    if (!user) return;
+    const unsubscribe = wsService.onReconnect(() => {
+      refreshRooms(selectedRoomIdRef.current);
+    });
+    return unsubscribe;
+  }, [user, refreshRooms]);
 
   // ─── 딥링크: ?room= 으로 방 선택 (+ ?nick=&img= 로 목록에 없는 새 방의 헤더 정보) ──
   useEffect(() => {
