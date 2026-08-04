@@ -1,6 +1,6 @@
 'use client';
 
-import { Suspense, useState, useEffect, useRef, useCallback, startTransition } from 'react';
+import { Suspense, useState, useEffect, useRef, useCallback } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useAuthContext } from '@/components/providers/AuthProvider';
 import { api } from '@/lib/api';
@@ -127,13 +127,13 @@ function DmPageInner() {
     if (!isNaN(roomId)) {
       const nickParam = searchParams.get('nick');
       const imgParam = searchParams.get('img');
-      startTransition(() => {
-        setSelectedRoomId(roomId);
-        setPendingPartner(
-          nickParam ? { nickname: nickParam, profileImageUrl: imgParam || null } : null
-        );
-        setMobileView('chat');
-      });
+      // URL 파라미터에서 state 동기화 (searchParams → room/nick/img 파싱 후 state 업데이트)
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setSelectedRoomId(roomId);
+      setPendingPartner(
+        nickParam ? { nickname: nickParam, profileImageUrl: imgParam || null } : null
+      );
+      setMobileView('chat');
     }
     // URL에서 쿼리 파라미터 제거 (뒤로가기 시 깔끔하게)
     router.replace('/dm', { scroll: false });
