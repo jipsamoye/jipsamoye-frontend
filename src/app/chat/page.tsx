@@ -117,8 +117,10 @@ export default function ChatPage() {
     const unsubscribe = wsService.onReconnect(() => {
       api.get<{ messages: ChatMessage[]; hasMore: boolean }>('/api/chat/messages?size=30', { silent: true })
         .then((res) => {
-          const { messages: merged, replaced } = mergeChatMessages(messagesRef.current, res.data?.messages ?? []);
-          setMessages(merged);
+          const fetched = res.data?.messages ?? [];
+          // replaced 판정은 hasMore 갱신용 — 실제 병합은 함수형 업데이터로 최신 prev 기준 수행
+          const { replaced } = mergeChatMessages(messagesRef.current, fetched);
+          setMessages((prev) => mergeChatMessages(prev, fetched).messages);
           // 통째 교체(갭) 시에만 hasMore도 스냅샷 기준으로 리셋
           if (replaced) setHasMore(res.data?.hasMore ?? false);
         })

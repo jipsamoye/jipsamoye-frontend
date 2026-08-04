@@ -17,9 +17,9 @@ describe('chat 페이지 — 재연결 재동기화 배선', () => {
     expect(afterRegistration).toMatch(/return unsubscribe/);
   });
 
-  it('재조회 결과를 mergeChatMessages(messagesRef.current, ...)로 병합한다', () => {
+  it('재조회 결과를 함수형 업데이터로 최신 prev 기준 병합한다(stale ref 유실 방지)', () => {
     expect(source).toMatch(/import \{ mergeChatMessages \} from '@\/lib\/chatMessages'/);
-    expect(source).toMatch(/mergeChatMessages\(messagesRef\.current/);
+    expect(source).toMatch(/setMessages\(\(prev\) => mergeChatMessages\(prev, fetched\)\.messages\)/);
   });
 
   it('통째 교체(replaced)일 때만 hasMore를 갱신한다', () => {
