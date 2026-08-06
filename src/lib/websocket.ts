@@ -1,12 +1,16 @@
 import SockJS from 'sockjs-client';
-import { Client, IMessage } from '@stomp/stompjs';
+import { Client, IMessage, ReconnectionTimeMode, TickerStrategy } from '@stomp/stompjs';
 import { showToast } from '@/components/common/Toast';
+import { api } from '@/lib/api';
 import type { DmMessage, DmRoomEvent } from '@/types/api';
 
 type MessageHandler = (data: unknown) => void;
 type DmRoomEventHandler = (event: DmRoomEvent) => void;
 
 type Channel = 'notification' | 'chat' | 'dm-rooms';
+
+/** CONNECTED에 도달하지 못한 연속 소켓 절단 횟수가 이 값에 달하면 세션 프로브 */
+const CONSECUTIVE_FAILURE_THRESHOLD = 5;
 
 class WebSocketService {
   private client: Client | null = null;
@@ -17,13 +21,24 @@ class WebSocketService {
   private userNickname: string | null = null;
   private connected = false;
   private authRejected = false;
+  /** 최초 연결과 재연결 구분 — 명시적 disconnect 시 리셋 */
+  private hasConnectedOnce = false;
+  private reconnectHandlers: Set<() => void> = new Set();
+  private consecutiveFailures = 0;
+  private probing = false;
 
   connect(userNickname: string): void {
-    if (this.connected && this.userNickname === userNickname) return;
+    // client 존재 여부로 키를 잡는다(connected 아님) — onWebSocketClose는 재시도
+    // 구간마다 connected를 false로 내리므로, 그 창에 같은 닉네임으로 재호출되면
+    // (예: 리렌더로 인한 identity 변경) connected 기준 가드는 뚫려 disconnect()가
+    // hasConnectedOnce/pendingDmRooms 같은 재연결 상태를 파괴한다. stompjs 클라이언트는
+    // 이미 자체적으로 재시도 중이므로 client 존재만으로 충분하다.
+    if (this.client && this.userNickname === userNickname) return;
 
     this.disconnect();
     this.userNickname = userNickname;
     this.authRejected = false;
+    this.consecutiveFailures = 0;
 
     const baseUrl = process.env.NEXT_PUBLIC_WS_URL || 'https://api.jipsamoye.com';
 
@@ -35,9 +50,16 @@ class WebSocketService {
             'xhr-polling': { withCredentials: true },
           },
         } as ConstructorParameters<typeof SockJS>[2]),
+      // 지수 백오프: 3s → 6s → 12s → ... 최대 60s (thundering herd 완화)
       reconnectDelay: 3000,
+      maxReconnectDelay: 60000,
+      reconnectTimeMode: ReconnectionTimeMode.EXPONENTIAL,
+      // Chrome 백그라운드 탭 타이머 스로틀링(분당 1회) 대응 — heartbeat를
+      // Web Worker 타이머로 발행. 미지원 환경은 라이브러리가 interval 폴백.
+      heartbeatStrategy: TickerStrategy.Worker,
       onConnect: () => {
         this.connected = true;
+        this.consecutiveFailures = 0;
         this.subscribeChannel('notification', '/user/sub/notifications');
         this.subscribeChannel('chat', '/sub/chat/room');
         // 사용자별 DM 방 목록 채널 — 방 밖(목록 화면)에서도 새 메시지/방 실시간 반영
@@ -46,11 +68,28 @@ class WebSocketService {
         this.pendingDmRooms.forEach((handler, roomId) => {
           this.subscribeDmRoomNow(roomId, handler);
         });
+        // 재연결이면(최초 연결 제외) 재구독 완료 후 재동기화 이벤트 발화
+        if (this.hasConnectedOnce) {
+          this.reconnectHandlers.forEach((handler) => handler());
+        }
+        this.hasConnectedOnce = true;
       },
       onDisconnect: () => {
         this.connected = false;
         // 구독 참조 초기화 (재연결 시 onConnect에서 재구독)
         this.subscriptions.clear();
+      },
+      onWebSocketClose: () => {
+        // onDisconnect는 정상 종료(DISCONNECT 프레임)에만 발화 —
+        // heartbeat 강제 종료·네트워크 순단 등 모든 소켓 절단은 여기서 정리
+        this.connected = false;
+        this.subscriptions.clear();
+        // 세션(2h) 만료 시 SockJS 핸드셰이크가 403 거부 — STOMP 이전 단계라
+        // onStompError에 안 걸리고 조용히 무한 재시도하므로 연속 실패를 세어 판별
+        this.consecutiveFailures += 1;
+        if (this.consecutiveFailures >= CONSECUTIVE_FAILURE_THRESHOLD) {
+          void this.probeSession();
+        }
       },
       onStompError: (frame) => {
         const message = frame.headers['message'] ?? '';
@@ -123,9 +162,45 @@ class WebSocketService {
     this.subscriptions.set(destination, sub);
   }
 
+  /**
+   * 핸드셰이크 연속 실패 시 세션 유효성 판별.
+   * 재시도를 멈추고 REST로 세션을 확인 — 401/403이면 만료 확정(로그인 안내),
+   * 그 외(성공·네트워크 오류)면 카운터 리셋 후 재시도 재개.
+   */
+  private async probeSession(): Promise<void> {
+    if (this.probing || !this.client) return;
+    this.probing = true;
+    const client = this.client;
+    try {
+      await client.deactivate();
+      await api.get<number>('/api/notifications/unread-count', { silent: true });
+      // 세션 유효 — 서버 WS만 문제일 수 있으므로 재시도 재개
+      this.consecutiveFailures = 0;
+      if (this.client === client) client.activate();
+    } catch (err) {
+      const status = (err as { status?: number }).status;
+      if (status === 401 || status === 403) {
+        // 프로브 응답 대기 중 로그아웃→재로그인 등으로 client가 교체됐다면
+        // 이 401/403은 이미 버려진 client에 대한 stale 응답 — 새 client에는
+        // 무관하므로 무시(토스트/disconnect 금지)
+        if (this.client !== client) return;
+        this.authRejected = true;
+        showToast('로그인하고 이용해 주세요');
+        this.disconnect();
+      } else {
+        // 서버 다운 등 — 세션 만료 아님, 재시도 재개
+        this.consecutiveFailures = 0;
+        if (this.client === client) client.activate();
+      }
+    } finally {
+      this.probing = false;
+    }
+  }
+
   disconnect(): void {
     this.userNickname = null;
     this.connected = false;
+    this.hasConnectedOnce = false;
     this.subscriptions.clear();
     this.pendingDmRooms.clear();
     if (this.client) {
@@ -152,6 +227,18 @@ class WebSocketService {
           this.channelHandlers.delete(channel);
         }
       }
+    };
+  }
+
+  /**
+   * 재연결(두 번째 이후 CONNECTED) 시에만 발화하는 이벤트 등록.
+   * 발화 시점은 채널 재구독 완료 후 — 핸들러에서 REST 재동기화를 수행해도
+   * 이후 WS 수신과 병합 가능. 반환값은 해제 함수.
+   */
+  onReconnect(handler: () => void): () => void {
+    this.reconnectHandlers.add(handler);
+    return () => {
+      this.reconnectHandlers.delete(handler);
     };
   }
 

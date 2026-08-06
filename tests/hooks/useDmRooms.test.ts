@@ -153,4 +153,49 @@ describe('useDmRooms', () => {
 
     expect(result.current.rooms[0].unreadCount).toBe(0);
   });
+
+  // ─── 재연결 재동기화 ─────────────────────────────────────────────────────
+
+  it('refreshRooms: GET /api/dm/rooms 재조회로 목록을 서버 스냅샷으로 교체한다', async () => {
+    apiMock.get.mockResolvedValueOnce(successRes([makeRoom({ roomId: 1, lastMessage: '이전' })]));
+    const { result } = renderHook(() => useDmRooms('집사'));
+    await waitFor(() => expect(result.current.rooms).toHaveLength(1));
+
+    apiMock.get.mockResolvedValueOnce(
+      successRes([
+        makeRoom({ roomId: 2, lastMessage: '새 방' }),
+        makeRoom({ roomId: 1, lastMessage: '갱신됨' }),
+      ])
+    );
+    await act(() => result.current.refreshRooms(null));
+
+    expect(result.current.rooms.map((r) => r.roomId)).toEqual([2, 1]);
+    expect(result.current.rooms[1].lastMessage).toBe('갱신됨');
+  });
+
+  it('refreshRooms: 열려 있는 방(openRoomId)의 unreadCount는 0으로 강제한다', async () => {
+    apiMock.get.mockResolvedValueOnce(successRes([]));
+    const { result } = renderHook(() => useDmRooms('집사'));
+    await waitFor(() => expect(apiMock.get).toHaveBeenCalled());
+
+    apiMock.get.mockResolvedValueOnce(
+      successRes([makeRoom({ roomId: 1, unreadCount: 5 }), makeRoom({ roomId: 2, unreadCount: 3 })])
+    );
+    await act(() => result.current.refreshRooms(1));
+
+    expect(result.current.rooms.find((r) => r.roomId === 1)?.unreadCount).toBe(0);
+    expect(result.current.rooms.find((r) => r.roomId === 2)?.unreadCount).toBe(3);
+  });
+
+  it('refreshRooms: 재조회 실패 시 기존 목록을 유지한다', async () => {
+    apiMock.get.mockResolvedValueOnce(successRes([makeRoom({ roomId: 1 })]));
+    const { result } = renderHook(() => useDmRooms('집사'));
+    await waitFor(() => expect(result.current.rooms).toHaveLength(1));
+
+    apiMock.get.mockRejectedValueOnce(new Error('network'));
+    await act(() => result.current.refreshRooms(null));
+
+    expect(result.current.rooms).toHaveLength(1);
+    expect(result.current.rooms[0].roomId).toBe(1);
+  });
 });

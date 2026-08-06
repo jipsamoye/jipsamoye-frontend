@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { ChatMessage } from '@/types/api';
 import { api } from '@/lib/api';
 import { wsService } from '@/lib/websocket';
+import { mergeChatMessages } from '@/lib/chatMessages';
 import { formatTime } from '@/lib/utils';
 import { showToast } from '@/components/common/Toast';
 import { useAuthContext } from '@/components/providers/AuthProvider';
@@ -107,6 +108,25 @@ export default function ChatPage() {
       if (!wasNearBottomRef.current && userRef.current && msg.senderNickname !== userRef.current.nickname) {
         setNewMsgPreview(msg);
       }
+    });
+    return unsubscribe;
+  }, []);
+
+  // 재연결 시 끊김 동안 놓친 메시지 재동기화 (최신 페이지 재조회 + id 병합)
+  useEffect(() => {
+    const unsubscribe = wsService.onReconnect(() => {
+      api.get<{ messages: ChatMessage[]; hasMore: boolean }>('/api/chat/messages?size=30', { silent: true })
+        .then((res) => {
+          const fetched = res.data?.messages ?? [];
+          // replaced 판정은 hasMore 갱신용 — 실제 병합은 함수형 업데이터로 최신 prev 기준 수행
+          const { replaced } = mergeChatMessages(messagesRef.current, fetched);
+          setMessages((prev) => mergeChatMessages(prev, fetched).messages);
+          // 통째 교체(갭) 시에만 hasMore도 스냅샷 기준으로 리셋
+          if (replaced) setHasMore(res.data?.hasMore ?? false);
+        })
+        .catch(() => {
+          // 재조회 실패 — 다음 재연결 때 재시도
+        });
     });
     return unsubscribe;
   }, []);

@@ -40,7 +40,16 @@ export default function NotificationProvider({ children }: NotificationProviderP
       const res = await api.get<{ content: Notification[] }>(
         `/api/notifications?page=0&size=20`
       );
-      setNotifications(res.data.content);
+      // 서버 스냅샷을 기준으로, 스냅샷에 없는 기존 항목(fetch 중 WS로 받은
+      // 더 새로운 알림 등)을 id 기준 중복 제거 후 병합 — 재연결 재동기화 대응
+      setNotifications((prev) => {
+        const merged = [...res.data.content];
+        const ids = new Set(merged.map((n) => n.id));
+        for (const n of prev) {
+          if (!ids.has(n.id)) merged.push(n);
+        }
+        return merged.sort((a, b) => b.id - a.id);
+      });
     } catch {
       // Backend may not be available
     }
@@ -84,14 +93,10 @@ export default function NotificationProvider({ children }: NotificationProviderP
 
   // Connect WebSocket and subscribe to notifications when user logs in
   useEffect(() => {
-    if (!user) {
-      wsService.disconnect();
-      setNotifications([]);
-      setUnreadCount(0);
-      return;
-    }
+    if (!user) return;
 
     wsService.connect(user.nickname);
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchNotifications();
     fetchUnreadCount();
 
@@ -103,10 +108,27 @@ export default function NotificationProvider({ children }: NotificationProviderP
       }
     });
 
+    // 재연결 시 끊김 동안 놓친 알림 재동기화 (REST 재조회 + id 병합)
+    const unsubscribeReconnect = wsService.onReconnect(() => {
+      fetchNotifications();
+      fetchUnreadCount();
+    });
+
     return () => {
       unsubscribe();
+      unsubscribeReconnect();
     };
   }, [user, fetchNotifications, fetchUnreadCount]);
+
+  // Handle logout: disconnect and clear state
+  useEffect(() => {
+    if (user) return;
+
+    wsService.disconnect();
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setNotifications([]);
+    setUnreadCount(0);
+  }, [user]);
 
   const value: NotificationContextValue = {
     notifications,

@@ -9,6 +9,11 @@ interface UseDmRoomsResult {
   updateLastMessage: (roomId: number, content: string) => void;
   applyServerLastMessage: (roomId: number, content: string, at: string) => void;
   /**
+   * 재연결 시 방 목록을 서버 스냅샷으로 재동기화.
+   * @param openRoomId 현재 열려 있는 방 id — 일치하면 unread를 0으로 강제(읽음 흐름 레이스 방지)
+   */
+  refreshRooms: (openRoomId: number | null) => Promise<void>;
+  /**
    * 사용자별 채널(/user/sub/dm/rooms)에서 온 방 업데이트를 목록에 반영(버그②).
    * @param payload 서버가 내려준 방 스냅샷(DmRoom 형태)
    * @param openRoomId 현재 열려 있는 방 id — 일치하면 unread를 0으로 강제(읽음 흐름 충돌 방지)
@@ -86,12 +91,31 @@ export function useDmRooms(userNickname: string | null): UseDmRoomsResult {
     []
   );
 
+  /**
+   * 재연결 시 방 목록 재동기화 — 서버 스냅샷으로 통째 교체.
+   * 열려 있는 방은 unreadCount 0 강제(applyRoomUpdate와 동일 규칙 —
+   * 열린 방의 읽음 처리 GET과의 순서 레이스를 순서 무관하게 방어).
+   * 실패 시 기존 목록 유지(마운트 로드와 달리 빈 배열 리셋 없음).
+   */
+  const refreshRooms = useCallback(async (openRoomId: number | null) => {
+    try {
+      const res = await api.get<DmRoom[]>('/api/dm/rooms');
+      const fetched = res.data ?? [];
+      setRooms(
+        fetched.map((r) => (r.roomId === openRoomId ? { ...r, unreadCount: 0 } : r))
+      );
+    } catch {
+      // 재조회 실패 — 기존 목록 유지, 다음 재연결 때 재시도
+    }
+  }, []);
+
   return {
     rooms,
     setRooms,
     resetUnread,
     updateLastMessage,
     applyServerLastMessage,
+    refreshRooms,
     applyRoomUpdate,
   };
 }
