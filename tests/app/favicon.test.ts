@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { readFileSync, existsSync } from 'node:fs';
+import { createHash } from 'node:crypto';
 import path from 'node:path';
 
 const root = path.resolve(__dirname, '../..');
@@ -80,6 +81,24 @@ describe('favicon — 구글 검색결과용 래스터 자산', () => {
     // IHDR: 8바이트 시그니처 + 4바이트 길이 + 4바이트 타입 다음이 width/height
     expect(png.readUInt32BE(16)).toBe(180);
     expect(png.readUInt32BE(20)).toBe(180);
+  });
+});
+
+/**
+ * public/favicon.ico·apple-touch-icon.png는 `npm run favicons`로
+ * public/favicon.svg를 래스터화해 커밋해둔 산출물이다. CI는 이 스크립트를
+ * 실행하지 않으므로, 누군가 favicon.svg만 고치고 favicons를 다시 굽지
+ * 않으면 위 자산 검증 테스트들은 여전히 통과하면서도(파일이 존재하고
+ * 형식이 유효하니까) 탭 아이콘(.svg)과 구글 SERP/Safari 아이콘(.ico/.png)이
+ * 조용히 서로 달라진다 — 이 브랜치가 고치려던 바로 그 종류의 버그다.
+ * favicon.svg의 해시를 고정해 그 드리프트를 잡는다.
+ */
+describe('favicon — SVG/래스터 드리프트 감지', () => {
+  it('favicon.svg가 바뀌면 실패한다 — npm run favicons로 자산을 다시 굽고 이 해시를 갱신할 것', () => {
+    const hash = createHash('sha256')
+      .update(readFileSync(path.join(root, 'public/favicon.svg')))
+      .digest('hex');
+    expect(hash).toBe('a23b75ab880fe4a028340ba5bc8792f7bc20030cb509371150ad6903b8ac65c7');
   });
 });
 

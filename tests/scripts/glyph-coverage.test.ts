@@ -9,8 +9,12 @@ describe('assertGlyphCoverage — 한글 글자 누락 감지', () => {
     [32, 992, 203],
     [48, 2236, 492],
     [180, 32400, 7249],
-  ])('정상 렌더(%ipx)는 통과한다', (size, opaque, white) => {
+  ])('정상 렌더(%ipx)는 통과하고 실측 비율을 그대로 반환한다', (size, opaque, white) => {
+    // assertGlyphCoverage는 범위를 벗어나면 던지므로, 여기서 실제로 원하는
+    // 검증은 "안 던진다"가 아니라 "반환값이 (white/opaque) 그대로다" —
+    // 그래야 밴드가 실측값 아래로 좁혀지는 회귀를 이 테스트가 잡는다.
     const ratio = assertGlyphCoverage({ size, opaque, white });
+    expect(ratio).toBeCloseTo(white / opaque, 10);
     expect(ratio).toBeGreaterThan(MIN_GLYPH_RATIO);
     expect(ratio).toBeLessThan(MAX_GLYPH_RATIO);
   });

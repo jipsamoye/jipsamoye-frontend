@@ -8,8 +8,16 @@
  * 실측 정상값(Windows / Malgun Gothic):
  *   16px 25.8% · 32px 20.5% · 48px 22.0% · 180px 22.4%
  *
- * 한계: "글자 없음"과 "전부 흰색"은 잡지만 두부(□□)를 100% 잡지는
- * 못한다. 최종 방어선은 산출물이 커밋되어 git diff로 사람이 보는 것.
+ * 이 10~40% 밴드는 위 값 하나(Windows, Malgun Gothic)로만 보정됐다. macOS의
+ * Apple SD Gothic Neo 등 다른 한글 폰트는 획 굵기가 달라 실측값이 달라질 수
+ * 있다 — 다른 환경에서 이 밴드를 벗어나는 실패가 난다면 밴드 자체를 넓혀야
+ * 할 수도 있다.
+ *
+ * 한계: 이 가드는 "글자가 아예 안 그려짐"과 "전부 흰색"처럼 확실히 잘못된
+ * 경우는 잡지만, 두부(□□) 감지는 best-effort라 100% 잡아내지 못한다.
+ * `git diff`는 바이너리 파일(.ico/.png)에 대해 "Binary files differ"만
+ * 보여줄 뿐 내용을 보여주지 않으므로 방어선이 되지 못한다. 최종 방어선은
+ * 사람이 생성된 PNG를 직접 열어 눈으로 확인하는 것이다.
  */
 
 export const MIN_GLYPH_RATIO = 0.1;
@@ -28,7 +36,9 @@ export function assertGlyphCoverage({ size, opaque, white }) {
     throw new Error(
       `${size}px: 글자 픽셀 비율이 ${(ratio * 100).toFixed(1)}% 로 정상 범위` +
         `(${MIN_GLYPH_RATIO * 100}~${MAX_GLYPH_RATIO * 100}%)를 벗어났습니다. ` +
-        `한글 폰트가 없는 환경일 수 있습니다 — scripts/generate-favicons.mjs 상단 주석 참고.`
+        `한글 폰트가 없는 환경일 수도 있고, 폰트는 있지만 획 굵기가 달라 ` +
+        `(이 밴드는 Windows/Malgun Gothic 실측 기준) 벗어났을 수도 있습니다 — ` +
+        `scripts/generate-favicons.mjs 상단 주석 참고.`
     );
   }
   return ratio;

@@ -15,7 +15,7 @@ export const metadata: Metadata = {
   description: "사진 한 장이면 세상에 하나뿐인 키캡 피규어로! 반려동물과 함께하는 일상을 공유하고 다른 집사들과 소통해보세요. AI 키캡 피규어, 사진 공유, 오픈채팅, DM까지!",
   icons: {
     icon: [
-      { url: '/favicon.ico', sizes: '48x48', type: 'image/x-icon' },
+      { url: '/favicon.ico', sizes: '16x16 32x32 48x48', type: 'image/x-icon' },
       { url: '/favicon.svg', type: 'image/svg+xml' },
     ],
     apple: [{ url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' }],
