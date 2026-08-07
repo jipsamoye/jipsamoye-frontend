@@ -5,8 +5,13 @@
  *   npm run favicons
  *
  * 산출물:
- *   public/favicon.ico          16/32/48 멀티사이즈 (PNG-in-ICO)
+ *   public/favicon.ico          32/48 멀티사이즈 (PNG-in-ICO)
  *   public/apple-touch-icon.png 180x180, 모서리 라운딩 없음
+ *
+ * 16px 프레임은 일부러 넣지 않는다. 브랜드 아이콘이 한글 4글자라
+ * 16px 직접 렌더는 판독 불가한 얼룩이 된다. 구글은 48을, 2× 디스플레이
+ * 브라우저는 32를 쓰고, 16이 필요한 소비자는 32/48을 다운스케일하는데
+ * 그쪽이 직접 렌더보다 결과가 낫다.
  *
  * ⚠️ 실행 환경 제약
  * 헤드리스 크롬의 "시스템에 설치된 한글 폰트"로 <text>를 렌더한다.
@@ -26,7 +31,7 @@ import { toAppleTouchSvg } from './lib/svg-variants.mjs';
 import { assertGlyphCoverage } from './lib/glyph-coverage.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const ICO_SIZES = [16, 32, 48];
+const ICO_SIZES = [32, 48];
 const APPLE_SIZE = 180;
 
 /**

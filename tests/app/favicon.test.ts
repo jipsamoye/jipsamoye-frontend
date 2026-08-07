@@ -53,13 +53,16 @@ describe('favicon — 구글 검색결과용 래스터 자산', () => {
     expect([...ico.subarray(0, 4)]).toEqual([0x00, 0x00, 0x01, 0x00]);
   });
 
-  it('favicon.ico가 16·32·48 멀티사이즈다 — 구글이 참조하는 건 48', () => {
+  // 16px 프레임은 일부러 뺐다. 한글 4글자를 16px로 직접 렌더하면 판독 불가한
+  // 얼룩이 된다. 구글은 48을, 2× 디스플레이 브라우저는 32를 쓰고, 16이 필요한
+  // 소비자는 32/48을 다운스케일하는데 그쪽이 직접 렌더보다 낫다.
+  it('favicon.ico가 32·48 멀티사이즈다 — 구글이 참조하는 건 48, 16은 의도적으로 뺐다', () => {
     const ico = readFileSync(icoPath);
     const count = ico.readUInt16LE(4);
     const sizes = Array.from({ length: count }, (_, i) =>
       ico.readUInt8(ICONDIR_SIZE + i * ICONDIRENTRY_SIZE)
     );
-    expect(sizes.sort((a, b) => a - b)).toEqual([16, 32, 48]);
+    expect(sizes.sort((a, b) => a - b)).toEqual([32, 48]);
   });
 
   it('favicon.ico의 각 엔트리가 실제 PNG를 가리킨다', () => {
