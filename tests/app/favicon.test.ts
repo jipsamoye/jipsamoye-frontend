@@ -95,10 +95,15 @@ describe('favicon — 구글 검색결과용 래스터 자산', () => {
  */
 describe('favicon — SVG/래스터 드리프트 감지', () => {
   it('favicon.svg가 바뀌면 실패한다 — npm run favicons로 자산을 다시 굽고 이 해시를 갱신할 것', () => {
-    const hash = createHash('sha256')
-      .update(readFileSync(path.join(root, 'public/favicon.svg')))
-      .digest('hex');
-    expect(hash).toBe('a23b75ab880fe4a028340ba5bc8792f7bc20030cb509371150ad6903b8ac65c7');
+    // Windows core.autocrlf=true에서 checkout 시 LF→CRLF로 변환되므로,
+    // 플랫폼별 개행 문자 차이에 상관없이 동일한 해시를 유지하려면
+    // 해시 전에 CRLF→LF로 정규화해야 한다.
+    // (정규화 없으면 Windows에선 CRLF 해시, Linux/macOS에선 LF 해시로 달라져서
+    //  CI에서 0 드리프트임에도 불구하고 거짓 양성 실패가 난다)
+    const svg = readFileSync(path.join(root, 'public/favicon.svg'), 'utf-8');
+    const normalized = svg.replace(/\r\n/g, '\n');
+    const hash = createHash('sha256').update(normalized).digest('hex');
+    expect(hash).toBe('3ee0defe56601ac60647abf81c682ca32d604b2535401570a2bf3b10140b52d8');
   });
 });
 
