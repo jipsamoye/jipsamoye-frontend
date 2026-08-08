@@ -32,6 +32,11 @@ describe('PressableKeycap — 누름 코어', () => {
     expect(keyButton()).toBeInTheDocument();
   });
 
+  it('액자 안쪽에 소켓 배경색이 깔려 있다 — 스쿼시로 드러나는 위쪽 띠가 눌림 홈으로 보이게', () => {
+    renderKeycap();
+    expect(keyButton().className).toContain('bg-gray-100');
+  });
+
   it('pointerdown: 스쿼시 클래스 + down 소리 / pointerup: 원복 + up 소리', () => {
     renderKeycap();
     fireEvent.pointerDown(keyButton());

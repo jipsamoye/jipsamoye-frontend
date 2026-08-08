@@ -119,7 +119,8 @@ export default function PressableKeycap({ children, nudge = false, className = '
           onKeyUp={(e) => {
             if (e.key === ' ' || e.key === 'Enter') pressUp();
           }}
-          className="relative block w-full overflow-hidden rounded-2xl cursor-pointer select-none [touch-action:manipulation] [-webkit-tap-highlight-color:transparent] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-500"
+          // bg-gray-100: 스쿼시로 드러나는 위쪽 띠가 빈 공백이 아니라 키캡이 눌려 들어가는 홈(하우징)으로 읽히게
+          className="relative block w-full overflow-hidden rounded-2xl bg-gray-100 cursor-pointer select-none [touch-action:manipulation] [-webkit-tap-highlight-color:transparent] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-500"
         >
           {/* 액자(버튼)는 고정, 이 래퍼만 바닥 기준으로 눌린다. reduced-motion이면 스쿼시 없음(소리는 유지)
               [&_img]:[-webkit-user-drag:none] — 누른 채 움직이면 데스크톱에서 고스트 이미지가
