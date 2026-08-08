@@ -16,7 +16,9 @@ interface KeycapSwitchBarProps {
  */
 export default function KeycapSwitchBar({ selectedId, muted, onSelect, onToggleMute }: KeycapSwitchBarProps) {
   return (
-    <div className="flex items-start gap-2 mt-3.5">
+    // select-none: 키캡을 꾹 누르며 놀다 손이 칩에 닿으면 iOS 롱프레스가 칩 라벨에서
+    // 텍스트 선택을 시작해 파란 선택 밴드·복사 메뉴가 뜬다. 라벨은 복사할 이유가 없는 텍스트.
+    <div className="flex items-start gap-2 mt-3.5 select-none">
       <button
         type="button"
         aria-label={muted ? '소리 켜기' : '소리 끄기'}
