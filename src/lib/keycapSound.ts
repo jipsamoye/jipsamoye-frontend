@@ -13,27 +13,46 @@ let ctx: AudioContext | null = null;
 const rawCache = new Map<string, Promise<ArrayBuffer | null>>();
 const decodedCache = new Map<string, Promise<AudioBuffer | null>>();
 
+/**
+ * 실패(null)로 끝난 엔트리는 캐시에서 지운다 — 남겨두면 첫 클릭 순간의 일시적
+ * 오프라인이나 배포 중 404 한 번으로 그 소리가 새로고침 전까지 영영 안 난다.
+ * 그 사이 같은 url로 새 시도가 들어와 캐시가 교체됐다면 건드리지 않는다.
+ */
+function forgetIfFailed<T>(
+  cache: Map<string, Promise<T | null>>,
+  url: string,
+  pending: Promise<T | null>,
+  value: T | null,
+): T | null {
+  if (!value && cache.get(url) === pending) cache.delete(url);
+  return value;
+}
+
 function fetchRaw(url: string): Promise<ArrayBuffer | null> {
-  let cached = rawCache.get(url);
-  if (!cached) {
-    cached = fetch(url)
-      .then((res) => (res.ok ? res.arrayBuffer() : null))
-      .catch(() => null);
-    rawCache.set(url, cached);
-  }
-  return cached;
+  const cached = rawCache.get(url);
+  if (cached) return cached;
+
+  const pending: Promise<ArrayBuffer | null> = fetch(url)
+    .then((res) => (res.ok ? res.arrayBuffer() : null))
+    .catch(() => null)
+    .then((raw) => forgetIfFailed(rawCache, url, pending, raw));
+
+  rawCache.set(url, pending);
+  return pending;
 }
 
 function decodeBuffer(url: string): Promise<AudioBuffer | null> {
-  let cached = decodedCache.get(url);
-  if (!cached) {
-    cached = fetchRaw(url)
-      // decodeAudioData가 ArrayBuffer를 detach하는 브라우저가 있어 복사본을 넘긴다
-      .then((raw) => (raw && ctx ? ctx.decodeAudioData(raw.slice(0)) : null))
-      .catch(() => null);
-    decodedCache.set(url, cached);
-  }
-  return cached;
+  const cached = decodedCache.get(url);
+  if (cached) return cached;
+
+  const pending: Promise<AudioBuffer | null> = fetchRaw(url)
+    // decodeAudioData가 ArrayBuffer를 detach하는 브라우저가 있어 복사본을 넘긴다
+    .then((raw) => (raw && ctx ? ctx.decodeAudioData(raw.slice(0)) : null))
+    .catch(() => null)
+    .then((buffer) => forgetIfFailed(decodedCache, url, pending, buffer));
+
+  decodedCache.set(url, pending);
+  return pending;
 }
 
 export function warmKeycapSound(id: KeycapSwitchId): void {

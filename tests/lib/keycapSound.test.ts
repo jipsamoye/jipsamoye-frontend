@@ -81,6 +81,48 @@ describe('keycapSound', () => {
     expect(sourceMock.start).not.toHaveBeenCalled();
   });
 
+  it('실패한 fetch는 캐시하지 않는다 — 재호출 시 재시도하고 성공하면 소리가 난다', async () => {
+    vi.stubGlobal('fetch', vi.fn(() => Promise.resolve({ ok: false })));
+    playKeycapSound('brown', 'down');
+    await flush();
+    expect(sourceMock.start).not.toHaveBeenCalled();
+
+    // 네트워크 복구 — 실패가 캐시에 남아 있으면 이 재시도가 무음이 된다
+    vi.stubGlobal('fetch', vi.fn(() =>
+      Promise.resolve({ ok: true, arrayBuffer: () => Promise.resolve(new ArrayBuffer(8)) }),
+    ));
+    playKeycapSound('brown', 'down');
+    await flush();
+    expect(fetch).toHaveBeenCalledWith('/sounds/keycap/brown-down.wav');
+    expect(sourceMock.start).toHaveBeenCalledTimes(1);
+  });
+
+  it('warm이 오프라인으로 실패해도 이후 play가 다시 받아온다', async () => {
+    vi.stubGlobal('fetch', vi.fn(() => Promise.reject(new Error('offline'))));
+    warmKeycapSound('brown');
+    await flush();
+
+    vi.stubGlobal('fetch', vi.fn(() =>
+      Promise.resolve({ ok: true, arrayBuffer: () => Promise.resolve(new ArrayBuffer(8)) }),
+    ));
+    playKeycapSound('brown', 'down');
+    await flush();
+    expect(sourceMock.start).toHaveBeenCalledTimes(1);
+  });
+
+  it('실패한 decode도 캐시하지 않는다 — 재호출 시 다시 decode한다', async () => {
+    playKeycapSound('brown', 'down');
+    const ctx = MockAudioContext.instances[0];
+    ctx.decodeAudioData.mockRejectedValueOnce(new Error('bad wav'));
+    await flush();
+    expect(sourceMock.start).not.toHaveBeenCalled();
+
+    playKeycapSound('brown', 'down');
+    await flush();
+    expect(ctx.decodeAudioData).toHaveBeenCalledTimes(2);
+    expect(sourceMock.start).toHaveBeenCalledTimes(1);
+  });
+
   it('AudioContext 미지원 환경이면 아무 일도 하지 않는다', async () => {
     vi.stubGlobal('AudioContext', undefined);
     expect(() => playKeycapSound('brown', 'down')).not.toThrow();
