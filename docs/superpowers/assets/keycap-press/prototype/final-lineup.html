@@ -1,0 +1,158 @@
+<h2>최종 라인업 — 축 7종</h2>
+<p class="subtitle">
+  kbsim(MIT) 5종 + Freesound(CC0) 2종을 합쳤습니다. 버클링 스프링·홀리판다는 뺐습니다.<br>
+  키캡을 눌러보고, 칩을 바꿔가며 전부 확인해주세요.
+</p>
+
+<div class="kc-lab">
+  <div class="kc-left">
+    <div class="kc-stage">
+      <div class="kc-frame" id="kc-key"><img src="./keycap.png" alt="AI 키캡 피규어" draggable="false"></div>
+    </div>
+    <p class="kc-now" id="kc-now">갈축</p>
+    <button class="kc-mute" id="kc-mute" type="button">🔊 소리 켜짐</button>
+  </div>
+
+  <div class="kc-right">
+    <div class="label">축 — 목록에서 직접 선택</div>
+    <div class="kc-chips" id="kc-switches"></div>
+  </div>
+</div>
+
+<div class="kc-note">
+  <b>확정</b> — 적용 범위: 결과 화면 + 공유 페이지 · 눌림: 스쿼시(액자 고정, 바닥 기준 세로 압축) ·
+  축: 목록에서 직접 선택, 갈축이 기본값, 선택은 기억됨 · 소리: 기본 켜짐 + 음소거 버튼 ·
+  무접점·버클링·홀리판다 제외 · 연타 변화 없음<br>
+  <b>총 용량</b> WAV 14개 168KB → 배포 시 ogg 변환하면 40KB 안팎
+</div>
+
+<div class="kc-warn">
+  <b>섞어 쓰면서 생긴 것 두 가지</b><br>
+  ① <b>저작권 고지는 여전히 필요합니다.</b> CC0 2종은 의무가 없지만 kbsim 5종이 MIT라, 푸터나 오픈소스 고지 페이지에 한 줄 들어가야 합니다 —
+  <code>키보드 사운드: kbsim © Thomas Lai (MIT)</code><br>
+  ② <b>박스 제이드만 유독 깁니다</b>(252ms). 다른 축은 60~90ms인데 CC0 쪽은 연속 타이핑에서 잘라낸 거라 길어요.
+  빠르게 두 번 누르면 소리가 겹칠 수 있습니다 — 눌러보시고 거슬리면 뒤를 잘라내겠습니다.
+</div>
+
+<style>
+.kc-lab { display: flex; flex-wrap: wrap; gap: 34px; align-items: flex-start; }
+.kc-left { flex: 0 0 auto; }
+.kc-right { flex: 1 1 340px; min-width: 300px; }
+.kc-stage { display: flex; align-items: center; justify-content: center; width: 300px; height: 270px; border-radius: 16px;
+  background: repeating-linear-gradient(45deg, rgba(128,128,128,.06) 0 10px, transparent 10px 20px); }
+.kc-now { margin-top: 12px; font-size: 15px; font-weight: 600; text-align: center; }
+.kc-mute { display: block; margin: 10px auto 0; padding: 8px 16px; border-radius: 10px; cursor: pointer;
+  border: 1px solid rgba(128,128,128,.35); background: transparent; color: inherit; font: inherit; font-size: 13px; }
+.kc-mute.off { opacity: .55; }
+
+/* 스쿼시 — 액자는 고정, 안쪽이 바닥 기준으로 찌그러진다 */
+.kc-frame { position: relative; width: 210px; height: 210px; border-radius: 16px; overflow: hidden;
+  cursor: pointer; touch-action: manipulation; -webkit-tap-highlight-color: transparent;
+  box-shadow: 0 10px 22px rgba(0,0,0,.25); }
+.kc-frame img { display: block; width: 100%; height: 100%; object-fit: cover; user-select: none; -webkit-user-drag: none;
+  transform-origin: 50% 100%; transition: transform 110ms cubic-bezier(.2,.8,.3,1); }
+.kc-frame.is-down img { transform: scaleY(.9) scaleX(1.04); }
+
+.kc-chips { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
+.kc-chip { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 12px; cursor: pointer;
+  border: 1px solid rgba(128,128,128,.3); background: transparent; color: inherit; font: inherit; text-align: left;
+  transition: border-color 120ms, background 120ms; }
+.kc-chip:hover { border-color: rgba(128,128,128,.6); }
+.kc-chip.is-on { border-color: #f59e0b; background: rgba(245,158,11,.1); }
+.kc-dot { width: 12px; height: 12px; border-radius: 50%; flex: 0 0 auto; }
+.kc-chip-t { display: flex; flex-direction: column; line-height: 1.35; }
+.kc-chip-t b { font-size: 14px; }
+.kc-chip-t i { font-size: 12px; font-style: normal; opacity: .6; }
+.kc-chip-t u { font-size: 10px; text-decoration: none; padding: 1px 6px; border-radius: 5px;
+  background: rgba(245,158,11,.2); color: #b45309; vertical-align: middle; font-weight: 600; }
+.kc-src { margin-left: auto; font-size: 10px; padding: 2px 7px; border-radius: 5px; flex: 0 0 auto;
+  border: 1px solid rgba(128,128,128,.35); opacity: .65; }
+
+.kc-note { margin-top: 26px; padding: 14px 16px; border-radius: 10px; border: 1px solid rgba(128,128,128,.25); font-size: 13px; line-height: 1.8; }
+.kc-warn { margin-top: 14px; padding: 14px 16px; border-radius: 10px; font-size: 13px; line-height: 1.8;
+  border: 1px solid rgba(245,158,11,.4); background: rgba(245,158,11,.07); }
+code { padding: 2px 6px; border-radius: 4px; background: rgba(128,128,128,.18); font-size: 12px; }
+</style>
+
+<script>
+(function () {
+  // down/up 파일명 규칙이 출처마다 달라서 prefix로 구분한다
+  var LIST = [
+    { id: 'brown',  ko: '갈축',        en: 'Cherry MX Brown',  c: '#a16207', src: 'MIT', down: 'brown-down',  up: 'brown-up',  def: 1 },
+    { id: 'blue',   ko: '청축',        en: 'Cherry MX Blue',   c: '#3b82f6', src: 'MIT', down: 'blue-down',   up: 'blue-up' },
+    { id: 'red',    ko: '적축(리니어)', en: 'Gateron Red Ink',  c: '#ef4444', src: 'MIT', down: 'red-down',   up: 'red-up' },
+    { id: 'navy',   ko: '박스 네이비', en: 'Kailh Box Navy',   c: '#1e40af', src: 'MIT', down: 'navy-down',  up: 'navy-up' },
+    { id: 'cream',  ko: '크림',        en: 'NovelKeys Cream',  c: '#eab308', src: 'MIT', down: 'cream-down',   up: 'cream-up' },
+    { id: 'jade',   ko: '박스 제이드', en: 'Kailh Box Jade',   c: '#10b981', src: 'CC0', down: 'jade-down',  up: 'jade-up', warn: '252ms — 길다' },
+    { id: 'gblack', ko: '게이트론 흑축', en: 'Gateron Black',  c: '#1f2937', src: 'CC0', down: 'black-down', up: 'black-up' }
+  ];
+
+  var ac = null, buffers = {}, idx = 0, muted = false;
+
+  function ctx() {
+    if (!ac) ac = new (window.AudioContext || window.webkitAudioContext)();
+    if (ac.state === 'suspended') ac.resume();
+    return ac;
+  }
+
+  // 눌러본 축만 그때그때 받는다
+  function load(name) {
+    if (buffers[name] !== undefined) return Promise.resolve(buffers[name]);
+    return fetch('../sounds/' + name + '.wav')
+      .then(function (r) { return r.ok ? r.arrayBuffer() : Promise.reject(); })
+      .then(function (b) { return ctx().decodeAudioData(b); })
+      .then(function (buf) { buffers[name] = buf; return buf; })
+      .catch(function () { buffers[name] = null; return null; });
+  }
+
+  function play(dir) {
+    if (muted) return;
+    load(LIST[idx][dir]).then(function (buf) {
+      if (!buf) return;
+      var a = ctx(), s = a.createBufferSource();
+      s.buffer = buf; s.connect(a.destination); s.start();
+    });
+  }
+
+  function render() {
+    var host = document.getElementById('kc-switches');
+    host.innerHTML = '';
+    LIST.forEach(function (sw, i) {
+      var b = document.createElement('button');
+      b.className = 'kc-chip' + (i === idx ? ' is-on' : '');
+      b.innerHTML =
+        '<span class="kc-dot" style="background:' + sw.c + '"></span>' +
+        '<span class="kc-chip-t"><b>' + sw.ko + (sw.def ? ' <u>기본값</u>' : '') + '</b>' +
+        '<i>' + sw.en + (sw.warn ? ' · ⚠ ' + sw.warn : '') + '</i></span>' +
+        '<span class="kc-src">' + sw.src + '</span>';
+      b.addEventListener('click', function () {
+        idx = i; render();
+        document.getElementById('kc-now').textContent = sw.ko;
+        play('down'); setTimeout(function () { play('up'); }, 130);
+      });
+      host.appendChild(b);
+    });
+  }
+
+  var muteBtn = document.getElementById('kc-mute');
+  muteBtn.addEventListener('click', function () {
+    muted = !muted;
+    muteBtn.textContent = muted ? '🔇 소리 꺼짐' : '🔊 소리 켜짐';
+    muteBtn.classList.toggle('off', muted);
+  });
+
+  var key = document.getElementById('kc-key');
+  key.addEventListener('pointerdown', function () {
+    key.classList.add('is-down'); play('down');
+    if (navigator.vibrate) navigator.vibrate(12);
+  });
+  ['pointerup', 'pointerleave', 'pointercancel'].forEach(function (ev) {
+    key.addEventListener(ev, function () {
+      if (!key.classList.contains('is-down')) return;
+      key.classList.remove('is-down'); play('up');
+    });
+  });
+
+  render();
+})();
+</script>
