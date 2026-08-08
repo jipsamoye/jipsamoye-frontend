@@ -36,10 +36,12 @@ describe('aiGenerated — forward-compat 필드', () => {
   });
 });
 
-describe('상세 페이지 — AI 키캡 배지', () => {
-  it('posts/[id]/page.tsx가 isAiKeycapPost 조건으로 AiKeycapBadge를 렌더한다', () => {
+describe('상세 페이지 — AI 키캡 식별', () => {
+  it('posts/[id]/page.tsx가 isAiKeycapPost 조건으로 PressableKeycap을 렌더한다 (배지는 상세에서 제거)', () => {
     const source = read('src/app/posts/[id]/page.tsx');
     expect(source).toContain('isAiKeycapPost');
-    expect(source).toContain('AiKeycapBadge');
+    // 상세에서 AI 표시 역할은 눌리는 이미지 + 축 칩바가 맡는다 — 배지는 스쿼시와 겉돌아 제거함
+    expect(source).toContain('PressableKeycap');
+    expect(source).not.toContain('AiKeycapBadge');
   });
 });

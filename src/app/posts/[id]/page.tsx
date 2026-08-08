@@ -8,7 +8,6 @@ import { useAuthContext } from '@/components/providers/AuthProvider';
 import { useOpenDm } from '@/hooks/useOpenDm';
 import Avatar from '@/components/common/Avatar';
 import DetailImage from '@/components/common/DetailImage';
-import AiKeycapBadge from '@/components/common/AiKeycapBadge';
 import { isAiKeycapPost } from '@/lib/aiPost';
 import PressableKeycap from '@/components/domain/PressableKeycap';
 import PostCard from '@/components/domain/PostCard';
@@ -181,22 +180,18 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
         </div>
       </div>
 
-      {/* 이미지 (세로 나열) — AI 키캡 글의 첫 이미지만 눌린다. 배지가 보이는 이미지 = 눌리는 이미지 */}
+      {/* 이미지 (세로 나열) — AI 키캡 글의 첫 이미지만 눌린다. 배지는 스쿼시와 겉돌아 상세에선 없음 (식별은 칩바·제목) */}
       <div className="flex flex-col gap-2 mb-6">
         {post.imageUrls.map((url, i) => (
           <div key={i} className="relative">
             {i === 0 && isAiKeycapPost(post) ? (
               <PressableKeycap>
-                {/* 배지를 눌리는 면 안에 둔다 — 액자 기준에 두면 스쿼시 때 이미지만 내려가 배지가 홀로 남는다 */}
-                <div className="relative">
-                  <DetailImage
-                    src={url}
-                    alt={`${post.title} ${i + 1}`}
-                    loading="eager"
-                    className="w-full rounded-2xl object-cover"
-                  />
-                  <AiKeycapBadge className="absolute top-4 left-4 pointer-events-none" />
-                </div>
+                <DetailImage
+                  src={url}
+                  alt={`${post.title} ${i + 1}`}
+                  loading="eager"
+                  className="w-full rounded-2xl object-cover"
+                />
               </PressableKeycap>
             ) : (
               <DetailImage

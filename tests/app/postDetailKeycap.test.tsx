@@ -74,20 +74,12 @@ describe('게시글 상세 — 키캡 누르기', () => {
     expect(soundMock.playKeycapSound).toHaveBeenCalledWith('brown', 'down');
   });
 
-  it('유도는 아예 없다 — 눌러보기 배지·물결 없음, 기존 AI 키캡 배지는 유지', async () => {
+  it('유도도 배지도 없다 — 눌러보기·물결·AI 키캡 배지 모두 없음', async () => {
     await renderPage(basePost);
     expect(screen.queryByText('눌러보기')).toBeNull();
     expect(document.querySelector('[data-testid="keycap-ripple"]')).toBeNull();
-    expect(screen.getByText('AI 키캡')).toBeInTheDocument();
-  });
-
-  it('AI 키캡 배지가 눌리는 면 안에 있어 이미지와 함께 눌린다', async () => {
-    await renderPage(basePost);
-    const keyButton = screen.getByRole('button', { name: '키캡 누르기' });
-    const badge = screen.getByText('AI 키캡');
-    expect(keyButton).toContainElement(badge);
-    // 스쿼시 대상은 버튼의 첫 자식 래퍼 — 그 안에 있어야 스쿼시 시 배지가 홀로 남지 않는다
-    expect(keyButton.firstElementChild).toContainElement(badge);
+    // AI 키캡 배지는 상세에서 제거 — 스쿼시 시 배지만 홀로 남는 위화감 때문 (식별은 칩바·제목이 맡음)
+    expect(screen.queryByText('AI 키캡')).toBeNull();
   });
 
   it('일반 글(aiGenerated=false): 아무 것도 안 바뀐다', async () => {
