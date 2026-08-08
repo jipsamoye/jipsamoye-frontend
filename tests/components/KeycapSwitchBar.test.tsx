@@ -37,6 +37,12 @@ describe('KeycapSwitchBar', () => {
     expect(chipRow.className).not.toContain('overflow-x');
   });
 
+  it('칩바 전체가 select-none — iOS 롱프레스 시 칩 라벨에서 텍스트 선택이 시작되지 않게', () => {
+    setup();
+    const bar = screen.getByRole('button', { name: '소리 끄기' }).parentElement as HTMLElement;
+    expect(bar.className).toContain('select-none');
+  });
+
   it('음소거 버튼: 소리 켜짐이면 "소리 끄기" 스피커+음파 SVG, 클릭 시 onToggleMute', () => {
     const { onToggleMute } = setup();
     const mute = screen.getByRole('button', { name: '소리 끄기' });
