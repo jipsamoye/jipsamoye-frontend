@@ -81,6 +81,15 @@ describe('게시글 상세 — 키캡 누르기', () => {
     expect(screen.getByText('AI 키캡')).toBeInTheDocument();
   });
 
+  it('AI 키캡 배지가 눌리는 면 안에 있어 이미지와 함께 눌린다', async () => {
+    await renderPage(basePost);
+    const keyButton = screen.getByRole('button', { name: '키캡 누르기' });
+    const badge = screen.getByText('AI 키캡');
+    expect(keyButton).toContainElement(badge);
+    // 스쿼시 대상은 버튼의 첫 자식 래퍼 — 그 안에 있어야 스쿼시 시 배지가 홀로 남지 않는다
+    expect(keyButton.firstElementChild).toContainElement(badge);
+  });
+
   it('일반 글(aiGenerated=false): 아무 것도 안 바뀐다', async () => {
     await renderPage({ ...basePost, id: 8, title: '우리집 고양이', aiGenerated: false });
     expect(screen.queryByRole('button', { name: '키캡 누르기' })).toBeNull();

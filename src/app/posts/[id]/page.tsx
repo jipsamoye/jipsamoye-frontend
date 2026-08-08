@@ -187,12 +187,16 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
           <div key={i} className="relative">
             {i === 0 && isAiKeycapPost(post) ? (
               <PressableKeycap>
-                <DetailImage
-                  src={url}
-                  alt={`${post.title} ${i + 1}`}
-                  loading="eager"
-                  className="w-full rounded-2xl object-cover"
-                />
+                {/* 배지를 눌리는 면 안에 둔다 — 액자 기준에 두면 스쿼시 때 이미지만 내려가 배지가 홀로 남는다 */}
+                <div className="relative">
+                  <DetailImage
+                    src={url}
+                    alt={`${post.title} ${i + 1}`}
+                    loading="eager"
+                    className="w-full rounded-2xl object-cover"
+                  />
+                  <AiKeycapBadge className="absolute top-4 left-4 pointer-events-none" />
+                </div>
               </PressableKeycap>
             ) : (
               <DetailImage
@@ -201,9 +205,6 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
                 loading={i === 0 ? 'eager' : 'lazy'}
                 className="w-full rounded-2xl object-cover"
               />
-            )}
-            {i === 0 && isAiKeycapPost(post) && (
-              <AiKeycapBadge className="absolute top-4 left-4 pointer-events-none" />
             )}
           </div>
         ))}
