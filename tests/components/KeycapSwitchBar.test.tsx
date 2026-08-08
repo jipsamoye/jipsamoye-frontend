@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, cleanup } from '@testing-library/react';
 import KeycapSwitchBar from '@/components/domain/KeycapSwitchBar';
 
 const setup = (over: Partial<Parameters<typeof KeycapSwitchBar>[0]> = {}) => {
@@ -37,19 +37,24 @@ describe('KeycapSwitchBar', () => {
     expect(chipRow.className).not.toContain('overflow-x');
   });
 
-  it('음소거 버튼: 소리 켜짐이면 "소리 끄기" 🔊, 클릭 시 onToggleMute', () => {
+  it('음소거 버튼: 소리 켜짐이면 "소리 끄기" 스피커+음파 SVG, 클릭 시 onToggleMute', () => {
     const { onToggleMute } = setup();
     const mute = screen.getByRole('button', { name: '소리 끄기' });
-    expect(mute).toHaveTextContent('🔊');
+    // 이모지는 플랫폼 폰트에 따라 뭉개져 보여 SVG 아이콘으로 교체 (데코라 aria-hidden)
+    expect(mute.querySelector('svg[aria-hidden="true"]')).not.toBeNull();
     expect(mute).toHaveAttribute('aria-pressed', 'false');
     fireEvent.click(mute);
     expect(onToggleMute).toHaveBeenCalledTimes(1);
   });
 
-  it('음소거 상태면 "소리 켜기" 🔇 + aria-pressed', () => {
+  it('음소거 상태면 "소리 켜기" + aria-pressed, 아이콘이 X 변형으로 바뀐다', () => {
+    setup();
+    const wave = screen.getByRole('button', { name: '소리 끄기' }).innerHTML;
+    cleanup();
     setup({ muted: true });
     const mute = screen.getByRole('button', { name: '소리 켜기' });
-    expect(mute).toHaveTextContent('🔇');
+    expect(mute.querySelector('svg[aria-hidden="true"]')).not.toBeNull();
+    expect(mute.innerHTML).not.toBe(wave);
     expect(mute).toHaveAttribute('aria-pressed', 'true');
   });
 });
