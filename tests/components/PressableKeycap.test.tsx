@@ -91,6 +91,36 @@ describe('PressableKeycap — 누름 코어', () => {
     vi.useRealTimers();
   });
 
+  it('칩 연타: 앞선 프리뷰의 up 타이머는 취소된다 (130ms 안 연타 시 소리 중첩 방지)', () => {
+    vi.useFakeTimers();
+    renderKeycap();
+    fireEvent.click(screen.getByRole('button', { name: '청축' }));
+    act(() => vi.advanceTimersByTime(50));
+    fireEvent.click(screen.getByRole('button', { name: '적축' }));
+    act(() => vi.advanceTimersByTime(300));
+    const ups = soundMock.playKeycapSound.mock.calls.filter(([, d]) => d === 'up');
+    expect(ups).toEqual([['red', 'up']]);
+    vi.useRealTimers();
+  });
+
+  it('프리뷰 중 언마운트되면 남은 up 타이머가 취소된다', () => {
+    vi.useFakeTimers();
+    const { unmount } = renderKeycap();
+    fireEvent.click(screen.getByRole('button', { name: '청축' }));
+    unmount();
+    act(() => vi.advanceTimersByTime(300));
+    expect(soundMock.playKeycapSound).not.toHaveBeenCalledWith('blue', 'up');
+    vi.useRealTimers();
+  });
+
+  it('누른 채 포커스를 잃으면 눌린 상태가 풀린다 (blur 갇힘 방지)', () => {
+    renderKeycap();
+    fireEvent.keyDown(keyButton(), { key: ' ' });
+    fireEvent.blur(keyButton());
+    expect(squashTarget().className).not.toContain('scale-y-[0.9]');
+    expect(soundMock.playKeycapSound).toHaveBeenCalledWith('brown', 'up');
+  });
+
   it('음소거 토글이 localStorage에 저장되고, 음소거 중 칩 클릭은 선택만 바꾼다', () => {
     renderKeycap();
     fireEvent.click(screen.getByRole('button', { name: '소리 끄기' }));

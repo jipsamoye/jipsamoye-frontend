@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   DEFAULT_SWITCH_ID, getStoredMuted, getStoredSwitchId, getHasPressed,
   markPressed, storeMuted, storeSwitchId, type KeycapSwitchId,
@@ -30,6 +30,10 @@ export default function PressableKeycap({ children, nudge = false, className = '
   const [nudgeActive, setNudgeActive] = useState(false);
   const [reducedMotion, setReducedMotion] = useState(false);
   const [demoPressing, setDemoPressing] = useState(false);
+  // 칩 프리뷰의 up 타이머 — 연타·언마운트 시 앞선 예약을 취소해 소리가 겹치지 않게 한다
+  const previewUpTimer = useRef<number | undefined>(undefined);
+
+  useEffect(() => () => clearTimeout(previewUpTimer.current), []);
 
   // localStorage는 마운트 후에 읽는다 — share 페이지가 서버 컴포넌트라
   // SSR 마크업과 첫 클라이언트 렌더가 일치해야 한다 (hydration mismatch 방지)
@@ -76,7 +80,8 @@ export default function PressableKeycap({ children, nudge = false, className = '
     if (!muted) {
       // 칩 프리뷰 — 실제 누름과 같은 down→up 순서 (프로토타입 튜닝값 130ms)
       playKeycapSound(id, 'down');
-      window.setTimeout(() => playKeycapSound(id, 'up'), 130);
+      clearTimeout(previewUpTimer.current);
+      previewUpTimer.current = window.setTimeout(() => playKeycapSound(id, 'up'), 130);
     }
   };
 
@@ -96,6 +101,7 @@ export default function PressableKeycap({ children, nudge = false, className = '
           onPointerUp={pressUp}
           onPointerLeave={pressUp}
           onPointerCancel={pressUp}
+          onBlur={pressUp} // 키보드로 누른 채 탭 이동하면 keyup이 안 와 눌린 상태로 갇힌다
           onKeyDown={(e) => {
             if ((e.key === ' ' || e.key === 'Enter') && !e.repeat) {
               e.preventDefault(); // Space 스크롤·keyup 시점 click 발화 방지
