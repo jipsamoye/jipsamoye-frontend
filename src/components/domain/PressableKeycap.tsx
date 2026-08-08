@@ -7,6 +7,7 @@ import {
 } from '@/lib/keycap';
 import { playKeycapSound, warmKeycapSound } from '@/lib/keycapSound';
 import KeycapSwitchBar from '@/components/domain/KeycapSwitchBar';
+import AiKeycapBadge from '@/components/common/AiKeycapBadge';
 
 interface PressableKeycapProps {
   /** 키캡 이미지 — DetailImage든 img든 그대로 감싼다 (각 페이지의 폴백 로직 보존) */
@@ -26,6 +27,9 @@ export default function PressableKeycap({ children, nudge = false, className = '
   const [switchId, setSwitchId] = useState<KeycapSwitchId>(DEFAULT_SWITCH_ID);
   const [muted, setMuted] = useState(false);
   const [isDown, setIsDown] = useState(false);
+  const [nudgeActive, setNudgeActive] = useState(false);
+  const [reducedMotion, setReducedMotion] = useState(false);
+  const [demoPressing, setDemoPressing] = useState(false);
 
   // localStorage는 마운트 후에 읽는다 — share 페이지가 서버 컴포넌트라
   // SSR 마크업과 첫 클라이언트 렌더가 일치해야 한다 (hydration mismatch 방지)
@@ -34,13 +38,29 @@ export default function PressableKeycap({ children, nudge = false, className = '
     setSwitchId(stored);
     setMuted(getStoredMuted());
     warmKeycapSound(stored);
-  }, []);
+    // 유도는 마운트 후에만 켠다 — SSR 마크업(유도 없음)과 일치시키고,
+    // 이미 눌러본 방문자에게 배지가 깜빡 떴다 사라지는 것도 막는다
+    if (nudge && !getHasPressed()) setNudgeActive(true);
+    if (typeof window.matchMedia === 'function') {
+      setReducedMotion(window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+    }
+  }, [nudge]);
+
+  // 자가 시연 — 등장 0.9초·4.2초 뒤 각 1회 (프로토타입 튜닝값). 소리 없음(자동재생 정책상 못 냄)
+  useEffect(() => {
+    if (!nudgeActive || reducedMotion) return;
+    const timers = [900, 4200].map((ms) => window.setTimeout(() => setDemoPressing(true), ms));
+    return () => timers.forEach(clearTimeout);
+  }, [nudgeActive, reducedMotion]);
 
   const pressDown = () => {
     if (isDown) return;
     setIsDown(true);
     if (!muted) playKeycapSound(switchId, 'down');
     if (!getHasPressed()) markPressed();
+    // 한 번이라도 누르면 유도 3종은 영구 소멸 (다음 방문 포함 — localStorage)
+    setNudgeActive(false);
+    setDemoPressing(false);
   };
 
   const pressUp = () => {
@@ -89,13 +109,29 @@ export default function PressableKeycap({ children, nudge = false, className = '
         >
           {/* 액자(버튼)는 고정, 이 래퍼만 바닥 기준으로 눌린다. reduced-motion이면 스쿼시 없음(소리는 유지) */}
           <div
+            onAnimationEnd={() => setDemoPressing(false)}
             className={`origin-bottom motion-safe:transition-transform motion-safe:duration-[110ms] motion-safe:ease-[cubic-bezier(0.2,0.8,0.3,1)] ${
               isDown ? 'motion-safe:scale-y-[0.9] motion-safe:scale-x-[1.04]' : ''
-            }`}
+            } ${demoPressing ? 'motion-safe:animate-[keycapNudge_380ms_cubic-bezier(0.2,0.8,0.3,1)]' : ''}`}
           >
             {children}
           </div>
+          {/* 물결 — 첫 누름까지 계속. reduced-motion이면 정지된 원만 남으니 아예 렌더하지 않는다 */}
+          {nudgeActive && !reducedMotion && (
+            <span
+              aria-hidden
+              data-testid="keycap-ripple"
+              className="absolute left-1/2 top-1/2 -ml-12 -mt-12 w-24 h-24 rounded-full border-[3px] border-white/95 pointer-events-none shadow-[0_0_0_1px_rgba(0,0,0,0.18),inset_0_0_0_1px_rgba(0,0,0,0.18)] animate-[keycapRipple_1.9s_ease-out_infinite]"
+            />
+          )}
         </button>
+        {/* 바깥 div가 중앙 정렬, 안쪽 배지가 둥둥 — 같은 요소에 두 transform을 걸면
+            badgeFloat의 translateY가 정렬 translateX를 덮어써 왼쪽으로 튕겨나간다 (제약 4) */}
+        {nudgeActive && (
+          <div className="absolute left-1/2 bottom-3 -translate-x-1/2 pointer-events-none">
+            <AiKeycapBadge label="눌러보기" floating />
+          </div>
+        )}
       </div>
       <KeycapSwitchBar
         selectedId={switchId}
