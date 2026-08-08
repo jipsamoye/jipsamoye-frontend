@@ -209,7 +209,7 @@ textarea:focus::-webkit-scrollbar-thumb {
 /* 키캡 누르기 — 자가 시연: 스스로 한 번 눌렸다 올라온다. 스쿼시와 같은 변형·곡선 */
 @keyframes keycapNudge {
   0%   { transform: scaleY(1) scaleX(1); }
-  32%  { transform: scaleY(0.87) scaleX(1.05); }
+  32%  { transform: scaleY(0.9) scaleX(1.04); }
   100% { transform: scaleY(1) scaleX(1); }
 }
 

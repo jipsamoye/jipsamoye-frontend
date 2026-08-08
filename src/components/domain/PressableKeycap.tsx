@@ -126,8 +126,8 @@ export default function PressableKeycap({ children, nudge = false, className = '
               딸려 나오며 pointercancel로 촉감이 깨진다. 래퍼에 pointer-events-none은 금지(iOS 롱프레스 저장 죽음) */}
           <div
             onAnimationEnd={() => setDemoPressing(false)}
-            className={`origin-bottom [&_img]:[-webkit-user-drag:none] motion-safe:transition-[transform,filter] motion-safe:duration-[110ms] motion-safe:ease-[cubic-bezier(0.2,0.8,0.3,1)] ${
-              isDown ? 'motion-safe:scale-y-[0.87] motion-safe:scale-x-[1.05] motion-safe:brightness-95' : ''
+            className={`origin-bottom [&_img]:[-webkit-user-drag:none] motion-safe:transition-transform motion-safe:duration-[110ms] motion-safe:ease-[cubic-bezier(0.2,0.8,0.3,1)] ${
+              isDown ? 'motion-safe:scale-y-[0.9] motion-safe:scale-x-[1.04]' : ''
             } ${demoPressing ? 'motion-safe:animate-[keycapNudge_380ms_cubic-bezier(0.2,0.8,0.3,1)]' : ''}`}
           >
             {children}

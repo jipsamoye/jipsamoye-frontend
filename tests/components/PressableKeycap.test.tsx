@@ -35,13 +35,11 @@ describe('PressableKeycap — 누름 코어', () => {
   it('pointerdown: 스쿼시 클래스 + down 소리 / pointerup: 원복 + up 소리', () => {
     renderKeycap();
     fireEvent.pointerDown(keyButton());
-    expect(squashTarget().className).toContain('scale-y-[0.87]');
-    // 눌린 동안 살짝 그늘 — 물리적으로 눌린 느낌 보강
-    expect(squashTarget().className).toContain('brightness-95');
+    expect(squashTarget().className).toContain('scale-y-[0.9]');
     expect(soundMock.playKeycapSound).toHaveBeenCalledWith('brown', 'down');
 
     fireEvent.pointerUp(keyButton());
-    expect(squashTarget().className).not.toContain('scale-y-[0.87]');
+    expect(squashTarget().className).not.toContain('scale-y-[0.9]');
     expect(soundMock.playKeycapSound).toHaveBeenCalledWith('brown', 'up');
   });
 
@@ -57,7 +55,7 @@ describe('PressableKeycap — 누름 코어', () => {
   it('키보드: Space keydown/keyup으로 누르고 뗄 수 있고, 반복 keydown은 무시한다', () => {
     renderKeycap();
     fireEvent.keyDown(keyButton(), { key: ' ' });
-    expect(squashTarget().className).toContain('scale-y-[0.87]');
+    expect(squashTarget().className).toContain('scale-y-[0.9]');
     fireEvent.keyDown(keyButton(), { key: ' ', repeat: true });
     const downs = soundMock.playKeycapSound.mock.calls.filter(([, d]) => d === 'down');
     expect(downs).toHaveLength(1);
@@ -69,7 +67,7 @@ describe('PressableKeycap — 누름 코어', () => {
     localStorage.setItem('keycap.muted', '1');
     renderKeycap();
     fireEvent.pointerDown(keyButton());
-    expect(squashTarget().className).toContain('scale-y-[0.87]');
+    expect(squashTarget().className).toContain('scale-y-[0.9]');
     expect(soundMock.playKeycapSound).not.toHaveBeenCalled();
   });
 
@@ -119,7 +117,7 @@ describe('PressableKeycap — 누름 코어', () => {
     renderKeycap();
     fireEvent.keyDown(keyButton(), { key: ' ' });
     fireEvent.blur(keyButton());
-    expect(squashTarget().className).not.toContain('scale-y-[0.87]');
+    expect(squashTarget().className).not.toContain('scale-y-[0.9]');
     expect(soundMock.playKeycapSound).toHaveBeenCalledWith('brown', 'up');
   });
 
@@ -146,7 +144,7 @@ describe('PressableKeycap — 누름 코어', () => {
     expect(localStorage.getItem('keycap.pressed')).toBeNull();
     // 소리·원복은 그대로 (기록만 건너뛴다)
     expect(soundMock.playKeycapSound).toHaveBeenCalledWith('brown', 'up');
-    expect(squashTarget().className).not.toContain('scale-y-[0.87]');
+    expect(squashTarget().className).not.toContain('scale-y-[0.9]');
   });
 
   it('pointerleave·blur로 끝난 누름은 정상 up으로 기록한다', () => {

@@ -10,8 +10,8 @@ describe('키캡 누르기 키프레임', () => {
   it('keycapNudge — 32% 지점에서 스쿼시와 동일한 변형(scaleY .9, scaleX 1.04)', () => {
     expect(css).toContain('@keyframes keycapNudge');
     const block = css.slice(css.indexOf('@keyframes keycapNudge'));
-    expect(block).toContain('scaleY(0.87)');
-    expect(block).toContain('scaleX(1.05)');
+    expect(block).toContain('scaleY(0.9)');
+    expect(block).toContain('scaleX(1.04)');
   });
 
   it('keycapRipple — scale 0.45→1.9, 정점 불투명도 0.95', () => {
