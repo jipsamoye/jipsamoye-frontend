@@ -185,7 +185,9 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
         {post.imageUrls.map((url, i) => (
           <div key={i} className="relative">
             {i === 0 && isAiKeycapPost(post) ? (
-              <PressableKeycap>
+              /* 결과·공유 화면과 같은 폭으로 제한 — 넓은 상세 컬럼에서 이미지가 900px로 커지면
+                 칩바·음소거가 폴드 아래로 밀려 "음소거 상시 가시" 원칙이 깨진다 */
+              <PressableKeycap className="max-w-xl mx-auto">
                 <DetailImage
                   src={url}
                   alt={`${post.title} ${i + 1}`}

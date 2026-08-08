@@ -82,6 +82,14 @@ describe('게시글 상세 — 키캡 누르기', () => {
     expect(screen.queryByText('AI 키캡')).toBeNull();
   });
 
+  it('키캡 블록은 데스크톱에서 max-w-xl로 제한된다 — 칩바·음소거가 폴드 안에 들어오게', async () => {
+    await renderPage(basePost);
+    const keyButton = screen.getByRole('button', { name: '키캡 누르기' });
+    // 결과 화면·공유 페이지와 같은 폭(576px). 넓은 상세 컬럼에서 1:1 이미지가
+    // 900px로 커지면 칩바·음소거가 폴드 아래로 밀린다 (음소거 상시 가시 원칙 위반)
+    expect(keyButton.closest('.max-w-xl.mx-auto')).not.toBeNull();
+  });
+
   it('일반 글(aiGenerated=false): 아무 것도 안 바뀐다', async () => {
     await renderPage({ ...basePost, id: 8, title: '우리집 고양이', aiGenerated: false });
     expect(screen.queryByRole('button', { name: '키캡 누르기' })).toBeNull();
