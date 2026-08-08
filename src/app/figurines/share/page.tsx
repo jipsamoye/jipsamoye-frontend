@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation';
 import DetailImage from '@/components/common/DetailImage';
 import PressableKeycap from '@/components/domain/PressableKeycap';
 import { getSharedFigurineImageUrl } from '@/lib/figurineShare';
+import { toThumbnailUrl } from '@/lib/imageUrl';
 
 /**
  * AI 키캡 결과 공유 페이지 — 로그인 없이 접근 가능해야 한다 (OG 크롤러 포함).
@@ -50,7 +51,8 @@ export default async function FigurineSharePage({ searchParams }: FigurineShareP
         반려동물 사진을 올리면 키캡 위 미니 피규어로 만들어 드려요.
       </p>
       {/* 원본(1024 PNG, ~1.3MB) 대신 800 웹피 썸네일(~35KB) 우선 — 생성 직후 썸네일이 없으면 DetailImage가 원본으로 폴백 */}
-      <PressableKeycap nudge className="mt-6">
+      {/* 백드롭은 DetailImage가 띄우는 800 썸네일과 같은 URL — 추가 다운로드 없음 (img는 CDN 검증 통과라 항상 리사이즈 가능) */}
+      <PressableKeycap nudge backdropSrc={toThumbnailUrl(imageUrl, 800)} className="mt-6">
         <DetailImage src={imageUrl} alt="AI 키캡 피규어" loading="eager" className="w-full rounded-2xl" />
       </PressableKeycap>
       <Link

@@ -9,7 +9,7 @@ vi.mock('@/lib/keycapSound', () => soundMock);
 
 import PressableKeycap from '@/components/domain/PressableKeycap';
 
-const renderKeycap = (props: { nudge?: boolean; className?: string } = {}) =>
+const renderKeycap = (props: { nudge?: boolean; className?: string; backdropSrc?: string } = {}) =>
   render(
     <PressableKeycap {...props}>
       <img src="/result.png" alt="완성된 AI 키캡 피규어" />
@@ -17,8 +17,8 @@ const renderKeycap = (props: { nudge?: boolean; className?: string } = {}) =>
   );
 
 const keyButton = () => screen.getByRole('button', { name: '키캡 누르기' });
-// 스쿼시 대상은 children을 감싼 래퍼 div
-const squashTarget = () => keyButton().firstElementChild as HTMLElement;
+// 스쿼시 대상은 children을 감싼 래퍼 div (백드롭이 첫 자식이 될 수 있어 testid로 조회)
+const squashTarget = () => keyButton().querySelector('[data-testid="keycap-squash"]') as HTMLElement;
 
 describe('PressableKeycap — 누름 코어', () => {
   beforeEach(() => {
@@ -32,8 +32,21 @@ describe('PressableKeycap — 누름 코어', () => {
     expect(keyButton()).toBeInTheDocument();
   });
 
-  it('액자 안쪽에 소켓 배경색이 깔려 있다 — 스쿼시로 드러나는 위쪽 띠가 눌림 홈으로 보이게', () => {
+  it('backdropSrc를 주면 같은 이미지의 블러 백드롭이 액자 안쪽에 깔린다', () => {
+    renderKeycap({ backdropSrc: '/result_800.webp' });
+    const backdrop = keyButton().querySelector('[data-testid="keycap-backdrop"]') as HTMLElement;
+    expect(backdrop).not.toBeNull();
+    // 장식 요소 — 스크린리더에서 숨김
+    expect(backdrop.getAttribute('aria-hidden')).toBe('true');
+    expect(backdrop.style.backgroundImage).toContain('/result_800.webp');
+    expect(backdrop.className).toContain('blur');
+    // 백드롭은 스쿼시 대상 밖(액자 쪽)에 있어야 눌러도 같이 안 눌린다
+    expect(squashTarget().contains(backdrop)).toBe(false);
+  });
+
+  it('backdropSrc가 없으면 백드롭 없이 소켓 배경색으로 폴백한다', () => {
     renderKeycap();
+    expect(keyButton().querySelector('[data-testid="keycap-backdrop"]')).toBeNull();
     expect(keyButton().className).toContain('bg-gray-100');
   });
 

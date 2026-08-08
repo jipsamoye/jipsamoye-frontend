@@ -9,6 +9,7 @@ import { useOpenDm } from '@/hooks/useOpenDm';
 import Avatar from '@/components/common/Avatar';
 import DetailImage from '@/components/common/DetailImage';
 import { isAiKeycapPost } from '@/lib/aiPost';
+import { isResizableUrl, toThumbnailUrl } from '@/lib/imageUrl';
 import PressableKeycap from '@/components/domain/PressableKeycap';
 import PostCard from '@/components/domain/PostCard';
 import CommentSection from '@/components/domain/CommentSection';
@@ -187,7 +188,11 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
             {i === 0 && isAiKeycapPost(post) ? (
               /* 결과·공유 화면과 같은 폭으로 제한 — 넓은 상세 컬럼에서 이미지가 900px로 커지면
                  칩바·음소거가 폴드 아래로 밀려 "음소거 상시 가시" 원칙이 깨진다 */
-              <PressableKeycap className="max-w-xl mx-auto">
+              <PressableKeycap
+                className="max-w-xl mx-auto"
+                // 백드롭은 DetailImage가 띄우는 것과 같은 URL(가능하면 800 썸네일) — 추가 다운로드 없음
+                backdropSrc={isResizableUrl(url) ? toThumbnailUrl(url, 800) : url}
+              >
                 <DetailImage
                   src={url}
                   alt={`${post.title} ${i + 1}`}

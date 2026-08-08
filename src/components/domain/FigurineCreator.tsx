@@ -227,7 +227,8 @@ export default function FigurineCreator() {
 
       {(phase === 'posting' || phase === 'posted' || (phase === 'completed' && revealReady)) && job?.resultImageUrl && (
         <section className="mt-6 animate-[fadeIn_0.5s_ease-out]">
-          <PressableKeycap nudge>
+          {/* 백드롭은 방금 표시한 원본 URL 그대로 — 캐시 히트, 추가 다운로드 없음 */}
+          <PressableKeycap nudge backdropSrc={job.resultImageUrl}>
             {/* eslint-disable-next-line @next/next/no-img-element -- 방금 생성된 결과라 Lambda 썸네일이 없을 수 있어 원본을 직접 표시 */}
             <img
               src={job.resultImageUrl}
