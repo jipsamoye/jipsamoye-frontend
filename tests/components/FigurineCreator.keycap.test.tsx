@@ -43,9 +43,6 @@ describe('FigurineCreator — 키캡 누르기', () => {
     render(<FigurineCreator />);
     const keyButton = await screen.findByRole('button', { name: '키캡 누르기' });
     expect(keyButton).toContainElement(screen.getByAltText('완성된 AI 키캡 피규어'));
-    // 결과 화면은 원본을 그대로 백드롭으로 (방금 표시한 URL이라 캐시 히트)
-    const backdrop = keyButton.querySelector('[data-testid="keycap-backdrop"]') as HTMLElement;
-    expect(backdrop.style.backgroundImage).toContain('https://cdn/results/1.png');
     // 결과 화면은 유도 있음 (기획 확정)
     expect(await screen.findByText('눌러보기')).toBeInTheDocument();
   });

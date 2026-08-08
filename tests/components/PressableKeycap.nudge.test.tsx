@@ -27,7 +27,7 @@ const renderKeycap = (nudge: boolean) =>
   );
 
 const keyButton = () => screen.getByRole('button', { name: '키캡 누르기' });
-const squashTarget = () => keyButton().querySelector('[data-testid="keycap-squash"]') as HTMLElement;
+const squashTarget = () => keyButton().firstElementChild as HTMLElement;
 const ripple = () => document.querySelector('[data-testid="keycap-ripple"]');
 
 describe('PressableKeycap — 유도(넛지)', () => {

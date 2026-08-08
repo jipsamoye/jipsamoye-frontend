@@ -14,12 +14,6 @@ interface PressableKeycapProps {
   children: React.ReactNode;
   /** 유도 3종(자가 시연·물결·눌러보기 배지). 게시글 상세는 false (기획 확정) */
   nudge?: boolean;
-  /**
-   * 액자 안쪽에 깔 블러 백드롭 이미지 URL — 스쿼시로 드러나는 위쪽 띠가 공백이 아니라
-   * 깊이감으로 읽히게 한다. 화면에 이미 뜬 것과 같은 URL을 넘겨야 추가 다운로드가 없다.
-   * 미지정 시 회색 소켓 배경으로 폴백.
-   */
-  backdropSrc?: string;
   className?: string;
 }
 
@@ -29,7 +23,7 @@ interface PressableKeycapProps {
  * 소리는 pointerdown/up에 down/up 클립 재생 — AudioContext는 첫 제스처에서 lazy 생성.
  * 상태(축·음소거·눌러본 적)는 localStorage만 사용, 백엔드 변경 없음.
  */
-export default function PressableKeycap({ children, nudge = false, backdropSrc, className = '' }: PressableKeycapProps) {
+export default function PressableKeycap({ children, nudge = false, className = '' }: PressableKeycapProps) {
   const [switchId, setSwitchId] = useState<KeycapSwitchId>(DEFAULT_SWITCH_ID);
   const [muted, setMuted] = useState(false);
   const [isDown, setIsDown] = useState(false);
@@ -125,26 +119,14 @@ export default function PressableKeycap({ children, nudge = false, backdropSrc, 
           onKeyUp={(e) => {
             if (e.key === ' ' || e.key === 'Enter') pressUp();
           }}
-          // bg-gray-100: 백드롭이 없거나 아직 안 실렸을 때의 소켓 배경 폴백
-          className="relative block w-full overflow-hidden rounded-2xl bg-gray-100 cursor-pointer select-none [touch-action:manipulation] [-webkit-tap-highlight-color:transparent] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-500"
+          className="relative block w-full overflow-hidden rounded-2xl cursor-pointer select-none [touch-action:manipulation] [-webkit-tap-highlight-color:transparent] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-500"
         >
-          {/* 액자 안쪽 — 같은 이미지의 블러 확대판. 눌러서 드러나는 띠가 사진 색감의 깊이로 읽힌다.
-              스쿼시 대상 밖(액자 쪽)에 두어 눌러도 배경은 고정된다 */}
-          {backdropSrc && (
-            <div
-              aria-hidden="true"
-              data-testid="keycap-backdrop"
-              style={{ backgroundImage: `url(${backdropSrc})` }}
-              className="absolute inset-0 scale-110 bg-cover bg-center blur-lg brightness-90"
-            />
-          )}
           {/* 액자(버튼)는 고정, 이 래퍼만 바닥 기준으로 눌린다. reduced-motion이면 스쿼시 없음(소리는 유지)
               [&_img]:[-webkit-user-drag:none] — 누른 채 움직이면 데스크톱에서 고스트 이미지가
               딸려 나오며 pointercancel로 촉감이 깨진다. 래퍼에 pointer-events-none은 금지(iOS 롱프레스 저장 죽음) */}
           <div
-            data-testid="keycap-squash"
             onAnimationEnd={() => setDemoPressing(false)}
-            className={`relative origin-bottom [&_img]:[-webkit-user-drag:none] motion-safe:transition-transform motion-safe:duration-[110ms] motion-safe:ease-[cubic-bezier(0.2,0.8,0.3,1)] ${
+            className={`origin-bottom [&_img]:[-webkit-user-drag:none] motion-safe:transition-transform motion-safe:duration-[110ms] motion-safe:ease-[cubic-bezier(0.2,0.8,0.3,1)] ${
               isDown ? 'motion-safe:scale-y-[0.9] motion-safe:scale-x-[1.04]' : ''
             } ${demoPressing ? 'motion-safe:animate-[keycapNudge_380ms_cubic-bezier(0.2,0.8,0.3,1)]' : ''}`}
           >

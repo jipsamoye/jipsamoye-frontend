@@ -66,11 +66,6 @@ describe('게시글 상세 — 키캡 누르기', () => {
     expect(keyButtons).toHaveLength(1);
     expect(keyButtons[0]).toContainElement(screen.getByAltText('AI 키캡 자랑 1'));
     expect(keyButtons[0]).not.toContainElement(screen.getByAltText('AI 키캡 자랑 2'));
-    // 백드롭은 화면에 이미 뜬 썸네일과 같은 URL — 추가 다운로드 없음
-    const backdrop = keyButtons[0].querySelector('[data-testid="keycap-backdrop"]') as HTMLElement;
-    expect(backdrop.style.backgroundImage).toContain(
-      'https://images.jipsamoye.com/posts/7/thumbnails/1_800.webp',
-    );
   });
 
   it('누르면 소리가 난다 — 동작은 결과 화면과 동일', async () => {

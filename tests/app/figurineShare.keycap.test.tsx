@@ -25,11 +25,6 @@ describe('공유 페이지 — 키캡 누르기', () => {
     const keyButton = screen.getByRole('button', { name: '키캡 누르기' });
     expect(keyButton).toContainElement(screen.getByAltText('AI 키캡 피규어'));
     expect(screen.getByText('눌러보기')).toBeInTheDocument();
-    // 백드롭은 DetailImage가 이미 띄운 800 썸네일과 같은 URL — 추가 다운로드 없음
-    const backdrop = keyButton.querySelector('[data-testid="keycap-backdrop"]') as HTMLElement;
-    expect(backdrop.style.backgroundImage).toContain(
-      'https://images.jipsamoye.com/posts/8/thumbnails/result_800.webp',
-    );
   });
 
   it('DetailImage 썸네일→원본 폴백이 래핑 후에도 살아 있다 (스펙 제약 5)', async () => {
