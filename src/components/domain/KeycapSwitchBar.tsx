@@ -22,13 +22,14 @@ export default function KeycapSwitchBar({ selectedId, muted, onSelect, onToggleM
         aria-label={muted ? '소리 켜기' : '소리 끄기'}
         aria-pressed={muted}
         onClick={onToggleMute}
-        className={`flex-none flex items-center justify-center w-9 h-9 rounded-[10px] border border-gray-300 bg-white text-gray-700 transition-opacity ${muted ? 'opacity-45' : ''}`}
+        className="flex-none flex items-center justify-center w-9 h-9 rounded-[10px] border border-gray-300 bg-white text-gray-700"
       >
         {/* 이모지는 플랫폼 폰트에 따라 뭉개져 보여 heroicons solid로 교체 */}
         {muted ? (
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" className="w-5 h-5">
-            <path d="M13.5 4.06c0-1.336-1.616-2.005-2.56-1.06l-4.5 4.5H4.508c-1.141 0-2.318.664-2.66 1.905A9.76 9.76 0 0 0 1.5 12c0 .898.121 1.768.35 2.595.341 1.24 1.518 1.905 2.659 1.905h1.93l4.5 4.5c.945.945 2.561.276 2.561-1.06V4.06Z" />
-            <path d="M17.78 9.22a.75.75 0 1 0-1.06 1.06L18.44 12l-1.72 1.72a.75.75 0 1 0 1.06 1.06l1.72-1.72 1.72 1.72a.75.75 0 1 0 1.06-1.06L20.56 12l1.72-1.72a.75.75 0 1 0-1.06-1.06l-1.72 1.72-1.72-1.72Z" />
+            {/* 스피커는 연하게 깔고, 아이콘 전체를 가로지르는 굵은 빨간 X로 "소리 안 남"을 한눈에 */}
+            <path className="opacity-40" d="M13.5 4.06c0-1.336-1.616-2.005-2.56-1.06l-4.5 4.5H4.508c-1.141 0-2.318.664-2.66 1.905A9.76 9.76 0 0 0 1.5 12c0 .898.121 1.768.35 2.595.341 1.24 1.518 1.905 2.659 1.905h1.93l4.5 4.5c.945.945 2.561.276 2.561-1.06V4.06Z" />
+            <path className="stroke-red-500" fill="none" strokeWidth="2.5" strokeLinecap="round" d="M5 5 19 19M19 5 5 19" />
           </svg>
         ) : (
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" className="w-5 h-5">

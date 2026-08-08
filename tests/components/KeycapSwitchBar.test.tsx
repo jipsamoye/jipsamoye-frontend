@@ -47,14 +47,17 @@ describe('KeycapSwitchBar', () => {
     expect(onToggleMute).toHaveBeenCalledTimes(1);
   });
 
-  it('음소거 상태면 "소리 켜기" + aria-pressed, 아이콘이 X 변형으로 바뀐다', () => {
+  it('음소거 상태면 "소리 켜기" + aria-pressed, 빨간 X 변형 아이콘으로 바뀐다', () => {
     setup();
-    const wave = screen.getByRole('button', { name: '소리 끄기' }).innerHTML;
+    const soundOn = screen.getByRole('button', { name: '소리 끄기' });
+    // 소리 켜짐 상태엔 빨간 표시가 없어야 한다
+    expect(soundOn.querySelector('.stroke-red-500')).toBeNull();
     cleanup();
     setup({ muted: true });
     const mute = screen.getByRole('button', { name: '소리 켜기' });
     expect(mute.querySelector('svg[aria-hidden="true"]')).not.toBeNull();
-    expect(mute.innerHTML).not.toBe(wave);
+    // 아이콘 전체를 가로지르는 굵은 빨간 X — 소리 안 남을 한눈에 알아볼 수 있게
+    expect(mute.querySelector('path.stroke-red-500')).not.toBeNull();
     expect(mute).toHaveAttribute('aria-pressed', 'true');
   });
 });
