@@ -81,6 +81,19 @@ describe('PressableKeycap — 유도(넛지)', () => {
     expect(localStorage.getItem('keycap.pressed')).toBe('1');
   });
 
+  it('스크롤로 취소된 누름(pointercancel): 화면상 유도는 사라지되 다음 방문엔 다시 뜬다', () => {
+    const { unmount } = renderKeycap(true);
+    fireEvent.pointerDown(keyButton());
+    fireEvent.pointerCancel(keyButton());
+    expect(screen.queryByText('눌러보기')).toBeNull();
+    expect(localStorage.getItem('keycap.pressed')).toBeNull();
+
+    unmount();
+    renderKeycap(true);
+    expect(screen.getByText('눌러보기')).toBeInTheDocument();
+    expect(ripple()).not.toBeNull();
+  });
+
   it('자가 시연: 0.9초 뒤 keycapNudge 애니메이션, 끝나면 제거, 4.2초에 한 번 더 — 소리는 없다', () => {
     vi.useFakeTimers();
     renderKeycap(true);

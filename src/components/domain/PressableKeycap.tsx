@@ -39,9 +39,11 @@ export default function PressableKeycap({ children, nudge = false, className = '
   // SSR 마크업과 첫 클라이언트 렌더가 일치해야 한다 (hydration mismatch 방지)
   useEffect(() => {
     const stored = getStoredSwitchId();
+    const storedMuted = getStoredMuted();
     setSwitchId(stored);
-    setMuted(getStoredMuted());
-    warmKeycapSound(stored);
+    setMuted(storedMuted);
+    // 음소거 상태면 어차피 재생하지 않으니 자산도 받지 않는다 (불필요한 fetch 절약)
+    if (!storedMuted) warmKeycapSound(stored);
     // 유도는 마운트 후에만 켠다 — SSR 마크업(유도 없음)과 일치시키고,
     // 이미 눌러본 방문자에게 배지가 깜빡 떴다 사라지는 것도 막는다
     if (nudge && !getHasPressed()) setNudgeActive(true);
@@ -61,16 +63,22 @@ export default function PressableKeycap({ children, nudge = false, className = '
     if (isDown) return;
     setIsDown(true);
     if (!muted) playKeycapSound(switchId, 'down');
-    if (!getHasPressed()) markPressed();
-    // 한 번이라도 누르면 유도 3종은 영구 소멸 (다음 방문 포함 — localStorage)
+    // 화면상 유도 3종은 누르는 즉시 사라진다 (영구 기록은 취소되지 않은 up에서)
     setNudgeActive(false);
     setDemoPressing(false);
   };
 
-  const pressUp = () => {
+  /**
+   * @param cancelled pointercancel로 끝난 누름 — 모바일에서 이미지 위를 스크롤하면
+   *   pointerdown→pointercancel만 오는데, 이걸 기록하면 유도 3종이 조용히 소진된다.
+   *   소리·원복은 그대로 하되 영구 기록만 건너뛴다. pointerleave·blur는 정상 up 취급.
+   */
+  const pressUp = (cancelled = false) => {
     if (!isDown) return;
     setIsDown(false);
     if (!muted) playKeycapSound(switchId, 'up');
+    // 한 번이라도 끝까지 누르면 유도 3종은 영구 소멸 (다음 방문 포함 — localStorage)
+    if (!cancelled && !getHasPressed()) markPressed();
   };
 
   const handleSelect = (id: KeycapSwitchId) => {
@@ -98,10 +106,10 @@ export default function PressableKeycap({ children, nudge = false, className = '
           type="button"
           aria-label="키캡 누르기"
           onPointerDown={pressDown}
-          onPointerUp={pressUp}
-          onPointerLeave={pressUp}
-          onPointerCancel={pressUp}
-          onBlur={pressUp} // 키보드로 누른 채 탭 이동하면 keyup이 안 와 눌린 상태로 갇힌다
+          onPointerUp={() => pressUp()}
+          onPointerLeave={() => pressUp()}
+          onPointerCancel={() => pressUp(true)}
+          onBlur={() => pressUp()} // 키보드로 누른 채 탭 이동하면 keyup이 안 와 눌린 상태로 갇힌다
           onKeyDown={(e) => {
             if ((e.key === ' ' || e.key === 'Enter') && !e.repeat) {
               e.preventDefault(); // Space 스크롤·keyup 시점 click 발화 방지
@@ -113,10 +121,12 @@ export default function PressableKeycap({ children, nudge = false, className = '
           }}
           className="relative block w-full overflow-hidden rounded-2xl cursor-pointer select-none [touch-action:manipulation] [-webkit-tap-highlight-color:transparent] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-500"
         >
-          {/* 액자(버튼)는 고정, 이 래퍼만 바닥 기준으로 눌린다. reduced-motion이면 스쿼시 없음(소리는 유지) */}
+          {/* 액자(버튼)는 고정, 이 래퍼만 바닥 기준으로 눌린다. reduced-motion이면 스쿼시 없음(소리는 유지)
+              [&_img]:[-webkit-user-drag:none] — 누른 채 움직이면 데스크톱에서 고스트 이미지가
+              딸려 나오며 pointercancel로 촉감이 깨진다. 래퍼에 pointer-events-none은 금지(iOS 롱프레스 저장 죽음) */}
           <div
             onAnimationEnd={() => setDemoPressing(false)}
-            className={`origin-bottom motion-safe:transition-transform motion-safe:duration-[110ms] motion-safe:ease-[cubic-bezier(0.2,0.8,0.3,1)] ${
+            className={`origin-bottom [&_img]:[-webkit-user-drag:none] motion-safe:transition-transform motion-safe:duration-[110ms] motion-safe:ease-[cubic-bezier(0.2,0.8,0.3,1)] ${
               isDown ? 'motion-safe:scale-y-[0.9] motion-safe:scale-x-[1.04]' : ''
             } ${demoPressing ? 'motion-safe:animate-[keycapNudge_380ms_cubic-bezier(0.2,0.8,0.3,1)]' : ''}`}
           >

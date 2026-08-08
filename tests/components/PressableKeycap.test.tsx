@@ -130,14 +130,48 @@ describe('PressableKeycap — 누름 코어', () => {
     expect(soundMock.playKeycapSound).not.toHaveBeenCalled();
   });
 
-  it('첫 누름을 localStorage에 기록한다', () => {
+  it('첫 누름(pointerdown→pointerup)을 localStorage에 기록한다', () => {
     renderKeycap();
     fireEvent.pointerDown(keyButton());
+    fireEvent.pointerUp(keyButton());
     expect(localStorage.getItem('keycap.pressed')).toBe('1');
+  });
+
+  it('pointercancel로 끝난 누름은 기록하지 않는다 (모바일 스크롤로 유도 소진 방지)', () => {
+    renderKeycap();
+    fireEvent.pointerDown(keyButton());
+    fireEvent.pointerCancel(keyButton());
+    expect(localStorage.getItem('keycap.pressed')).toBeNull();
+    // 소리·원복은 그대로 (기록만 건너뛴다)
+    expect(soundMock.playKeycapSound).toHaveBeenCalledWith('brown', 'up');
+    expect(squashTarget().className).not.toContain('scale-y-[0.9]');
+  });
+
+  it('pointerleave·blur로 끝난 누름은 정상 up으로 기록한다', () => {
+    renderKeycap();
+    fireEvent.pointerDown(keyButton());
+    fireEvent.pointerLeave(keyButton());
+    expect(localStorage.getItem('keycap.pressed')).toBe('1');
+
+    localStorage.removeItem('keycap.pressed');
+    fireEvent.keyDown(keyButton(), { key: ' ' });
+    fireEvent.blur(keyButton());
+    expect(localStorage.getItem('keycap.pressed')).toBe('1');
+  });
+
+  it('이미지 드래그 금지: 스쿼시 래퍼가 자손 img의 -webkit-user-drag를 끈다', () => {
+    renderKeycap();
+    expect(squashTarget().className).toContain('[&_img]:[-webkit-user-drag:none]');
   });
 
   it('마운트 시 현재 축 소리를 미리 받아둔다 (warm)', () => {
     renderKeycap();
     expect(soundMock.warmKeycapSound).toHaveBeenCalledWith('brown');
+  });
+
+  it('음소거 저장 상태면 마운트 warm을 건너뛴다 (불필요한 fetch 없음)', () => {
+    localStorage.setItem('keycap.muted', '1');
+    renderKeycap();
+    expect(soundMock.warmKeycapSound).not.toHaveBeenCalled();
   });
 });

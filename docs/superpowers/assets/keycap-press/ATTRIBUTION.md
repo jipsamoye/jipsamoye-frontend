@@ -33,6 +33,8 @@
 - kbsim: `GENERIC_R2`(QWERTY 줄) 변형 선택. R0~R4는 키보드 **행(row)** 을 뜻하며 `KeySimulator.js`에서 확인됨. 윗줄이 밝고 아랫줄이 어둡다.
 - Freesound: 익명으로는 원본 다운로드 불가(API/CDN 6개 경로 전부 401/403/302 확인). `cdn.freesound.org/previews/...-hq.ogg`에서 잘라냄. **mp3 미리듣기는 19kHz 로우패스가 걸려 있어 ogg를 썼다.**
 - 전부 mono / 44100Hz / `pcm_s16le`, **피크 -3.0 dBFS로 정규화**, 리딩 무음 제거(온셋 ≤4ms), 트랜지언트 1개만 포함되도록 검증.
+- 배포본(`public/sounds/keycap/`)의 `jade-down.wav` / `jade-up.wav`: 원본 252ms → **140ms로 트림 + 끝 35ms 페이드아웃**.
+- 잘린 꼬리 구간은 최대 −59 dBFS(사실상 무음)이라 트림으로 소리 자체가 달라지지 않는다.
 
 ## 배제한 소스와 이유
 

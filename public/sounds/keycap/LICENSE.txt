@@ -29,6 +29,9 @@ SOFTWARE.
 ----
 
 jade, black (down/up 각 1개): Freesound el_boss (CC0)
-- https://freesound.org/people/el_boss/sounds/643558/
-- https://freesound.org/people/el_boss/sounds/643559/
-CC0 — 고지 의무 없음. 상세 가공 내역: 레포 docs/superpowers/assets/keycap-press/ATTRIBUTION.md
+- jade  (Kailh Box Jade)  : https://freesound.org/people/el_boss/sounds/643558/
+- black (Gateron Black)   : https://freesound.org/people/el_boss/sounds/643559/
+CC0 — 고지 의무 없음.
+
+가공: jade-down.wav / jade-up.wav 는 원본 252ms 를 140ms 로 트림 + 끝 35ms 페이드아웃
+(잘린 꼬리는 최대 -59 dBFS 무음). 상세 내역: 레포 docs/superpowers/assets/keycap-press/ATTRIBUTION.md

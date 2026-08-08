@@ -6,6 +6,7 @@ vi.mock('next/navigation', () => ({
     throw new Error('NEXT_NOT_FOUND');
   }),
 }));
+vi.mock('@/lib/keycapSound', () => ({ playKeycapSound: vi.fn(), warmKeycapSound: vi.fn() }));
 
 import FigurineSharePage, { generateMetadata } from '@/app/figurines/share/page';
 
