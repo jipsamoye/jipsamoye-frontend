@@ -23,6 +23,7 @@ vi.mock('@/components/common/DetailImage', () => ({
 }));
 vi.mock('@/components/domain/PostCard', () => ({ default: () => <div /> }));
 vi.mock('@/components/domain/CommentSection', () => ({ default: () => <div /> }));
+vi.mock('@/lib/keycapSound', () => ({ playKeycapSound: vi.fn(), warmKeycapSound: vi.fn() }));
 
 import PostDetailPage from '@/app/posts/[id]/page';
 

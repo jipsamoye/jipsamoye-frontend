@@ -206,6 +206,20 @@ textarea:focus::-webkit-scrollbar-thumb {
   50%      { transform: translateY(-3px); }
 }
 
+/* 키캡 누르기 — 자가 시연: 스스로 한 번 눌렸다 올라온다. 스쿼시와 같은 변형·곡선 */
+@keyframes keycapNudge {
+  0%   { transform: scaleY(1) scaleX(1); }
+  32%  { transform: scaleY(0.9) scaleX(1.04); }
+  100% { transform: scaleY(1) scaleX(1); }
+}
+
+/* 키캡 누르기 — 첫 누름 전까지 중앙에서 계속 퍼지는 물결 */
+@keyframes keycapRipple {
+  0%   { transform: scale(0.45); opacity: 0; }
+  22%  { opacity: 0.95; }
+  100% { transform: scale(1.9); opacity: 0; }
+}
+
 /* ==========================================================================
    AI 키캡 피규어 생성 대기 — 스캔 현상 애니메이션 (C안)
    서버가 진행률을 주지 않으므로 퍼센트는 쓰지 않는다. 스캔 빔이 사진을 훑고

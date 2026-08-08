@@ -1,0 +1,278 @@
+<h2>모바일 — 칩 줄바꿈 + "누르게 만드는" 방법 3안</h2>
+<p class="subtitle">
+  칩은 가로 스크롤을 없애고 <strong>두 줄로 접어서 7종이 한눈에</strong> 들어옵니다(375px 실폭 기준).<br>
+  유도 방식만 다른 세 개를 나란히 놨습니다. <strong>각 화면을 새로 고치듯 "다시 보기" 버튼</strong>으로 처음 등장 순간을 반복 재생할 수 있습니다.
+</p>
+
+<div class="mk-phones">
+
+  <div class="mk-wrap">
+    <div class="mk-tag">A. 키캡이 스스로 한 번 눌린다</div>
+    <div class="mk-phone" data-variant="a">
+      <div class="mk-phone-bar">jipsamoye.com</div>
+      <div class="mk-phone-body">
+        <h1 class="mk-h1">AI 키캡 피규어</h1>
+        <p class="mk-sub">반려동물 사진을 올리면 키캡 위 미니 피규어로 만들어 드려요.</p>
+        <div class="mk-keywrap">
+          <div class="kc-frame" data-key><img src="./keycap.png" alt="" draggable="false"></div>
+          <div class="mk-hint" data-hint><span class="mk-badge">눌러보기</span></div>
+        </div>
+        <div class="mk-switchbar">
+          <button class="mk-mute" data-mute>🔊</button>
+          <div class="mk-chips" data-chips></div>
+        </div>
+        <button class="mk-btn-amber">나도 만들어보기</button>
+      </div>
+    </div>
+    <button class="mk-replay" data-replay>↻ 처음부터 다시 보기</button>
+    <p class="mk-desc">등장 0.9초 뒤 키캡이 <b>스스로 톡 눌렸다 올라옵니다</b>(소리는 안 남). 4초 뒤 한 번 더 하고 멈춥니다.</p>
+  </div>
+
+  <div class="mk-wrap">
+    <div class="mk-tag">B. 물결이 계속 퍼진다</div>
+    <div class="mk-phone" data-variant="b">
+      <div class="mk-phone-bar">jipsamoye.com</div>
+      <div class="mk-phone-body">
+        <h1 class="mk-h1">AI 키캡 피규어</h1>
+        <p class="mk-sub">반려동물 사진을 올리면 키캡 위 미니 피규어로 만들어 드려요.</p>
+        <div class="mk-keywrap">
+          <div class="kc-frame" data-key>
+            <img src="./keycap.png" alt="" draggable="false">
+            <span class="mk-ripple" data-ripple></span>
+          </div>
+          <div class="mk-hint" data-hint><span class="mk-badge">눌러보기</span></div>
+        </div>
+        <div class="mk-switchbar">
+          <button class="mk-mute" data-mute>🔊</button>
+          <div class="mk-chips" data-chips></div>
+        </div>
+        <button class="mk-btn-amber">나도 만들어보기</button>
+      </div>
+    </div>
+    <button class="mk-replay" data-replay>↻ 처음부터 다시 보기</button>
+    <p class="mk-desc">키캡 가운데서 <b>물결이 계속 퍼집니다</b>. 누를 때까지 멈추지 않아요.</p>
+  </div>
+
+  <div class="mk-wrap">
+    <div class="mk-tag">C. 둘 다</div>
+    <div class="mk-phone" data-variant="c">
+      <div class="mk-phone-bar">jipsamoye.com</div>
+      <div class="mk-phone-body">
+        <h1 class="mk-h1">AI 키캡 피규어</h1>
+        <p class="mk-sub">반려동물 사진을 올리면 키캡 위 미니 피규어로 만들어 드려요.</p>
+        <div class="mk-keywrap">
+          <div class="kc-frame" data-key>
+            <img src="./keycap.png" alt="" draggable="false">
+            <span class="mk-ripple" data-ripple></span>
+          </div>
+          <div class="mk-hint" data-hint><span class="mk-badge">눌러보기</span></div>
+        </div>
+        <div class="mk-switchbar">
+          <button class="mk-mute" data-mute>🔊</button>
+          <div class="mk-chips" data-chips></div>
+        </div>
+        <button class="mk-btn-amber">나도 만들어보기</button>
+      </div>
+    </div>
+    <button class="mk-replay" data-replay>↻ 처음부터 다시 보기</button>
+    <p class="mk-desc">자가 시연 + 물결을 같이. 확실하지만 <b>과할 수 있습니다</b>.</p>
+  </div>
+
+</div>
+
+<div class="kc-note">
+  <b>셋 다 공통</b> — 한 번이라도 누르면 힌트·물결·자가 시연이 <b>영구히 사라집니다</b>. 눌러본 사람에게 계속 "누르세요"라고 하는 건 소음이니까요.
+  실제로는 <code>localStorage</code>에 기록해서 <b>다음 방문에도 안 뜨게</b> 할 생각입니다.<br>
+  <b>칩 줄바꿈</b> — 7개가 두 줄(4+3)로 들어갑니다. 세로로 44px 더 먹지만 스크롤이 사라졌습니다.
+</div>
+
+<style>
+.mk-phones { display: flex; flex-wrap: wrap; gap: 24px; align-items: flex-start; }
+.mk-wrap { flex: 0 0 auto; width: 375px; }
+.mk-tag { font-size: 14px; font-weight: 600; margin-bottom: 8px; }
+.mk-desc { font-size: 12.5px; line-height: 1.7; opacity: .8; margin: 8px 0 0; }
+.mk-replay { margin-top: 10px; padding: 7px 14px; border-radius: 9px; cursor: pointer;
+  border: 1px solid rgba(128,128,128,.35); background: transparent; color: inherit; font: inherit; font-size: 12.5px; }
+
+.mk-phone { width: 375px; background: #fff; color: #111827; border: 1px solid #e5e7eb; border-radius: 20px; overflow: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', sans-serif; }
+.mk-phone-bar { height: 38px; display: flex; align-items: center; justify-content: center; font-size: 12px;
+  color: #6b7280; background: #f3f4f6; border-bottom: 1px solid #e5e7eb; }
+.mk-phone-body { padding: 22px 16px 26px; }
+.mk-h1 { font-size: 21px; font-weight: 700; margin: 0; }
+.mk-sub { font-size: 13px; color: #4b5563; margin: 8px 0 0; }
+
+.mk-keywrap { position: relative; margin-top: 20px; }
+.kc-frame { position: relative; width: 100%; aspect-ratio: 1/1; border-radius: 16px; overflow: hidden;
+  cursor: pointer; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+.kc-frame img { display: block; width: 100%; height: 100%; object-fit: cover; user-select: none; -webkit-user-drag: none;
+  transform-origin: 50% 100%; transition: transform 110ms cubic-bezier(.2,.8,.3,1); }
+.kc-frame.is-down img { transform: scaleY(.9) scaleX(1.04); }
+
+/* A · C — 스스로 한 번 눌렸다 올라오는 시연 */
+@keyframes mkNudge {
+  0%   { transform: scaleY(1)    scaleX(1); }
+  32%  { transform: scaleY(.9)   scaleX(1.04); }
+  100% { transform: scaleY(1)    scaleX(1); }
+}
+.kc-frame.nudge img { animation: mkNudge 380ms cubic-bezier(.2,.8,.3,1); }
+
+/* B · C — 퍼지는 물결 */
+.mk-ripple { position: absolute; left: 50%; top: 50%; width: 96px; height: 96px; margin: -48px 0 0 -48px;
+  border-radius: 50%; border: 3px solid rgba(255,255,255,.95); pointer-events: none;
+  box-shadow: 0 0 0 1px rgba(0,0,0,.18), inset 0 0 0 1px rgba(0,0,0,.18);
+  animation: mkRipple 1.9s ease-out infinite; }
+@keyframes mkRipple {
+  0%   { transform: scale(.45); opacity: 0; }
+  22%  { opacity: .95; }
+  100% { transform: scale(1.9); opacity: 0; }
+}
+
+/* 힌트 = 사이드바 "AI 키캡" 뱃지(AiKeycapBadge) 그대로.
+   바깥 div가 가운데 정렬을 맡고, 안쪽 span이 둥둥 뜬다 —
+   한 요소에서 translateX 정렬과 translateY 애니메이션을 같이 하면 서로 덮어쓴다. */
+.mk-hint { position: absolute; left: 50%; bottom: 12px; transform: translateX(-50%);
+  pointer-events: none; transition: opacity 220ms; }
+.mk-badge { display: inline-flex; align-items: center; padding: 6px 16px; border-radius: 9999px;
+  background: linear-gradient(to right, #f59e0b, #ff5c8a); color: #fff;
+  font-size: 14px; font-weight: 800; white-space: nowrap;
+  box-shadow: 0 3px 10px rgba(255, 92, 138, .45);
+  animation: badgeFloat 2s ease-in-out infinite; }
+@keyframes badgeFloat {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-3px); }
+}
+.gone { opacity: 0 !important; animation: none !important; }
+
+.mk-switchbar { display: flex; align-items: flex-start; gap: 8px; margin-top: 14px; }
+.mk-mute { flex: 0 0 auto; width: 36px; height: 36px; border-radius: 10px; border: 1px solid #d1d5db;
+  background: #fff; cursor: pointer; font-size: 15px; line-height: 1; }
+.mk-mute.off { opacity: .45; }
+/* 가로 스크롤 없이 줄바꿈 — 7개가 두 줄로 다 보인다 */
+.mk-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.mk-chip { flex: 0 0 auto; display: flex; align-items: center; gap: 5px; height: 36px; padding: 0 10px;
+  border-radius: 10px; border: 1px solid #d1d5db; background: #fff; color: #374151;
+  font-size: 12.5px; cursor: pointer; white-space: nowrap; font-family: inherit; }
+.mk-chip.on { border-color: #f59e0b; background: #fffbeb; color: #b45309; font-weight: 600; }
+.mk-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+.mk-btn-amber { display: block; width: 100%; margin-top: 14px; padding: 12px 24px; border: 0; border-radius: 12px;
+  background: #f59e0b; color: #fff; font-size: 15px; font-weight: 500; cursor: pointer; font-family: inherit; }
+
+.kc-note { margin-top: 26px; padding: 14px 16px; border-radius: 10px; border: 1px solid rgba(128,128,128,.25); font-size: 13px; line-height: 1.8; }
+code { padding: 2px 6px; border-radius: 4px; background: rgba(128,128,128,.18); font-size: 12px; }
+</style>
+
+<script>
+(function () {
+  var LIST = [
+    { ko: '갈축',   c: '#a16207', down: 'brown-down', up: 'brown-up' },
+    { ko: '청축',   c: '#3b82f6', down: 'blue-down',  up: 'blue-up' },
+    { ko: '적축',   c: '#ef4444', down: 'red-down',  up: 'red-up' },
+    { ko: '네이비', c: '#1e40af', down: 'navy-down', up: 'navy-up' },
+    { ko: '크림',   c: '#eab308', down: 'cream-down',  up: 'cream-up' },
+    { ko: '제이드', c: '#10b981', down: 'jade-down',  up: 'jade-up' },
+    { ko: '흑축',   c: '#1f2937', down: 'black-down', up: 'black-up' }
+  ];
+
+  var ac = null, buffers = {}, idx = 0, muted = false;
+
+  function ctx() {
+    if (!ac) ac = new (window.AudioContext || window.webkitAudioContext)();
+    if (ac.state === 'suspended') ac.resume();
+    return ac;
+  }
+  function load(n) {
+    if (buffers[n] !== undefined) return Promise.resolve(buffers[n]);
+    return fetch('../sounds/' + n + '.wav')
+      .then(function (r) { return r.ok ? r.arrayBuffer() : Promise.reject(); })
+      .then(function (b) { return ctx().decodeAudioData(b); })
+      .then(function (b) { buffers[n] = b; return b; })
+      .catch(function () { buffers[n] = null; return null; });
+  }
+  function play(dir) {
+    if (muted) return;
+    load(LIST[idx][dir]).then(function (b) {
+      if (!b) return;
+      var a = ctx(), s = a.createBufferSource();
+      s.buffer = b; s.connect(a.destination); s.start();
+    });
+  }
+
+  function renderChips() {
+    document.querySelectorAll('[data-chips]').forEach(function (host) {
+      host.innerHTML = '';
+      LIST.forEach(function (sw, i) {
+        var b = document.createElement('button');
+        b.className = 'mk-chip' + (i === idx ? ' on' : '');
+        b.innerHTML = '<span class="mk-dot" style="background:' + sw.c + '"></span>' + sw.ko;
+        b.addEventListener('click', function () {
+          idx = i; renderChips();
+          play('down'); setTimeout(function () { play('up'); }, 130);
+        });
+        host.appendChild(b);
+      });
+    });
+  }
+
+  document.querySelectorAll('[data-mute]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      muted = !muted;
+      document.querySelectorAll('[data-mute]').forEach(function (b) {
+        b.textContent = muted ? '🔇' : '🔊';
+        b.classList.toggle('off', muted);
+      });
+    });
+  });
+
+  // 폰 하나 = 유도 로직 하나. 누르면 그 폰의 유도가 전부 꺼진다.
+  document.querySelectorAll('[data-variant]').forEach(function (phone) {
+    var variant = phone.dataset.variant;
+    var key = phone.querySelector('[data-key]');
+    var hint = phone.querySelector('[data-hint]');
+    var ripple = phone.querySelector('[data-ripple]');
+    var timers = [];
+
+    function stopNudging() {
+      timers.forEach(clearTimeout); timers = [];
+      hint.classList.add('gone');
+      if (ripple) ripple.classList.add('gone');
+      key.classList.remove('nudge');
+    }
+
+    function startNudging() {
+      timers.forEach(clearTimeout); timers = [];
+      hint.classList.remove('gone');
+      if (ripple) ripple.classList.remove('gone');
+      if (variant === 'a' || variant === 'c') {
+        // 애니메이션을 다시 태우려면 클래스를 한 프레임 뗐다 붙여야 한다
+        [900, 4200].forEach(function (t) {
+          timers.push(setTimeout(function () {
+            key.classList.remove('nudge');
+            void key.offsetWidth;
+            key.classList.add('nudge');
+          }, t));
+        });
+      }
+    }
+
+    key.addEventListener('pointerdown', function () {
+      key.classList.remove('nudge');
+      key.classList.add('is-down'); play('down');
+      if (navigator.vibrate) navigator.vibrate(12);
+      stopNudging();
+    });
+    ['pointerup', 'pointerleave', 'pointercancel'].forEach(function (ev) {
+      key.addEventListener(ev, function () {
+        if (!key.classList.contains('is-down')) return;
+        key.classList.remove('is-down'); play('up');
+      });
+    });
+
+    phone.parentElement.querySelector('[data-replay]').addEventListener('click', startNudging);
+    startNudging();
+  });
+
+  renderChips();
+})();
+</script>

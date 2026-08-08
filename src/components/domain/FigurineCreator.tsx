@@ -11,6 +11,7 @@ import { openLoginModal } from '@/lib/loginModal';
 import { showToast } from '@/components/common/Toast';
 import { preloadImage } from '@/lib/preloadImage';
 import FigurineLoading from '@/components/domain/FigurineLoading';
+import PressableKeycap from '@/components/domain/PressableKeycap';
 import { ALLOWED_IMAGE_EXTS, POST_CONFIG } from '@/lib/constants';
 import type { ApiResponse } from '@/types/api';
 
@@ -226,13 +227,16 @@ export default function FigurineCreator() {
 
       {(phase === 'posting' || phase === 'posted' || (phase === 'completed' && revealReady)) && job?.resultImageUrl && (
         <section className="mt-6 animate-[fadeIn_0.5s_ease-out]">
-          {/* eslint-disable-next-line @next/next/no-img-element -- 방금 생성된 결과라 Lambda 썸네일이 없을 수 있어 원본을 직접 표시 */}
-          <img
-            src={job.resultImageUrl}
-            alt="완성된 AI 키캡 피규어"
-            decoding="async"
-            className="w-full rounded-2xl"
-          />
+          <PressableKeycap nudge>
+            {/* eslint-disable-next-line @next/next/no-img-element -- 방금 생성된 결과라 Lambda 썸네일이 없을 수 있어 원본을 직접 표시 */}
+            <img
+              src={job.resultImageUrl}
+              alt="완성된 AI 키캡 피규어"
+              decoding="async"
+              className="w-full rounded-2xl"
+            />
+          </PressableKeycap>
+          {/* 이하 버튼 3개는 그대로 — 칩바는 PressableKeycap이 이미지 바로 아래에 렌더한다 */}
           <button
             type="button"
             className={`${PRIMARY_BUTTON} mt-4`}

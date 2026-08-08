@@ -1,0 +1,223 @@
+<h2>프로덕션 적용 목업</h2>
+<p class="subtitle">
+  실제 디자인 토큰 그대로입니다 — <code>bg-amber-500</code> 주 버튼, <code>rounded-xl</code>, <code>max-w-xl</code> 중앙 정렬, 기존 헤더·사이드바.<br>
+  <strong>목업 안의 키캡도 실제로 눌립니다.</strong> 소리·스쿼시 전부 동작하니 눌러보세요.
+</p>
+
+<div class="label">A. 결과 화면 — <code>/figurines/new</code> · 데스크톱</div>
+<div class="mk-scroll">
+<div class="mk-app">
+  <div class="mk-header">
+    <div class="mk-logo">집사모여</div>
+    <div class="mk-hdr-right">
+      <button class="mk-btn-ghost">AI 키캡 🧸</button>
+      <button class="mk-btn-amber sm">자랑하기</button>
+      <span class="mk-icon">🔍</span><span class="mk-icon">🔔</span><span class="mk-avatar"></span>
+    </div>
+  </div>
+  <div class="mk-body">
+    <div class="mk-side">
+      <div class="mk-nav">🏠 홈</div><div class="mk-nav">🏆 랭킹</div><div class="mk-nav">📋 자유게시판</div>
+      <div class="mk-nav">💬 오픈채팅</div><div class="mk-nav">✈️ DM</div>
+    </div>
+    <div class="mk-main">
+      <div class="mk-col">
+        <h1 class="mk-h1">AI 키캡 피규어</h1>
+        <p class="mk-sub">반려동물 사진을 올리면 <b>키캡 위 미니 피규어</b>로 만들어 드려요!</p>
+
+        <div class="mk-keywrap">
+          <div class="kc-frame" data-key><img src="./keycap.png" alt="완성된 AI 키캡 피규어" draggable="false"></div>
+          <div class="mk-hint" data-hint>👆 눌러보세요</div>
+        </div>
+
+        <div class="mk-switchbar">
+          <button class="mk-mute" data-mute title="소리 끄기">🔊</button>
+          <div class="mk-chips" data-chips></div>
+        </div>
+
+        <button class="mk-btn-amber">자랑 피드에 게시하기</button>
+        <button class="mk-btn-outline">링크로 공유하기</button>
+        <button class="mk-btn-outline">다른 사진으로 다시 만들기</button>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<div class="label" style="margin-top:34px">B. 공유 페이지 — <code>/figurines/share</code> · 모바일 (비로그인 진입)</div>
+<div class="mk-phones">
+  <div class="mk-phone">
+    <div class="mk-phone-bar">jipsamoye.com</div>
+    <div class="mk-phone-body">
+      <h1 class="mk-h1">AI 키캡 피규어</h1>
+      <p class="mk-sub">반려동물 사진을 올리면 키캡 위 미니 피규어로 만들어 드려요.</p>
+      <div class="mk-keywrap">
+        <div class="kc-frame wide" data-key><img src="./keycap.png" alt="AI 키캡 피규어" draggable="false"></div>
+        <div class="mk-hint" data-hint>👆 눌러보세요</div>
+      </div>
+      <div class="mk-switchbar">
+        <button class="mk-mute" data-mute title="소리 끄기">🔊</button>
+        <div class="mk-chips" data-chips></div>
+      </div>
+      <button class="mk-btn-amber">나도 만들어보기</button>
+    </div>
+  </div>
+
+  <div class="mk-notes">
+    <h3>목업에서 확인해주실 것</h3>
+    <ol>
+      <li><b>축 선택 줄이 CTA를 밀어내는 정도.</b> 이 화면의 주인공은 "게시하기"인데 칩 줄이 36px 끼어듭니다. 모바일에서 버튼이 접히는지 봐주세요.</li>
+      <li><b>칩은 가로 스크롤입니다.</b> 7개가 모바일 폭에 안 들어가서 오른쪽이 잘립니다 — 잘린 게 보여야 더 있다는 걸 아니까 일부러 남겼습니다.</li>
+      <li><b>"눌러보세요" 힌트.</b> 한 번 누르면 사라지고 다시 안 뜹니다. 없으면 아무도 안 누를 거라 넣었는데, 지저분하면 뺍니다.</li>
+      <li><b>음소거 버튼이 칩 줄 맨 앞</b>에 고정입니다. 소리가 기본 켜짐이라 끄는 길이 항상 보여야 합니다.</li>
+    </ol>
+  </div>
+</div>
+
+<style>
+.mk-scroll { overflow-x: auto; border-radius: 14px; }
+.mk-app { width: 980px; background: #fff; color: #111827; border: 1px solid #e5e7eb; border-radius: 14px; overflow: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; }
+.mk-header { display: flex; align-items: center; justify-content: space-between; height: 60px; padding: 0 20px; border-bottom: 1px solid #e5e7eb; }
+.mk-logo { font-size: 19px; font-weight: 700; }
+.mk-hdr-right { display: flex; align-items: center; gap: 10px; }
+.mk-icon { font-size: 15px; opacity: .6; }
+.mk-avatar { width: 28px; height: 28px; border-radius: 50%; background: #e5e7eb; }
+.mk-body { display: flex; min-height: 620px; }
+.mk-side { width: 168px; padding: 16px 10px; border-right: 1px solid #e5e7eb; flex: 0 0 auto; }
+.mk-nav { padding: 10px 12px; font-size: 14px; color: #374151; border-radius: 8px; }
+.mk-main { flex: 1; padding: 32px 24px 40px; }
+.mk-col { max-width: 576px; margin: 0 auto; }
+.mk-h1 { font-size: 22px; font-weight: 700; margin: 0; }
+.mk-sub { font-size: 13px; color: #4b5563; margin: 8px 0 0; }
+.mk-sub b { color: #d97706; }
+
+.mk-keywrap { position: relative; margin-top: 22px; }
+.mk-hint { position: absolute; left: 50%; bottom: 14px; transform: translateX(-50%);
+  padding: 7px 14px; border-radius: 999px; background: rgba(17,24,39,.78); color: #fff; font-size: 12.5px;
+  pointer-events: none; transition: opacity 220ms; }
+.mk-hint.gone { opacity: 0; }
+
+/* 스쿼시 — 액자 고정, 내용만 바닥 기준 압축 */
+.kc-frame { position: relative; width: 100%; aspect-ratio: 1/1; border-radius: 16px; overflow: hidden;
+  cursor: pointer; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+.kc-frame.wide { aspect-ratio: 1/1; }
+.kc-frame img { display: block; width: 100%; height: 100%; object-fit: cover; user-select: none; -webkit-user-drag: none;
+  transform-origin: 50% 100%; transition: transform 110ms cubic-bezier(.2,.8,.3,1); }
+.kc-frame.is-down img { transform: scaleY(.9) scaleX(1.04); }
+
+.mk-switchbar { display: flex; align-items: center; gap: 8px; margin-top: 14px; }
+.mk-mute { flex: 0 0 auto; width: 36px; height: 36px; border-radius: 10px; border: 1px solid #d1d5db;
+  background: #fff; cursor: pointer; font-size: 15px; line-height: 1; }
+.mk-mute.off { opacity: .45; }
+.mk-chips { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 2px; scrollbar-width: none; }
+.mk-chips::-webkit-scrollbar { display: none; }
+.mk-chip { flex: 0 0 auto; display: flex; align-items: center; gap: 6px; height: 36px; padding: 0 12px;
+  border-radius: 10px; border: 1px solid #d1d5db; background: #fff; color: #374151;
+  font-size: 13px; cursor: pointer; white-space: nowrap; font-family: inherit; }
+.mk-chip.on { border-color: #f59e0b; background: #fffbeb; color: #b45309; font-weight: 600; }
+.mk-dot { width: 9px; height: 9px; border-radius: 50%; }
+
+.mk-btn-amber { display: block; width: 100%; margin-top: 14px; padding: 12px 24px; border: 0; border-radius: 12px;
+  background: #f59e0b; color: #fff; font-size: 15px; font-weight: 500; cursor: pointer; font-family: inherit; }
+.mk-btn-amber.sm { width: auto; margin: 0; padding: 7px 14px; font-size: 13px; border-radius: 9px; }
+.mk-btn-outline { display: block; width: 100%; margin-top: 8px; padding: 12px 24px; border: 1px solid #d1d5db;
+  border-radius: 12px; background: #fff; color: #374151; font-size: 15px; font-weight: 500; cursor: pointer; font-family: inherit; }
+.mk-btn-ghost { padding: 7px 12px; border: 1px solid #d1d5db; border-radius: 9px; background: #fff; color: #374151;
+  font-size: 13px; cursor: pointer; font-family: inherit; }
+
+.mk-phones { display: flex; flex-wrap: wrap; gap: 26px; align-items: flex-start; }
+.mk-phone { flex: 0 0 auto; width: 375px; background: #fff; color: #111827; border: 1px solid #e5e7eb; border-radius: 20px;
+  overflow: hidden; font-family: -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', sans-serif; }
+.mk-phone-bar { height: 38px; display: flex; align-items: center; justify-content: center; font-size: 12px;
+  color: #6b7280; background: #f3f4f6; border-bottom: 1px solid #e5e7eb; }
+.mk-phone-body { padding: 22px 18px 26px; }
+.mk-notes { flex: 1 1 300px; min-width: 280px; }
+.mk-notes h3 { margin: 0 0 10px; font-size: 15px; }
+.mk-notes ol { margin: 0; padding-left: 20px; }
+.mk-notes li { font-size: 13px; line-height: 1.75; margin-bottom: 10px; opacity: .85; }
+code { padding: 2px 6px; border-radius: 4px; background: rgba(128,128,128,.18); font-size: 12px; }
+</style>
+
+<script>
+(function () {
+  var LIST = [
+    { ko: '갈축',   c: '#a16207', down: 'brown-down', up: 'brown-up' },
+    { ko: '청축',   c: '#3b82f6', down: 'blue-down',  up: 'blue-up' },
+    { ko: '적축',   c: '#ef4444', down: 'red-down',  up: 'red-up' },
+    { ko: '네이비', c: '#1e40af', down: 'navy-down', up: 'navy-up' },
+    { ko: '크림',   c: '#eab308', down: 'cream-down',  up: 'cream-up' },
+    { ko: '제이드', c: '#10b981', down: 'jade-down',  up: 'jade-up' },
+    { ko: '흑축',   c: '#1f2937', down: 'black-down', up: 'black-up' }
+  ];
+
+  // 두 목업이 상태를 공유한다 — 실제로도 localStorage 하나를 같이 쓴다
+  var ac = null, buffers = {}, idx = 0, muted = false;
+
+  function ctx() {
+    if (!ac) ac = new (window.AudioContext || window.webkitAudioContext)();
+    if (ac.state === 'suspended') ac.resume();
+    return ac;
+  }
+  function load(n) {
+    if (buffers[n] !== undefined) return Promise.resolve(buffers[n]);
+    return fetch('../sounds/' + n + '.wav')
+      .then(function (r) { return r.ok ? r.arrayBuffer() : Promise.reject(); })
+      .then(function (b) { return ctx().decodeAudioData(b); })
+      .then(function (b) { buffers[n] = b; return b; })
+      .catch(function () { buffers[n] = null; return null; });
+  }
+  function play(dir) {
+    if (muted) return;
+    load(LIST[idx][dir]).then(function (b) {
+      if (!b) return;
+      var a = ctx(), s = a.createBufferSource();
+      s.buffer = b; s.connect(a.destination); s.start();
+    });
+  }
+
+  function renderChips() {
+    document.querySelectorAll('[data-chips]').forEach(function (host) {
+      host.innerHTML = '';
+      LIST.forEach(function (sw, i) {
+        var b = document.createElement('button');
+        b.className = 'mk-chip' + (i === idx ? ' on' : '');
+        b.innerHTML = '<span class="mk-dot" style="background:' + sw.c + '"></span>' + sw.ko;
+        b.addEventListener('click', function () {
+          idx = i; renderChips();
+          play('down'); setTimeout(function () { play('up'); }, 130);
+        });
+        host.appendChild(b);
+      });
+    });
+  }
+
+  document.querySelectorAll('[data-mute]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      muted = !muted;
+      document.querySelectorAll('[data-mute]').forEach(function (b) {
+        b.textContent = muted ? '🔇' : '🔊';
+        b.classList.toggle('off', muted);
+        b.title = muted ? '소리 켜기' : '소리 끄기';
+      });
+    });
+  });
+
+  document.querySelectorAll('[data-key]').forEach(function (el) {
+    el.addEventListener('pointerdown', function () {
+      el.classList.add('is-down'); play('down');
+      if (navigator.vibrate) navigator.vibrate(12);
+      // 힌트는 처음 한 번 누르면 영구히 사라진다
+      document.querySelectorAll('[data-hint]').forEach(function (h) { h.classList.add('gone'); });
+    });
+    ['pointerup', 'pointerleave', 'pointercancel'].forEach(function (ev) {
+      el.addEventListener(ev, function () {
+        if (!el.classList.contains('is-down')) return;
+        el.classList.remove('is-down'); play('up');
+      });
+    });
+  });
+
+  renderChips();
+})();
+</script>

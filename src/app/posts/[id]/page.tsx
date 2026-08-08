@@ -8,8 +8,8 @@ import { useAuthContext } from '@/components/providers/AuthProvider';
 import { useOpenDm } from '@/hooks/useOpenDm';
 import Avatar from '@/components/common/Avatar';
 import DetailImage from '@/components/common/DetailImage';
-import AiKeycapBadge from '@/components/common/AiKeycapBadge';
 import { isAiKeycapPost } from '@/lib/aiPost';
+import PressableKeycap from '@/components/domain/PressableKeycap';
 import PostCard from '@/components/domain/PostCard';
 import CommentSection from '@/components/domain/CommentSection';
 import PostActions from '@/components/domain/PostActions';
@@ -180,18 +180,28 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
         </div>
       </div>
 
-      {/* 이미지 (세로 나열) */}
+      {/* 이미지 (세로 나열) — AI 키캡 글의 첫 이미지만 눌린다. 배지는 스쿼시와 겉돌아 상세에선 없음 (식별은 칩바·제목) */}
       <div className="flex flex-col gap-2 mb-6">
         {post.imageUrls.map((url, i) => (
           <div key={i} className="relative">
-            <DetailImage
-              src={url}
-              alt={`${post.title} ${i + 1}`}
-              loading={i === 0 ? 'eager' : 'lazy'}
-              className="w-full rounded-2xl object-cover"
-            />
-            {i === 0 && isAiKeycapPost(post) && (
-              <AiKeycapBadge className="absolute top-4 left-4" />
+            {i === 0 && isAiKeycapPost(post) ? (
+              /* 결과·공유 화면과 같은 폭으로 제한 — 넓은 상세 컬럼에서 이미지가 900px로 커지면
+                 칩바·음소거가 폴드 아래로 밀려 "음소거 상시 가시" 원칙이 깨진다 */
+              <PressableKeycap className="max-w-xl mx-auto">
+                <DetailImage
+                  src={url}
+                  alt={`${post.title} ${i + 1}`}
+                  loading="eager"
+                  className="w-full rounded-2xl object-cover"
+                />
+              </PressableKeycap>
+            ) : (
+              <DetailImage
+                src={url}
+                alt={`${post.title} ${i + 1}`}
+                loading={i === 0 ? 'eager' : 'lazy'}
+                className="w-full rounded-2xl object-cover"
+              />
             )}
           </div>
         ))}

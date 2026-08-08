@@ -27,6 +27,7 @@ vi.mock('@/lib/uploadImage', () => uploadMock);
 vi.mock('@/components/common/Toast', () => ({ showToast: toastMock.showToast }));
 vi.mock('@/lib/preloadImage', () => ({ preloadImage: preloadMock.preloadImage }));
 vi.mock('@/lib/loginModal', () => ({ openLoginModal: loginModalMock.openLoginModal }));
+vi.mock('@/lib/keycapSound', () => ({ playKeycapSound: vi.fn(), warmKeycapSound: vi.fn() }));
 
 import FigurineCreator from '@/components/domain/FigurineCreator';
 
