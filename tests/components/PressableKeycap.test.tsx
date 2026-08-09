@@ -233,6 +233,28 @@ describe('PressableKeycap — 누름 코어', () => {
     expect(squashTarget().className).toContain('keycapRelease_150ms');
   });
 
+  it('중단된 릴리즈 뒤의 pointercancel은 릴리즈를 되살리지 않는다 (스크롤 중 튀어오름 방지)', () => {
+    renderKeycap();
+    fireEvent.pointerDown(keyButton());
+    fireEvent.pointerUp(keyButton());
+    expect(squashTarget().className).toContain('keycapRelease_150ms');
+
+    // 재생 중 다시 누르면 클래스가 빠지며 브라우저는 animationcancel만 쏜다 —
+    // animationend가 영영 안 오므로 "재생 중" 상태를 여기서 꺼야 한다
+    fireEvent.pointerDown(keyButton());
+    fireEvent.pointerCancel(keyButton());
+    expect(squashTarget().className).not.toContain('keycapRelease');
+  });
+
+  it('중단된 릴리즈 뒤의 정상 up은 다음 이름으로 재생된다 (위 케이스의 대조군)', () => {
+    renderKeycap();
+    fireEvent.pointerDown(keyButton());
+    fireEvent.pointerUp(keyButton());
+    fireEvent.pointerDown(keyButton());
+    fireEvent.pointerUp(keyButton());
+    expect(squashTarget().className).toContain('keycapReleaseAlt_150ms');
+  });
+
   it('reduced-motion: 릴리즈 클래스가 붙지 않고 소리는 그대로 난다', () => {
     window.matchMedia = vi.fn().mockImplementation((query: string) => ({
       matches: query.includes('prefers-reduced-motion'),

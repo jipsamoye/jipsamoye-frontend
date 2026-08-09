@@ -74,6 +74,11 @@ export default function PressableKeycap({ children, nudge = false, className = '
     // 화면상 유도 3종은 누르는 즉시 사라진다 (영구 기록은 취소되지 않은 up에서)
     setNudgeActive(false);
     setDemoPressing(false);
+    // 재생 중이던 릴리즈는 클래스가 빠지며 중단된다 — 브라우저는 animationcancel만 쏘고
+    // animationend는 영영 오지 않으므로 여기서 꺼야 한다. 안 끄면 이 누름이 pointercancel로
+    // 끝났을 때 !isDown 조건이 되살아나 릴리즈가 재부착된다(스크롤 중 키캡이 튀어오름).
+    // tick은 건드리지 않는다 — 홀짝 교대가 깨진다.
+    setReleasePlaying(false);
   };
 
   /**
