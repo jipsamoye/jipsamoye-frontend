@@ -250,7 +250,6 @@ export default function CommentThread<TComment extends RenderableComment>({
       <div className="flex flex-col mt-4 mb-12">
         {comments.length === 0 && !loading && (
           <div className="flex flex-col items-center justify-center py-10 text-gray-300">
-            <span className="text-3xl mb-2">🐾</span>
             <p className="text-sm text-center">
               아직 댓글이 없어요.<br />첫 댓글을 남겨보세요!
             </p>

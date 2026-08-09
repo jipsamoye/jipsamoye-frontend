@@ -92,8 +92,9 @@ describe('CommentSection', () => {
 
   it('댓글이 없고 로딩 중이 아닐 때 빈 상태 문구가 표시된다', () => {
     setupHook({ comments: [] });
-    const { getByText } = render(<CommentSection postId="42" user={null} />);
+    const { getByText, container } = render(<CommentSection postId="42" user={null} />);
     expect(getByText(/아직 댓글이 없어요/)).toBeInTheDocument();
+    expect(container.textContent).not.toContain('🐾');
   });
 
   it('댓글이 있을 때 빈 상태 문구가 표시되지 않는다', () => {
