@@ -213,6 +213,19 @@ textarea:focus::-webkit-scrollbar-thumb {
   100% { transform: scaleY(1) scaleX(1); }
 }
 
+/* 키캡 누르기 — 뗄 때 재생하는 릴리즈. 탭처럼 짧은 누름에서는 down/up 사이에 렌더
+   프레임이 없어 트랜지션이 아예 생성되지 않으므로, 키프레임으로 "눌림→복귀"를 보장한다.
+   내용이 같은 키프레임이 두 개인 이유: 연타 시 animation-name을 교대해 확실히 재시작. */
+@keyframes keycapRelease {
+  0%   { transform: scaleY(0.9) scaleX(1.04); }
+  100% { transform: scaleY(1) scaleX(1); }
+}
+
+@keyframes keycapReleaseAlt {
+  0%   { transform: scaleY(0.9) scaleX(1.04); }
+  100% { transform: scaleY(1) scaleX(1); }
+}
+
 /* 키캡 누르기 — 첫 누름 전까지 중앙에서 계속 퍼지는 물결 */
 @keyframes keycapRipple {
   0%   { transform: scale(0.45); opacity: 0; }

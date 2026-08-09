@@ -21,4 +21,23 @@ describe('키캡 누르기 키프레임', () => {
     expect(block).toContain('scale(1.9)');
     expect(block).toContain('0.95');
   });
+
+  // 이름 교대 재시작용 쌍둥이 키프레임 — 내용이 갈라지면 연타 시 두 번째 릴리즈만 모양이 달라진다
+  const keyframeBody = (name: string) => {
+    const m = css.match(new RegExp(`@keyframes ${name}\\s*\\{([\\s\\S]*?)\\n\\}`));
+    return (m?.[1] ?? '').trim();
+  };
+
+  it('keycapRelease — 0%가 스쿼시 값(scaleY .9, scaleX 1.04), 100%가 원위치', () => {
+    const body = keyframeBody('keycapRelease');
+    expect(body).toContain('scaleY(0.9)');
+    expect(body).toContain('scaleX(1.04)');
+    expect(body).toContain('scaleY(1)');
+  });
+
+  it('keycapReleaseAlt — keycapRelease와 내용이 동일하다 (연타 교대 재시작용)', () => {
+    const alt = keyframeBody('keycapReleaseAlt');
+    expect(alt).not.toBe('');
+    expect(alt).toBe(keyframeBody('keycapRelease'));
+  });
 });
