@@ -174,4 +174,76 @@ describe('PressableKeycap — 누름 코어', () => {
     renderKeycap();
     expect(soundMock.warmKeycapSound).not.toHaveBeenCalled();
   });
+
+  it('탭(즉시 down→up)에도 릴리즈 애니메이션이 재생돼 눌림→복귀가 보인다', () => {
+    renderKeycap();
+    fireEvent.pointerDown(keyButton());
+    fireEvent.pointerUp(keyButton());
+    // 트랜지션은 렌더 프레임이 없으면 생성되지 않으므로 키프레임으로 보장
+    expect(squashTarget().className).toContain('keycapRelease_150ms');
+    fireEvent.animationEnd(squashTarget(), { animationName: 'keycapRelease' });
+    expect(squashTarget().className).not.toContain('keycapRelease');
+  });
+
+  it('pointercancel로 끝난 누름은 릴리즈를 재생하지 않는다 (스크롤 잔류 방지)', () => {
+    renderKeycap();
+    fireEvent.pointerDown(keyButton());
+    fireEvent.pointerCancel(keyButton());
+    expect(squashTarget().className).not.toContain('keycapRelease');
+  });
+
+  it('pointerleave·blur·Space 종료도 릴리즈를 재생한다', () => {
+    renderKeycap();
+    fireEvent.pointerDown(keyButton());
+    fireEvent.pointerLeave(keyButton());
+    expect(squashTarget().className).toContain('keycapRelease_150ms');
+    fireEvent.animationEnd(squashTarget(), { animationName: 'keycapRelease' });
+
+    fireEvent.keyDown(keyButton(), { key: ' ' });
+    fireEvent.blur(keyButton());
+    expect(squashTarget().className).toContain('keycapReleaseAlt_150ms');
+    fireEvent.animationEnd(squashTarget(), { animationName: 'keycapReleaseAlt' });
+
+    fireEvent.keyDown(keyButton(), { key: ' ' });
+    fireEvent.keyUp(keyButton(), { key: ' ' });
+    expect(squashTarget().className).toContain('keycapRelease_150ms');
+  });
+
+  it('연타: 릴리즈 진행 중 다음 탭은 다른 키프레임 이름으로 재시작된다', () => {
+    renderKeycap();
+    fireEvent.pointerDown(keyButton());
+    fireEvent.pointerUp(keyButton());
+    expect(squashTarget().className).toContain('keycapRelease_150ms');
+
+    // 애니메이션이 끝나기 전 두 번째 탭 — down 동안은 릴리즈가 꺼지고(스쿼시가 우선),
+    fireEvent.pointerDown(keyButton());
+    expect(squashTarget().className).not.toContain('keycapRelease');
+    // up에서 다른 이름으로 재생 → 같은 프레임에 갈아끼워져도 브라우저가 확실히 재시작
+    fireEvent.pointerUp(keyButton());
+    expect(squashTarget().className).toContain('keycapReleaseAlt_150ms');
+  });
+
+  it('animationEnd 분기: keycapNudge가 끝나도 릴리즈 상태를 건드리지 않는다', () => {
+    renderKeycap();
+    fireEvent.pointerDown(keyButton());
+    fireEvent.pointerUp(keyButton());
+    expect(squashTarget().className).toContain('keycapRelease_150ms');
+    // 다른 애니메이션의 end가 릴리즈를 끄면 안 된다
+    fireEvent.animationEnd(squashTarget(), { animationName: 'keycapNudge' });
+    expect(squashTarget().className).toContain('keycapRelease_150ms');
+  });
+
+  it('reduced-motion: 릴리즈 클래스가 붙지 않고 소리는 그대로 난다', () => {
+    window.matchMedia = vi.fn().mockImplementation((query: string) => ({
+      matches: query.includes('prefers-reduced-motion'),
+      media: query,
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+    }));
+    renderKeycap();
+    fireEvent.pointerDown(keyButton());
+    fireEvent.pointerUp(keyButton());
+    expect(squashTarget().className).not.toContain('keycapRelease');
+    expect(soundMock.playKeycapSound).toHaveBeenCalledWith('brown', 'up');
+  });
 });

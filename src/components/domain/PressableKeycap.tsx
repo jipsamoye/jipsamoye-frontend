@@ -30,6 +30,14 @@ export default function PressableKeycap({ children, nudge = false, className = '
   const [nudgeActive, setNudgeActive] = useState(false);
   const [reducedMotion, setReducedMotion] = useState(false);
   const [demoPressing, setDemoPressing] = useState(false);
+  // 뗄 때 재생하는 릴리즈 애니메이션 — 탭처럼 짧은 누름에서는 렌더 프레임이 없어
+  // 트랜지션이 생성되지 않으므로 키프레임으로 눌림→복귀를 보장한다.
+  // releaseTick: 재생할 때마다 증가하는 단조 카운터. 홀짝으로 키프레임 이름을 교대해
+  //   같은 프레임에 클래스가 갈아끼워져도 브라우저가 확실히 재시작하게 한다.
+  //   (animationend에서 0으로 되돌리면 다음 릴리즈가 같은 이름이 돼 연타 재시작이 깨진다)
+  // releasePlaying: 지금 재생 중인가 — animationend에서만 꺼진다.
+  const [releaseTick, setReleaseTick] = useState(0);
+  const [releasePlaying, setReleasePlaying] = useState(false);
   // 칩 프리뷰의 up 타이머 — 연타·언마운트 시 앞선 예약을 취소해 소리가 겹치지 않게 한다
   const previewUpTimer = useRef<number | undefined>(undefined);
 
@@ -79,6 +87,12 @@ export default function PressableKeycap({ children, nudge = false, className = '
     if (!muted) playKeycapSound(switchId, 'up');
     // 한 번이라도 끝까지 누르면 유도 3종은 영구 소멸 (다음 방문 포함 — localStorage)
     if (!cancelled && !getHasPressed()) markPressed();
+    // 시각 릴리즈 — cancelled(스크롤)면 재생하지 않고, reduced-motion이면
+    // 애니메이션이 실행되지 않아 animationend가 안 와 상태가 갇히므로 JS에서도 가드
+    if (!cancelled && !reducedMotion) {
+      setReleaseTick((n) => n + 1);
+      setReleasePlaying(true);
+    }
   };
 
   const handleSelect = (id: KeycapSwitchId) => {
@@ -125,10 +139,24 @@ export default function PressableKeycap({ children, nudge = false, className = '
               [&_img]:[-webkit-user-drag:none] — 누른 채 움직이면 데스크톱에서 고스트 이미지가
               딸려 나오며 pointercancel로 촉감이 깨진다. 래퍼에 pointer-events-none은 금지(iOS 롱프레스 저장 죽음) */}
           <div
-            onAnimationEnd={() => setDemoPressing(false)}
+            // 'keycapRelease'는 'keycapReleaseAlt'의 부분 문자열이라 완전 일치로만 가른다.
+            // 릴리즈가 아닌 end(자가 시연·이름 없는 합성 이벤트)는 시연 종료로 취급한다.
+            onAnimationEnd={(e) => {
+              if (e.animationName === 'keycapRelease' || e.animationName === 'keycapReleaseAlt')
+                setReleasePlaying(false);
+              else setDemoPressing(false);
+            }}
             className={`origin-bottom [&_img]:[-webkit-user-drag:none] motion-safe:transition-transform motion-safe:duration-[110ms] motion-safe:ease-[cubic-bezier(0.2,0.8,0.3,1)] ${
               isDown ? 'motion-safe:scale-y-[0.9] motion-safe:scale-x-[1.04]' : ''
-            } ${demoPressing ? 'motion-safe:animate-[keycapNudge_380ms_cubic-bezier(0.2,0.8,0.3,1)]' : ''}`}
+            } ${
+              demoPressing
+                ? 'motion-safe:animate-[keycapNudge_380ms_cubic-bezier(0.2,0.8,0.3,1)]'
+                : !isDown && releasePlaying
+                  ? releaseTick % 2
+                    ? 'motion-safe:animate-[keycapRelease_150ms_cubic-bezier(0.2,0.8,0.3,1)]'
+                    : 'motion-safe:animate-[keycapReleaseAlt_150ms_cubic-bezier(0.2,0.8,0.3,1)]'
+                  : ''
+            }`}
           >
             {children}
           </div>
